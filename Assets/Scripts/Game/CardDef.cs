@@ -61,7 +61,7 @@ namespace Argensimia
                 if (stats.hp > 0) parts.Add(Stat("Gobernabilidad", Names.Num(stats.hp * LevelHp(level) * (defense == DefenseKind.Vallado || defense == DefenseKind.Infanteria ? m : 1))));
                 if (stats.damage > 0) parts.Add(Stat("Daño", Names.Num(stats.damage * (defense == DefenseKind.Vallado || defense == DefenseKind.Infanteria ? 1 : m))));
                 if (stats.rate > 0) parts.Add(Stat("Ritmo", Names.Num(stats.rate) + "/s"));
-                if (stats.range > 0) parts.Add(Stat("Alcance", Names.Num(stats.range) + " m"));
+                if (stats.range > 0) parts.Add(Stat("Alcance", stats.range >= 6 ? Mathf.RoundToInt(stats.range / 6.8f) + " casilleros" : Names.Num(stats.range) + " m"));
                 return string.Join("  ", parts);
             }
             if (moneyDelta != 0) parts.Add(Tag(moneyDelta > 0, (moneyDelta > 0 ? "+$" : "-$") + GameState.Money(moneyDelta)));

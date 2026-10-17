@@ -15,9 +15,10 @@ MonoBehaviour:
   id: lanzagases
   title: Lanzagases
   kind: 0
-  cost: 1300
-  description: "Tira granadas de gas de lejos al grupo m\xE1s denso: da\xF1o por
-    segundo en un \xE1rea y -40% de velocidad."
+  cost: 1620
+  description: "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros
+    adelante, al azar en su carril o en los de al lado, al grupo m\xE1s denso: da\xF1o
+    por segundo en un \xE1rea y -40% de velocidad."
   art: {fileID: 0}
   color: {r: 0.42745098, g: 0.49019608, b: 0.18039216, a: 1}
   copies: 1
@@ -37,9 +38,9 @@ MonoBehaviour:
   stats:
     hp: 120
     damage: 4
-    rate: 0.4
-    range: 12
-    area: 3
+    rate: 0.35
+    range: 21
+    area: 3.5
     speed: 0
   maxBlock: 0
   slow: 0.4

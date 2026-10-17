@@ -24,7 +24,7 @@ MonoBehaviour:
   headline: "Nuevo d\xF3lar soja: liquidan r\xE9cord en una semana"
   rarity: 1
   inPool: 1
-  popularityDelta: -2
+  popularityDelta: -4
   moneyDelta: 4000
   incomeDelta: 0
   popPerMandate: 0

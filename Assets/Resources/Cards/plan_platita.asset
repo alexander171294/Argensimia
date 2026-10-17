@@ -15,7 +15,7 @@ MonoBehaviour:
   id: plan_platita
   title: Plan platita
   kind: 1
-  cost: 1500
+  cost: 1850
   description: "Reparto de fondos. Sube la popularidad: menos gente en la calle y
     columnas m\xE1s tranquilas."
   art: {fileID: 0}

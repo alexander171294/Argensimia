@@ -15,7 +15,7 @@ MonoBehaviour:
   id: tarifazo
   title: Tarifazo
   kind: 3
-  cost: 1000
+  cost: 1240
   description: 'Aumentan luz, gas y transporte: baja el ingreso por segundo.'
   art: {fileID: 0}
   color: {r: 0.47843137, g: 0.23921569, b: 0.12156863, a: 1}

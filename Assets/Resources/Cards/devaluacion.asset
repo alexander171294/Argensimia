@@ -15,7 +15,7 @@ MonoBehaviour:
   id: devaluacion
   title: "Devaluaci\xF3n"
   kind: 3
-  cost: 1500
+  cost: 1850
   description: "Salto del d\xF3lar: perd\xE9s el 30% de la plata. Aceptala o pag\xE1
     para evitarla."
   art: {fileID: 0}

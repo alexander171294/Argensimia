@@ -44,78 +44,82 @@ public static class HudSetup
     {
         int n = 0;
         // ---- Policía (Colocar). Stats: vida, daño, ritmo (golpes/s), alcance, área, velocidad
-        n += Card("vallado", "Vallado", CardKind.Colocar, 500, "#1fa59a", 3, Rarity.Comun,
-            "Vallas sobre el carril. Frenan a la columna hasta que las derriban. Los encapuchados las rompen el triple de rápido.",
+        n += Card("vallado", "Vallado", CardKind.Colocar, 620, "#1fa59a", 3, Rarity.Comun,
+            "Una línea de vallas al fondo del slot. Frena a todos hasta que la derriban; los encapuchados la rompen el triple de rápido. Las balas de goma pueden disparar por detrás.",
             "Vallan la Plaza: «es preventivo», explican desde Casa Rosada",
             c => { c.defense = DefenseKind.Vallado; c.stats = S(300, 0, 0, 0); });
-        n += Card("infanteria", "Infantería con escudos", CardKind.Colocar, 900, "#3557b8", 2, Rarity.Comun,
-            "Tanque barato: una línea de agentes con escudos que frena hasta 3 manifestantes a la vez y los golpea.",
+        n += Card("infanteria", "Infantería con escudos", CardKind.Colocar, 1140, "#3557b8", 2, Rarity.Comun,
+            "Tanque barato: una línea de agentes con escudos que frena a todos los que llegan y los golpea cuerpo a cuerpo. No llega detrás de un vallado.",
             "Despliegan la Infantería frente a la Casa Rosada",
-            c => { c.defense = DefenseKind.Infanteria; c.stats = S(600, 8, 1, 1.5f); c.maxBlock = 3; });
-        n += Card("lanzagases", "Lanzagases", CardKind.Colocar, 1300, "#6d7d2e", 1, Rarity.PocoComun,
-            "Tira granadas de gas de lejos al grupo más denso: daño por segundo en un área y -40% de velocidad.",
+            c => { c.defense = DefenseKind.Infanteria; c.stats = S(600, 8, 1, 1.5f); });
+        n += Card("balas_goma", "Infantería con balas de goma", CardKind.Colocar, 1380, "#c0612b", 1, Rarity.PocoComun,
+            "Agentes sin escudo con escopetas antitumulto. Disparan balas de goma hasta 2 casilleros adelante en su carril: desde atrás de un vallado le tiran primero a los que lo están golpeando. También frenan a todos los que llegan.",
+            "Balas de goma en la Plaza: hay heridos y la oposición pide un informe",
+            c => { c.defense = DefenseKind.BalasGoma; c.stats = S(400, 9, 1.2f, 14); });
+        n += Card("lanzagases", "Lanzagases", CardKind.Colocar, 1620, "#6d7d2e", 1, Rarity.PocoComun,
+            "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros adelante, al azar en su carril o en los de al lado, al grupo más denso: daño por segundo en un área y -40% de velocidad.",
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
-            c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.4f, 12, 3); c.slow = 0.4f; c.slowTime = 3; });
-        n += Card("detencion", "Brigada de detención", CardKind.Colocar, 1400, "#4b4f9e", 0, Rarity.PocoComun,
+            c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
+        n += Card("detencion", "Brigada de detención", CardKind.Colocar, 1760, "#4b4f9e", 0, Rarity.PocoComun,
             "Cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales; no puede con columnas.",
             "Detenciones en la Plaza: la oposición pide explicaciones",
             c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 2.5f); });
-        n += Card("motorizada", "Motorizada", CardKind.Colocar, 1800, "#24408f", 1, Rarity.Rara,
+        n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 1, Rarity.Rara,
             "Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.",
             "Irrumpe la policía motorizada en la Plaza",
             c => { c.defense = DefenseKind.Motorizada; c.stats = S(300, 40, 0, 0); c.push = 3; c.stun = 1; c.cycleOff = 12; });
-        n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 2800, "#2a7fd1", 1, Rarity.Rara,
-            "Control de masa: chorro de 10 m que moja, empuja 2 m/s y ralentiza 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
+        n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 1, Rarity.Rara,
+            "Cañón de agua de hasta 4 casilleros adelante. Apunta solo al manifestante más cercano, en su carril o en los de al lado: lo moja, lo empuja 2 m/s y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
             "Hidrantes en la Plaza: denuncian represión",
-            c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 10); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
+            c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
         // ---- Efecto
         n += Card("impuestazo", "Impuestazo", CardKind.Efecto, 0, "#d8452f", 2, Rarity.Comun,
             "La AFIP sale a recaudar. Entra plata, pero la calle se calienta y las columnas llegan más enojadas.",
-            "AFIP anuncia un nuevo impuesto «transitorio»", c => { c.moneyDelta = 3000; c.popularityDelta = -8; });
-        n += Card("plan_platita", "Plan platita", CardKind.Efecto, 1500, "#8a3fc4", 2, Rarity.PocoComun,
+            "AFIP anuncia un nuevo impuesto «transitorio»", c => { c.moneyDelta = 3000; c.popularityDelta = -16; });
+        n += Card("plan_platita", "Plan platita", CardKind.Efecto, 1850, "#8a3fc4", 2, Rarity.PocoComun,
             "Reparto de fondos. Sube la popularidad: menos gente en la calle y columnas más tranquilas.",
             "Lluvia de bonos: «es para reactivar el consumo»", c => c.popularityDelta = 10);
         n += Card("prestamo", "Préstamo FMI", CardKind.Efecto, 0, "#d9961c", 1, Rarity.Rara,
             "Entran dólares ya, a cambio de ajuste: baja el ingreso por segundo durante las oleadas.",
             "Llegó el desembolso del Fondo: «es el último», aseguran", c => { c.moneyDelta = 5000; c.incomeDelta = -15; });
-        n += Card("blanqueo", "Blanqueo", CardKind.Efecto, 800, "#2f9a4a", 2, Rarity.PocoComun,
+        n += Card("blanqueo", "Blanqueo", CardKind.Efecto, 1000, "#2f9a4a", 2, Rarity.PocoComun,
             "Moratoria para que entre plata al sistema. Sube el ingreso por segundo, con algo de costo político.",
-            "Lanzan un blanqueo: «esta vez sí», prometen", c => { c.incomeDelta = 20; c.popularityDelta = -3; });
-        n += Card("cadena_nacional", "Cadena nacional", CardKind.Efecto, 400, "#c7477a", 2, Rarity.Comun,
+            "Lanzan un blanqueo: «esta vez sí», prometen", c => { c.incomeDelta = 20; c.popularityDelta = -6; });
+        n += Card("cadena_nacional", "Cadena nacional", CardKind.Efecto, 520, "#c7477a", 2, Rarity.Comun,
             "Mensaje presidencial en todos los canales. Sube un poco la popularidad.",
             "Cadena nacional: el Presidente pide «calma y paciencia»", c => c.popularityDelta = 5);
-        n += Card("feriado_puente", "Feriado puente", CardKind.Efecto, 1200, "#e07b2a", 0, Rarity.PocoComun,
+        n += Card("feriado_puente", "Feriado puente", CardKind.Efecto, 1520, "#e07b2a", 0, Rarity.PocoComun,
             "Medio país se va a la costa: la próxima oleada viene 20% más chica. Solo en la previa.",
             "Decretan feriado puente: rutas colapsadas hacia la costa", c => { c.nextWaveReduction = 0.2f; c.previaOnly = true; });
         n += Card("dolar_soja", "Dólar soja", CardKind.Efecto, 0, "#9aa83a", 0, Rarity.PocoComun,
             "Tipo de cambio especial para el campo: entra mucha plata de golpe. Solo en la previa.",
-            "Nuevo dólar soja: liquidan récord en una semana", c => { c.moneyDelta = 4000; c.popularityDelta = -2; c.previaOnly = true; });
+            "Nuevo dólar soja: liquidan récord en una semana", c => { c.moneyDelta = 4000; c.popularityDelta = -4; c.previaOnly = true; });
 
         // ---- Ministros (gabinete de 3; solo salen en el 1 de 3)
-        n += Card("min_economia", "Min. Economía", CardKind.Ministro, 1500, "#b8860b", 0, Rarity.PocoComun,
-            "Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 1% de popularidad.",
-            "Asume el nuevo ministro de Economía: «no hay plata», advierte", c => { c.incomeDelta = 25; c.popPerMandate = -1; });
-        n += Card("min_seguridad", "Min. Seguridad", CardKind.Ministro, 1800, "#2b4a8a", 0, Rarity.Rara,
+        n += Card("min_economia", "Min. Economía", CardKind.Ministro, 1850, "#b8860b", 0, Rarity.PocoComun,
+            "Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 2% de popularidad.",
+            "Asume el nuevo ministro de Economía: «no hay plata», advierte", c => { c.incomeDelta = 25; c.popPerMandate = -2; });
+        n += Card("min_seguridad", "Min. Seguridad", CardKind.Ministro, 2230, "#2b4a8a", 0, Rarity.Rara,
             "Ministro pasivo: todas las defensas policiales tienen +25% de gobernabilidad.",
             "Asume la nueva ministra de Seguridad: «el que las hace, las paga»", c => c.defenseHpBonus = 0.25f);
-        n += Card("min_desarrollo", "Min. Desarrollo Social", CardKind.Ministro, 2000, "#3f9a7a", 0, Rarity.Rara,
+        n += Card("min_desarrollo", "Min. Desarrollo Social", CardKind.Ministro, 2470, "#3f9a7a", 0, Rarity.Rara,
             "Ministro pasivo: cada mandato suma 3% de popularidad.",
             "Desarrollo Social anuncia refuerzo de planes", c => c.popPerMandate = 3);
 
         // ---- Crisis (entran solas a la mano; el costo es lo que sale evitarlas)
-        n += Card("devaluacion", "Devaluación", CardKind.Crisis, 1500, "#7a2d2d", 0, Rarity.Comun,
+        n += Card("devaluacion", "Devaluación", CardKind.Crisis, 1850, "#7a2d2d", 0, Rarity.Comun,
             "Salto del dólar: perdés el 30% de la plata. Aceptala o pagá para evitarla.",
             "Disparada del dólar: el Gobierno habla de «reacomodamiento»", c => { c.moneyMultiplier = 0.7f; c.inPool = false; });
-        n += Card("paro_general", "Paro general", CardKind.Crisis, 2000, "#8a1f1f", 0, Rarity.Comun,
+        n += Card("paro_general", "Paro general", CardKind.Crisis, 2470, "#8a1f1f", 0, Rarity.Comun,
             "La CGT para el país: +1 columna organizada en la próxima oleada.",
             "La CGT confirma paro general y movilización a Plaza de Mayo", c => { c.extraColumns = 1; c.inPool = false; });
-        n += Card("tarifazo", "Tarifazo", CardKind.Crisis, 1000, "#7a3d1f", 0, Rarity.Comun,
+        n += Card("tarifazo", "Tarifazo", CardKind.Crisis, 1240, "#7a3d1f", 0, Rarity.Comun,
             "Aumentan luz, gas y transporte: baja el ingreso por segundo.",
             "Tarifazo: las boletas llegan con aumentos de tres cifras", c => { c.incomeDelta = -10; c.inPool = false; });
-        n += Card("escandalo", "Escándalo", CardKind.Crisis, 1200, "#6a2a5a", 0, Rarity.Comun,
-            "Se filtra un audio comprometedor: -10% de popularidad.",
-            "Se filtró un audio y el Gobierno habla de «operación»", c => { c.popularityDelta = -10; c.inPool = false; });
+        n += Card("escandalo", "Escándalo", CardKind.Crisis, 1520, "#6a2a5a", 0, Rarity.Comun,
+            "Se filtra un audio comprometedor: -15% de popularidad.",
+            "Se filtró un audio y el Gobierno habla de «operación»", c => { c.popularityDelta = -15; c.inPool = false; });
         return n;
     }
 
@@ -151,11 +155,11 @@ public static class HudSetup
         int n = 0;
         n += Unit("comun", "Manifestante", UnitKind.Comun, 1, S(40, 5, 1, 1, 0, 1.4f), 1, 1, 6, false, u => u.prop = "flag");
         n += Unit("cacerolero", "Cacerolero", UnitKind.Cacerolero, 1, S(30, 0, 0, 0, 0, 1.2f), 1, 1, 2.2f, false,
-            u => { u.popOnArrive = 1; u.shirt = 1; u.prop = "pot"; });
+            u => { u.shirt = 1; u.prop = "pot"; });
         n += Unit("jubilado", "Jubilado", UnitKind.Jubilado, 1, S(25, 2, 0.5f, 1, 0, 0.8f), 1, 2, 1.5f, false,
-            u => { u.popOnHit = 0.5f; u.hair = 5; u.shirt = 6; u.scale = 0.95f; });
+            u => { u.popOnHit = 0.1f; u.hair = 5; u.shirt = 6; u.scale = 0.95f; u.prop = "cane"; });
         n += Unit("encapuchado", "Encapuchado", UnitKind.Encapuchado, 2, S(50, 15, 1.2f, 1, 0, 2.0f), 2, 2, 1.6f, true,
-            u => { u.fenceMultiplier = 3; u.shirt = 7; u.hair = 3; u.prop = "hood"; });
+            u => { u.fenceMultiplier = 3; u.jumpChance = 0.3f; u.shirt = 7; u.hair = 3; u.prop = "hood"; });
         n += Unit("piquetero", "Piquetero", UnitKind.Piquetero, 3, S(80, 6, 1, 1, 0, 1.2f), 2, 3, 1.1f, true,
             u => { u.tireEvery = 10; u.shirt = 5; u.prop = "tire"; });
         n += Unit("mortero", "Mortero", UnitKind.Mortero, 4, S(35, 25, 0.25f, 14, 2, 1.0f), 3, 3, 0.8f, true,
@@ -173,7 +177,7 @@ public static class HudSetup
         if (isNew) u = ScriptableObject.CreateInstance<UnitDef>();
         u.id = id; u.title = title; u.kind = kind; u.cost = cost; u.stats = st; u.govDamage = gov; u.minMandate = minMandate;
         u.weight = weight; u.special = special;
-        u.popOnHit = 0; u.popOnArrive = 0; u.fenceMultiplier = 1; u.pushResist = 0; u.auraSpeed = 0; u.auraRadius = 4; u.tireEvery = 0;
+        u.popOnHit = 0; u.popOnArrive = 0; u.fenceMultiplier = 1; u.pushResist = 0; u.auraSpeed = 0; u.auraRadius = 4; u.tireEvery = 0; u.jumpChance = 0;
         u.shirt = -1; u.hair = -1; u.scale = 1; u.members = 1; u.prop = "none";
         setup(u);
         if (isNew) AssetDatabase.CreateAsset(u, path);
@@ -300,6 +304,7 @@ public static class HudSetup
         go.AddComponent<WaveDirector>();
         go.AddComponent<StreetMood>();
         go.AddComponent<GameHud>();
+        go.AddComponent<GameFlow>();
         var es = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         es.transform.SetParent(go.transform);
         es.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();

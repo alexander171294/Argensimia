@@ -15,15 +15,15 @@ MonoBehaviour:
   id: escandalo
   title: "Esc\xE1ndalo"
   kind: 3
-  cost: 1200
-  description: 'Se filtra un audio comprometedor: -10% de popularidad.'
+  cost: 1520
+  description: 'Se filtra un audio comprometedor: -15% de popularidad.'
   art: {fileID: 0}
   color: {r: 0.41568628, g: 0.16470589, b: 0.3529412, a: 1}
   copies: 0
   headline: "Se filtr\xF3 un audio y el Gobierno habla de \xABoperaci\xF3n\xBB"
   rarity: 0
   inPool: 0
-  popularityDelta: -10
+  popularityDelta: -15
   moneyDelta: 0
   incomeDelta: 0
   popPerMandate: 0

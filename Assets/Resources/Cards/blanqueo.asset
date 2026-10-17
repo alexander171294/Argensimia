@@ -15,7 +15,7 @@ MonoBehaviour:
   id: blanqueo
   title: Blanqueo
   kind: 1
-  cost: 800
+  cost: 1000
   description: "Moratoria para que entre plata al sistema. Sube el ingreso por segundo,
     con algo de costo pol\xEDtico."
   art: {fileID: 0}
@@ -24,7 +24,7 @@ MonoBehaviour:
   headline: "Lanzan un blanqueo: \xABesta vez s\xED\xBB, prometen"
   rarity: 1
   inPool: 1
-  popularityDelta: -3
+  popularityDelta: -6
   moneyDelta: 0
   incomeDelta: 20
   popPerMandate: 0

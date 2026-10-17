@@ -15,9 +15,9 @@ MonoBehaviour:
   id: infanteria
   title: "Infanter\xEDa con escudos"
   kind: 0
-  cost: 900
-  description: "Tanque barato: una l\xEDnea de agentes con escudos que frena hasta
-    3 manifestantes a la vez y los golpea."
+  cost: 1140
+  description: "Tanque barato: una l\xEDnea de agentes con escudos que frena a todos
+    los que llegan y los golpea cuerpo a cuerpo. No llega detr\xE1s de un vallado."
   art: {fileID: 0}
   color: {r: 0.20784314, g: 0.34117648, b: 0.72156864, a: 1}
   copies: 2
@@ -41,7 +41,7 @@ MonoBehaviour:
     range: 1.5
     area: 0
     speed: 0
-  maxBlock: 3
+  maxBlock: 0
   slow: 0
   slowTime: 0
   stun: 0

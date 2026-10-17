@@ -4,7 +4,7 @@ namespace Argensimia
 {
     public enum CardKind { Colocar = 0, Efecto = 1, Ministro = 2, Crisis = 3 }
     public enum Rarity { Comun, PocoComun, Rara }
-    public enum DefenseKind { Vallado, Infanteria, Lanzagases, Detencion, Motorizada, Hidrante }
+    public enum DefenseKind { Vallado, Infanteria, Lanzagases, Detencion, Motorizada, Hidrante, BalasGoma }
     public enum UnitKind { Comun, Cacerolero, Jubilado, Encapuchado, Piquetero, Mortero, Columna }
     public enum Phase { Previa, Oleada, Cierre, Victoria, Derrota }
 

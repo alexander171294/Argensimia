@@ -15,7 +15,7 @@ MonoBehaviour:
   id: motorizada
   title: Motorizada
   kind: 0
-  cost: 1800
+  cost: 2230
   description: 'Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av.
     de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot
     ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.'

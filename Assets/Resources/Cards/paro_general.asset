@@ -15,7 +15,7 @@ MonoBehaviour:
   id: paro_general
   title: Paro general
   kind: 3
-  cost: 2000
+  cost: 2470
   description: "La CGT para el pa\xEDs: +1 columna organizada en la pr\xF3xima oleada."
   art: {fileID: 0}
   color: {r: 0.5411765, g: 0.12156863, b: 0.12156863, a: 1}

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: min_desarrollo
   title: Min. Desarrollo Social
   kind: 2
-  cost: 2000
+  cost: 2470
   description: 'Ministro pasivo: cada mandato suma 3% de popularidad.'
   art: {fileID: 0}
   color: {r: 0.24705882, g: 0.6039216, b: 0.47843137, a: 1}

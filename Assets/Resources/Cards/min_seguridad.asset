@@ -15,7 +15,7 @@ MonoBehaviour:
   id: min_seguridad
   title: Min. Seguridad
   kind: 2
-  cost: 1800
+  cost: 2230
   description: 'Ministro pasivo: todas las defensas policiales tienen +25% de gobernabilidad.'
   art: {fileID: 0}
   color: {r: 0.16862746, g: 0.2901961, b: 0.5411765, a: 1}

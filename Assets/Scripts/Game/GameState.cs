@@ -17,7 +17,7 @@ namespace Argensimia
         public int salaryPerPop = 40;
 
         [Header("Popularidad (0-100). Baja = más gente y más picante")]
-        [Range(0, 100)] public float popularity = 55;
+        [Range(0, 100)] public float popularity = 78; // arranca alta: hay aire para medidas impopulares
 
         [Header("Gobernabilidad (se pierde si llega a 0)")]
         public int maxGovernability = 20;
@@ -85,7 +85,7 @@ namespace Argensimia
         public void ApplyEffect(CardDef c)
         {
             int before = MoodIndex;
-            if (c.moneyMultiplier > 0 && c.moneyMultiplier < 1) money *= c.moneyMultiplier;
+            if (c.moneyMultiplier > 0 && c.moneyMultiplier < 1) { float before0 = money; money *= c.moneyMultiplier; Lost?.Invoke("money", before0 - money, null); }
             money = Mathf.Max(0, money + c.moneyDelta);
             income = Mathf.Max(0, income + c.incomeDelta);
             AddPopularity(c.popularityDelta, false);
@@ -96,6 +96,16 @@ namespace Argensimia
             }
             if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(c.headline);
             MoodHeadline(before);
+        }
+
+        // Pérdidas que el HUD muestra como números rojos flotantes (kind: pop, gov, money). at = posición en el mundo (opcional).
+        public event System.Action<string, float, Vector3?> Lost;
+
+        public void LosePopularity(float amount, Vector3? at = null)
+        {
+            if (amount <= 0) return;
+            AddPopularity(-amount);
+            Lost?.Invoke("pop", amount, at);
         }
 
         public void AddPopularity(float d, bool headline = true)
@@ -130,14 +140,15 @@ namespace Argensimia
         {
             int s = Salary;
             money += s;
-            foreach (var c in cabinet) AddPopularity(c.popPerMandate);
+            foreach (var c in cabinet) { if (c.popPerMandate < 0) LosePopularity(-c.popPerMandate); else AddPopularity(c.popPerMandate); }
             return s;
         }
 
-        public void LoseGovernability(int n)
+        public void LoseGovernability(int n, Vector3? at = null)
         {
             if (phase != Phase.Oleada) return;
             governability = Mathf.Max(0, governability - n);
+            Lost?.Invoke("gov", n, at);
             if (governability <= 0)
             {
                 Headline?.Invoke("Crisis institucional: el Gobierno pierde el control de la Plaza");

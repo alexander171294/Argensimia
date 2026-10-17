@@ -62,6 +62,7 @@ namespace Argensimia.UI
 
         void UpdateFlow()
         {
+            UpdateAlerts();
             if (gs.governability != lastGov)
             {
                 if (lastGov > gs.governability) { StartCoroutine(Shake(govPanel)); FloatText(govPanel, "-" + (lastGov - gs.governability), UiKit.RedSoft, 0); }
@@ -113,7 +114,7 @@ namespace Argensimia.UI
                 lastPhase = gs.phase;
                 if (gs.phase == Phase.Cierre) StartCoroutine(ShowClose());
                 else if (gs.phase == Phase.Victoria) StartCoroutine(ShowEnd(true));
-                else if (gs.phase == Phase.Derrota) StartCoroutine(ShowEnd(false));
+                else if (gs.phase == Phase.Derrota) { if (GameFlow.I) { if (GameFlow.I.state == GameFlow.State.Playing) GameFlow.I.ToMenu(false); } else StartCoroutine(ShowEnd(false)); }
             }
         }
 
@@ -137,8 +138,8 @@ namespace Argensimia.UI
 
         void OnStart()
         {
-            if (busy || flowBusy || zoomed || placing || paused || gs.phase != Phase.Previa) return;
-            StartCoroutine(StartRoutine());
+            if (busy || flowBusy || zoomed || placing || paused || overlay || gs.phase != Phase.Previa) return;
+            ConfirmStart();
         }
 
         IEnumerator StartRoutine()
@@ -352,6 +353,7 @@ namespace Argensimia.UI
             });
             Button(o, win ? "JUGAR DE NUEVO" : "REINTENTAR", "#2f6fd6", "#163a7a", new Vector2(win ? 230 : 0, -40), () =>
             {
+                if (GameFlow.I && GameFlow.I.state == GameFlow.State.Playing) { Destroy(overlay.gameObject); overlay = null; GameFlow.I.ToMenu(win); return; }
                 Time.timeScale = 1;
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             });

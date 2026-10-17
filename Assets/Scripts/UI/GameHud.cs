@@ -78,11 +78,13 @@ namespace Argensimia.UI
             EnsureEventSystem();
             Build();
             ApplySafeArea(true);
+            if (GameFlow.I && !GameFlow.I.HudVisible) SetHudVisible(false, 0); // menú: el HUD aparece al terminar el paneo
             gs.Headline += OnHeadline;
+            gs.Lost += OnLost;
             StartCoroutine(DealHand(0.6f));
         }
 
-        void OnDestroy() { if (gs) gs.Headline -= OnHeadline; Time.timeScale = 1; }
+        void OnDestroy() { if (gs) { gs.Headline -= OnHeadline; gs.Lost -= OnLost; } Time.timeScale = 1; }
 
         static void EnsureEventSystem()
         {
@@ -309,12 +311,20 @@ namespace Argensimia.UI
 
         void BuildPause()
         {
-            var bg = UiKit.Img(root, "PauseOverlay", null, new Color(0.02f, 0.04f, 0.1f, 0.72f), 0, true);
+            // fondo oscuro que bloquea el juego (no cierra al tocar: para eso está CONTINUAR)
+            var bg = UiKit.Img(root, "PauseOverlay", null, new Color(0.02f, 0.04f, 0.1f, 0.78f), 0, true);
             bg.RT().Fill();
-            UiKit.Txt(bg.transform, "T", "PAUSA", 96, Color.white, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(800, 120));
-            UiKit.Txt(bg.transform, "S", "Tocá para continuar", 30, UiKit.Gold, TextAlignmentOptions.Center, false, UiKit.FontBody)
-                .RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, -50), new Vector2(800, 44));
-            bg.gameObject.AddComponent<Tap>().onTap = TogglePause;
+            // contenedor con el título PAUSA afuera, arriba; los dos se animan juntos (hijos de un grupo)
+            var group = UiKit.Rect("Group", bg.transform).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(10, 10));
+            UiKit.Txt(group, "T", "PAUSA", 104, Color.white, TextAlignmentOptions.Center, true).RT()
+                .At(new Vector2(0.5f, 0.5f), new Vector2(0, 262), new Vector2(700, 130));
+            var panel = UiKit.Panel(group, "Panel", 28, true).At(new Vector2(0.5f, 0.5f), new Vector2(0, -50), new Vector2(700, 470));
+            VolumeSlider.Create(panel, "MÚSICA", new Vector2(0.5f, 1), new Vector2(0, -52), 600, () => GameAudio.Music, GameAudio.SetMusic);
+            VolumeSlider.Create(panel, "EFECTOS", new Vector2(0.5f, 1), new Vector2(0, -118), 600, () => GameAudio.Sfx, GameAudio.SetSfx);
+            PauseButton(panel, "CONTINUAR", "#43c157", "#1d6b2a", new Vector2(0, -228), TogglePause);
+            PauseButton(panel, "RENUNCIAR", "#d8452f", "#7a1f14", new Vector2(0, -344), Resign);
+            UiKit.Txt(panel, "RS", "Presentar la renuncia indeclinable y abandonar la Casa Rosada", 20, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody).RT()
+                .At(new Vector2(0.5f, 1), new Vector2(0, -408), new Vector2(660, 30), new Vector2(0.5f, 1));
             pauseOverlay = bg.gameObject;
             pauseOverlay.SetActive(false);
         }
@@ -804,6 +814,28 @@ namespace Argensimia.UI
             paused = !paused;
             Time.timeScale = paused ? 0 : 1;
             pauseOverlay.SetActive(paused);
+            if (paused) StartCoroutine(UiKit.Tween(0.25f, t => { if (pauseOverlay) pauseOverlay.transform.Find("Group").localScale = Vector3.one * Mathf.Lerp(0.85f, 1f, Ease.OutBack(t)); }));
+        }
+
+        void PauseButton(RectTransform parent, string label, string faceHex, string baseHex, Vector2 pos, System.Action onTap)
+        {
+            var b = UiKit.Rect(label, parent).At(new Vector2(0.5f, 1), pos, new Vector2(460, 96), new Vector2(0.5f, 0.5f));
+            UiKit.Img(b, "Base", UiKit.RR, UiKit.Hex(baseHex), 24, true).RT().Fill();
+            var f = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex(faceHex), 24).RT().Fill(0, 0, 0, 9);
+            UiKit.Txt(f, "T", label, 40, Color.white, TextAlignmentOptions.Center, true).RT().Fill();
+            var t = b.gameObject.AddComponent<Tap>();
+            t.visual = b; t.onTap = onTap;
+        }
+
+        // El presidente renuncia: se va en helicóptero y vuelve al menú.
+        void Resign()
+        {
+            if (!paused) return;
+            TogglePause();
+            if (zoomed) CancelZoom();
+            if (placing) CancelPlacement();
+            if (GameFlow.I && GameFlow.I.state == GameFlow.State.Playing) GameFlow.I.Resign();
+            else if (WaveDirector.I) WaveDirector.I.Lose();
         }
 
         void FloatText(RectTransform anchor, string s, Color c, float delay) => StartCoroutine(FloatRoutine(anchor, s, c, delay));

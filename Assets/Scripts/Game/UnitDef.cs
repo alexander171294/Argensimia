@@ -24,6 +24,7 @@ namespace Argensimia
         [Tooltip("Aura: +velocidad a los cercanos (0,2 = +20%)")] public float auraSpeed;
         public float auraRadius = 4;
         [Tooltip("Segundos entre gomas quemadas (0 = no tira)")] public float tireEvery;
+        [Tooltip("Chance (0-1) de saltar cada retén policial que lo frena. Solo el encapuchado")] [Range(0, 1)] public float jumpChance;
 
         [Header("Visual")]
         [Tooltip("Índice en GameAssets.shirts (-1 = al azar)")] public int shirt = -1;

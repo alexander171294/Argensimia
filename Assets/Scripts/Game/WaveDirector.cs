@@ -111,12 +111,12 @@ namespace Argensimia
                 plan.Add(new Entry { unit = pick });
                 budget -= pick.cost;
             }
-            // por dónde entran: mandatos 1-2 solo Av. de Mayo; desde el 3 se abren norte y sur
+            // por dónde entran: mandatos 1-4 solo Av. de Mayo; desde el 5 se abren norte y sur
             for (int i = 0; i < plan.Count; i++)
             {
                 var e = plan[i];
                 double roll = rnd.NextDouble();
-                float sideChance = m <= 2 ? 0 : m == 3 ? 0.3f : 0.5f;
+                float sideChance = m < 5 ? 0 : 0.5f;
                 e.side = roll < sideChance ? (rnd.NextDouble() < 0.5 ? 1 : 2) : 0;
                 plan[i] = e;
             }

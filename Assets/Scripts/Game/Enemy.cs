@@ -25,6 +25,11 @@ namespace Argensimia
         Transform model;
         HpBar bar;
         Defense blocker;
+        public Defense Blocker => blocker; // defensa que lo está frenando (ej. el vallado que golpea)
+        readonly HashSet<Defense> rolled = new HashSet<Defense>(); // retenes contra los que ya tiró la chance de salto
+        bool jumping;
+        float jumpFrom, jumpTo, jumpT;
+        public bool Jumping => jumping;
 
         PoliceSlots Slots => PoliceSlots.I;
         float SpeedScale => WaveDirector.I ? WaveDirector.I.speedScale : 1.3f;
@@ -54,16 +59,28 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ visual
 
+        // Formación fija de la columna organizada: triángulo 3-2-1 (la punta de 3 adelante, el abanderado atrás).
+        static readonly Vector3[] Triangle =
+        {
+            new Vector3(-1.4f, 0, 1.2f), new Vector3(0, 0, 1.2f), new Vector3(1.4f, 0, 1.2f),
+            new Vector3(-0.7f, 0, 0), new Vector3(0.7f, 0, 0),
+            new Vector3(0, 0, -1.2f),
+        };
+
+        int uniformShirt = -1; // columna: todos con la misma remera
+
         void BuildModel()
         {
             var a = GameAssets.I;
             model = new GameObject("Model").transform;
             model.SetParent(transform, false);
             int n = Mathf.Max(1, def.members);
+            if (def.kind == UnitKind.Columna) uniformShirt = def.shirt >= 0 ? def.shirt : Random.Range(0, a.shirts.Length);
             for (int i = 0; i < n; i++)
             {
                 Vector3 lp = Vector3.zero;
-                if (n > 1) lp = new Vector3((i / 3 - 0.5f) * 1.5f + Random.Range(-0.15f, 0.15f), 0, ((i % 3) - 1) * 1.35f + Random.Range(-0.15f, 0.15f));
+                if (n > 1) lp = def.kind == UnitKind.Columna && i < Triangle.Length ? Triangle[i]
+                    : new Vector3((i / 3 - 0.5f) * 1.5f + Random.Range(-0.15f, 0.15f), 0, ((i % 3) - 1) * 1.35f + Random.Range(-0.15f, 0.15f));
                 Person(a, lp, i);
             }
             if (def.prop == "banner" && a.banner)
@@ -77,13 +94,27 @@ namespace Argensimia
             bar = HpBar.Create(transform, h, n > 1 ? 4.2f : def.special ? 3f : 2.4f, n > 1 ? 0.55f : 0.45f);
         }
 
+        static readonly Color Black = new Color(0.05f, 0.05f, 0.06f);
+
         void Person(GameAssets a, Vector3 lp, int i)
         {
-            var src = a.people[Random.Range(0, a.people.Length)];
-            var p = Instantiate(src, model);
+            // person_c (cartel) y person_d (bombo) solo para el manifestante común; el resto usa cuerpos limpios para leer su silueta
+            int pick = def.kind == UnitKind.Comun || a.people.Length < 2 ? Random.Range(0, a.people.Length) : Random.Range(0, 2);
+            var p = Instantiate(a.people[pick], model);
+            // silueta por tipo: ancho (x, z) y alto (y), e inclinación hacia adelante
+            Vector3 body = Vector3.one;
+            float lean = 0;
+            switch (def.kind)
+            {
+                case UnitKind.Jubilado: body = new Vector3(0.95f, 0.88f, 0.95f); lean = 14; break;
+                case UnitKind.Piquetero: body = new Vector3(0.66f, 1.1f, 0.66f); break;
+                case UnitKind.Mortero: body = new Vector3(1.55f, 0.8f, 1.45f); lean = 12; break;
+            }
+            bool column = def.kind == UnitKind.Columna;
             p.transform.localPosition = lp;
-            p.transform.localRotation = Quaternion.Euler(0, Random.Range(-14f, 14f), 0);
-            p.transform.localScale = Vector3.one * Defense.PeopleScale * def.scale * Random.Range(0.93f, 1.07f);
+            p.transform.localRotation = Quaternion.Euler(lean, column ? 0 : Random.Range(-14f, 14f), 0);
+            p.transform.localScale = Vector3.Scale(body, Vector3.one * Defense.PeopleScale * def.scale * (column ? 1 : Random.Range(0.93f, 1.07f)));
+            bool allBlack = def.kind == UnitKind.Encapuchado;
             foreach (var r in p.GetComponentsInChildren<Renderer>())
             {
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
@@ -91,38 +122,62 @@ namespace Argensimia
                 for (int k = 0; k < sm.Length; k++)
                 {
                     if (sm[k] == null) continue;
+                    if (allBlack) { sm[k] = FxKit.Mat(Black); continue; }
                     string nm = sm[k].name;
-                    if (nm.StartsWith("M_Shirt")) sm[k] = a.shirts[def.shirt >= 0 ? def.shirt : Random.Range(0, a.shirts.Length)];
-                    else if (nm.StartsWith("M_Pants")) sm[k] = a.pants[Random.Range(0, a.pants.Length)];
+                    if (nm.StartsWith("M_Shirt")) sm[k] = a.shirts[uniformShirt >= 0 ? uniformShirt : def.shirt >= 0 ? def.shirt : Random.Range(0, a.shirts.Length)];
+                    else if (nm.StartsWith("M_Pants")) sm[k] = column ? a.pants[0] : a.pants[Random.Range(0, a.pants.Length)];
                     else if (nm.StartsWith("M_Skin")) sm[k] = a.skins[Random.Range(0, a.skins.Length)];
                     else if (nm.StartsWith("M_Hair")) sm[k] = a.hairs[def.hair >= 0 ? def.hair : Random.Range(0, a.hairs.Length)];
                 }
                 r.sharedMaterials = sm;
             }
+            Fidget.Add(p, column ? Fidget.Mode.Firm : Fidget.Mode.Crowd);
             var t = p.transform;
-            switch (def.prop)
+            var wood = new Color(0.45f, 0.3f, 0.17f);
+            switch (def.kind)
             {
-                case "pot":
+                case UnitKind.Cacerolero:
                     FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.32f, 0.95f, 0.22f), new Vector3(0.24f, 0.09f, 0.24f), new Color(0.72f, 0.72f, 0.75f));
                     FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(-0.3f, 1.05f, 0.25f), new Vector3(0.03f, 0.16f, 0.03f), new Color(0.5f, 0.32f, 0.18f), Quaternion.Euler(40, 0, 0));
                     break;
-                case "mortar":
-                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.18f, 1.25f, 0.05f), new Vector3(0.14f, 0.42f, 0.14f), new Color(0.24f, 0.3f, 0.2f), Quaternion.Euler(-35, 0, -10));
-                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.62f, -0.06f), new Vector3(0.36f, 0.3f, 0.38f), new Color(0.3f, 0.2f, 0.12f)); // rastas
+                case UnitKind.Jubilado:
+                    // boina, anteojos, bastón y bolsa de los mandados
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.74f, -0.01f), new Vector3(0.36f, 0.1f, 0.36f), new Color(0.2f, 0.22f, 0.3f));
+                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 1.6f, 0.15f), new Vector3(0.26f, 0.06f, 0.04f), new Color(0.1f, 0.1f, 0.1f));
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.3f, 0.48f, 0.22f), new Vector3(0.045f, 0.48f, 0.045f), wood, Quaternion.Euler(-12, 0, 0));
+                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(-0.3f, 0.75f, 0.05f), new Vector3(0.12f, 0.3f, 0.26f), new Color(0.85f, 0.75f, 0.45f));
                     break;
-                case "hood":
-                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.6f, -0.02f), new Vector3(0.34f, 0.36f, 0.34f), new Color(0.08f, 0.08f, 0.09f));
+                case UnitKind.Encapuchado:
+                    // pasamontañas negro con ranura para los ojos y un palo
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.62f, 0), new Vector3(0.38f, 0.42f, 0.38f), Black);
+                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 1.66f, 0.17f), new Vector3(0.2f, 0.045f, 0.06f), new Color(0.85f, 0.62f, 0.48f));
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.32f, 1.15f, 0.2f), new Vector3(0.05f, 0.55f, 0.05f), new Color(0.3f, 0.2f, 0.12f), Quaternion.Euler(35, 0, 0));
                     break;
-                case "tire":
-                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.38f, 0.75f, 0), new Vector3(0.5f, 0.07f, 0.5f), new Color(0.07f, 0.07f, 0.07f), Quaternion.Euler(0, 0, 90));
+                case UnitKind.Piquetero:
+                    // flaco, gorra, pañuelo en la cara, palo largo y goma
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.74f, 0.04f), new Vector3(0.36f, 0.12f, 0.42f), new Color(0.15f, 0.2f, 0.45f));
+                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 1.48f, 0.14f), new Vector3(0.3f, 0.14f, 0.12f), new Color(0.8f, 0.12f, 0.12f));
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(-0.3f, 1.1f, 0.12f), new Vector3(0.05f, 1.0f, 0.05f), wood);
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.38f, 0.75f, 0), new Vector3(0.55f, 0.1f, 0.55f), new Color(0.07f, 0.07f, 0.07f), Quaternion.Euler(0, 0, 90));
                     break;
-                case "flag":
-                    if (i % 2 == 0 && a.flagArg)
+                case UnitKind.Mortero:
+                    // gordo, agachado, gorra y mortero casero (tubo con base) apuntando hacia adelante y arriba
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.72f, 0.04f), new Vector3(0.34f, 0.12f, 0.4f), new Color(0.75f, 0.2f, 0.15f));
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0, 0.95f, 0.45f), new Vector3(0.24f, 0.45f, 0.24f), new Color(0.22f, 0.26f, 0.2f), Quaternion.Euler(18, 0, 0));
+                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0, 1.38f, 0.59f), new Vector3(0.28f, 0.05f, 0.28f), new Color(0.12f, 0.12f, 0.12f), Quaternion.Euler(18, 0, 0));
+                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 0.62f, 0.25f), new Vector3(0.36f, 0.06f, 0.3f), new Color(0.3f, 0.3f, 0.3f));
+                    break;
+                case UnitKind.Columna:
+                    // gorra igual para todos: se lee como grupo organizado
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.74f, 0.04f), new Vector3(0.36f, 0.12f, 0.42f), new Color(0.85f, 0.85f, 0.85f));
+                    break;
+                default:
+                    if (def.prop == "flag" && i % 2 == 0 && a.flagArg)
                     {
-                        var f = Instantiate(Random.value < 0.5f ? a.flagArg : a.flagRed, t);
-                        f.transform.localPosition = new Vector3(-0.3f, 0, 0.1f) / 1.45f;
-                        f.transform.localRotation = Quaternion.Euler(0, Random.Range(-30f, 30f), 0);
-                        f.transform.localScale = Vector3.one / 1.45f;
+                        var fl = Instantiate(Random.value < 0.5f ? a.flagArg : a.flagRed, t);
+                        fl.transform.localPosition = new Vector3(-0.3f, 0, 0.1f) / 1.45f;
+                        fl.transform.localRotation = Quaternion.Euler(0, Random.Range(-30f, 30f), 0);
+                        fl.transform.localScale = Vector3.one / 1.45f;
                     }
                     break;
             }
@@ -171,10 +226,17 @@ namespace Argensimia
             }
             else
             {
+                if (jumping) { Jump(dt); return; }
                 if (def.kind == UnitKind.Mortero && Mortar()) { }
                 else
                 {
                     var b = Defense.BlockerFor(this);
+                    // encapuchado: la primera vez que un retén lo frena, tira la chance de saltarlo
+                    if (b && def.jumpChance > 0 && !rolled.Contains(b))
+                    {
+                        rolled.Add(b);
+                        if (Random.value < def.jumpChance) { b.Release(this); StartJump(b); return; }
+                    }
                     if (b != blocker) { if (blocker) blocker.Release(this); blocker = b; }
                     if (blocker)
                     {
@@ -200,6 +262,34 @@ namespace Argensimia
                 Place(true);
             }
             Animate(moving);
+        }
+
+        void StartJump(Defense d)
+        {
+            if (blocker) { blocker.Release(this); blocker = null; }
+            jumping = true;
+            jumpT = 0;
+            jumpFrom = x;
+            jumpTo = d.WestFace - 1.2f;
+            if (GameState.I) GameState.I.PushHeadline("Un encapuchado salta el cerco policial");
+        }
+
+        // Salto en arco por encima del retén (con giro), sin poder ser frenado en el aire.
+        void Jump(float dt)
+        {
+            jumpT = Mathf.Min(1, jumpT + dt / 0.75f);
+            x = Mathf.Lerp(jumpFrom, jumpTo, jumpT);
+            Place(true);
+            float h = Mathf.Sin(jumpT * Mathf.PI);
+            model.localPosition = Vector3.up * h * 3.2f;
+            model.localRotation = Quaternion.Euler(0, 0, -jumpT * 360f) ;
+            if (jumpT >= 1)
+            {
+                jumping = false;
+                model.localPosition = Vector3.zero;
+                model.localRotation = Quaternion.identity;
+                if (x <= Slots.WestX(lane) + 0.6f) Arrive();
+            }
         }
 
         void Place(bool face)
@@ -270,7 +360,7 @@ namespace Argensimia
             if (def.popOnHit > 0 && popCd <= 0 && GameState.I)
             {
                 popCd = 1f;
-                GameState.I.AddPopularity(-def.popOnHit);
+                GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
             }
             if (bar) bar.Set(hp / maxHp);
             if (hp <= 0) Die(false);
@@ -291,7 +381,7 @@ namespace Argensimia
         public void Capture()
         {
             if (Dead) return;
-            if (def.popOnHit > 0 && GameState.I) GameState.I.AddPopularity(-def.popOnHit);
+            if (def.popOnHit > 0 && GameState.I) GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
             Die(true);
         }
 
@@ -299,8 +389,8 @@ namespace Argensimia
         {
             if (GameState.I)
             {
-                GameState.I.LoseGovernability(def.govDamage);
-                if (def.popOnArrive > 0) GameState.I.AddPopularity(-def.popOnArrive);
+                GameState.I.LoseGovernability(def.govDamage, transform.position + Vector3.up * 4.5f);
+                if (def.popOnArrive > 0) GameState.I.LosePopularity(def.popOnArrive, transform.position + Vector3.up * 4.5f);
             }
             Die(false, true);
         }

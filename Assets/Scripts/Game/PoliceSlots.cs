@@ -66,6 +66,19 @@ namespace Argensimia
 
         public Vector3 LanePoint(int lane, float x, float y = 0.16f) => new Vector3(x, y, LaneZ(lane, x));
 
+        // El carril y sus vecinos inmediatos (ordenados por z a la altura de x): para gases e hidrante.
+        public List<int> NeighborLanes(int lane, float x)
+        {
+            var order = new List<int>();
+            for (int l = 0; l < lanes.Count; l++) order.Add(l);
+            order.Sort((a, b) => LaneZ(a, x).CompareTo(LaneZ(b, x)));
+            int i = order.IndexOf(lane);
+            var r = new List<int> { lane };
+            if (i > 0) r.Add(order[i - 1]);
+            if (i >= 0 && i < order.Count - 1) r.Add(order[i + 1]);
+            return r;
+        }
+
         // Carril más cercano a un punto (dentro de la plaza).
         public int NearestLane(Vector3 p, float maxDist)
         {

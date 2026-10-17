@@ -34,6 +34,7 @@ MonoBehaviour:
   auraSpeed: 0
   auraRadius: 4
   tireEvery: 10
+  jumpChance: 0
   shirt: 5
   hair: -1
   scale: 1

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: detencion
   title: "Brigada de detenci\xF3n"
   kind: 0
-  cost: 1400
+  cost: 1760
   description: Cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales;
     no puede con columnas.
   art: {fileID: 0}

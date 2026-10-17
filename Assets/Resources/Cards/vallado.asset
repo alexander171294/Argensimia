@@ -15,9 +15,10 @@ MonoBehaviour:
   id: vallado
   title: Vallado
   kind: 0
-  cost: 500
-  description: "Vallas sobre el carril. Frenan a la columna hasta que las derriban.
-    Los encapuchados las rompen el triple de r\xE1pido."
+  cost: 620
+  description: "Una l\xEDnea de vallas al fondo del slot. Frena a todos hasta que
+    la derriban; los encapuchados la rompen el triple de r\xE1pido. Las balas de
+    goma pueden disparar por detr\xE1s."
   art: {fileID: 0}
   color: {r: 0.12156863, g: 0.64705884, b: 0.6039216, a: 1}
   copies: 3

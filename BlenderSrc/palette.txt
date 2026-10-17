@@ -90,3 +90,4 @@ M_Zinc #7d8a8f 0
 M_StoneDark #5e5650 0 T_stone 2
 M_Rust #6b4630 0 T_stone 1
 M_SteelDark #4a4643 0 T_stone 1
+M_NavGreen #2ee05a 2.0

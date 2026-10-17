@@ -24,7 +24,7 @@ MonoBehaviour:
   headline: "AFIP anuncia un nuevo impuesto \xABtransitorio\xBB"
   rarity: 0
   inPool: 1
-  popularityDelta: -8
+  popularityDelta: -16
   moneyDelta: 3000
   incomeDelta: 0
   popPerMandate: 0

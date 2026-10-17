@@ -15,7 +15,7 @@ MonoBehaviour:
   id: feriado_puente
   title: Feriado puente
   kind: 1
-  cost: 1200
+  cost: 1520
   description: "Medio pa\xEDs se va a la costa: la pr\xF3xima oleada viene 20% m\xE1s
     chica. Solo en la previa."
   art: {fileID: 0}

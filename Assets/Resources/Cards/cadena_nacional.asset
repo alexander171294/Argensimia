@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cadena_nacional
   title: Cadena nacional
   kind: 1
-  cost: 400
+  cost: 520
   description: Mensaje presidencial en todos los canales. Sube un poco la popularidad.
   art: {fileID: 0}
   color: {r: 0.78039217, g: 0.2784314, b: 0.47843137, a: 1}

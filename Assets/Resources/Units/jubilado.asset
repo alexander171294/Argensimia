@@ -27,15 +27,16 @@ MonoBehaviour:
   minMandate: 2
   weight: 1.5
   special: 0
-  popOnHit: 0.5
+  popOnHit: 0.1
   popOnArrive: 0
   fenceMultiplier: 1
   pushResist: 0
   auraSpeed: 0
   auraRadius: 4
   tireEvery: 0
+  jumpChance: 0
   shirt: 6
   hair: 5
   scale: 0.95
   members: 1
-  prop: none
+  prop: cane

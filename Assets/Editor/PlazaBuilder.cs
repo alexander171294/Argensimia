@@ -268,6 +268,7 @@ public static class PlazaBuilder
             imp.animationType = ModelImporterAnimationType.None;
             imp.importCameras = false; imp.importLights = false;
             imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+            if (path.EndsWith("police_officer.fbx")) imp.isReadable = true; // Defense saca el escudo (balas de goma)
             var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             foreach (var r in go.GetComponentsInChildren<Renderer>(true))
                 foreach (var sm in r.sharedMaterials)
@@ -299,6 +300,7 @@ public static class PlazaBuilder
         Place("ground", Vector3.zero, 0, root, true);
         BuildCity();
         BuildCasaRosada();
+        BuildHelipad();
         BuildPlaza();
         // Sin policía ni patrulleros fijos: toda la policía la coloca el jugador con cartas (Defense.cs)
         BuildCrowds();
@@ -475,6 +477,30 @@ public static class PlazaBuilder
             foreach (var z in new[] { FenceHalf, -FenceHalf }) { var f = Place("iron_fence", new Vector3(x, 0.155f, z), 0, t); f.transform.localScale = new Vector3(1, 1.3f, 1); }
         for (int i = 0; i < GateZ.Length; i++)
             foreach (var sd in new[] { -1f, 1f }) Place("lamp", new Vector3(FenceX + 0.4f, 0.155f, GateZ[i] + sd * (GateW[i] / 2 + 0.5f)), 0, t);
+    }
+
+    // Helipuerto en la explanada detrás de la Casa Rosada (heli_kit.py) con el helicóptero presidencial listo para despegar.
+    static readonly Vector3 HelipadPos = new Vector3(-87f, 0.155f, 0f);
+    static void BuildHelipad()
+    {
+        var t = new GameObject("Helipuerto").transform; t.SetParent(root);
+        Place("helipad", HelipadPos, 0, t);
+        var heli = Place("helicopter", HelipadPos + Vector3.up * 0.35f, -35, t, false, 1.15f);
+        if (!heli) return;
+        var rotor = Place("heli_rotor", Vector3.zero, 0, heli.transform, false);
+        if (!rotor) return;
+        rotor.transform.localPosition = new Vector3(0, 3.95f, -0.3f);
+        rotor.transform.localRotation = Quaternion.Euler(0, 20, 0);
+        rotor.transform.localScale = Vector3.one;
+        rotor.AddComponent<Argensimia.Spin>().speed = 90f; // motor en marcha: por si hay que evacuar
+
+        // Escena del menú: hidrante y patrulleros en barricada frente a la multitud (GameFlow los anima en el menú)
+        var hid = Place("police_truck", new Vector3(-70.66f, 0f, -30.06f), -90, t, false, 1.05f);
+        if (hid) hid.name = "MenuHidrante";
+        var c1 = Place("patrol_car", new Vector3(-73.3f, 0f, 30.9f), 62, t, true, 1.15f);
+        if (c1) c1.name = "MenuPatrullero1";
+        var c2 = Place("patrol_car", new Vector3(-68.1f, 0f, 32.0f), 118, t, true, 1.15f);
+        if (c2) c2.name = "MenuPatrullero2";
     }
 
     // lawn test, mirrors gen_assets lawn geometry
@@ -711,7 +737,7 @@ public static class PlazaBuilder
         cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.93f, 0.82f, 0.70f);
         cam.fieldOfView = 50; cam.nearClipPlane = 1f; cam.farClipPlane = 700;
         var rot = Quaternion.Euler(50, 180, 0); // vista desde el norte: Casa Rosada a la derecha
-        var target = new Vector3(-6, 0, 1);
+        var target = new Vector3(-6, 0, 3.9f); // corrida 2,9 m hacia atrás: se ve mejor el terreno
         camGo.transform.SetPositionAndRotation(target - rot * Vector3.forward * 72f, rot);
         var data = camGo.AddComponent<UniversalAdditionalCameraData>();
         data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;

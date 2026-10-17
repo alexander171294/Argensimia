@@ -15,8 +15,8 @@ MonoBehaviour:
   id: min_economia
   title: "Min. Econom\xEDa"
   kind: 2
-  cost: 1500
-  description: 'Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 1%
+  cost: 1850
+  description: 'Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 2%
     de popularidad.'
   art: {fileID: 0}
   color: {r: 0.72156864, g: 0.5254902, b: 0.043137256, a: 1}
@@ -27,7 +27,7 @@ MonoBehaviour:
   popularityDelta: 0
   moneyDelta: 0
   incomeDelta: 25
-  popPerMandate: -1
+  popPerMandate: -2
   defenseHpBonus: 0
   moneyMultiplier: 1
   extraColumns: 0

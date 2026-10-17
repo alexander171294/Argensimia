@@ -7,7 +7,7 @@ namespace Argensimia
     // En la previa los carriles nuevos titilan más fuerte para avisar que se abrió una fila.
     public class LaneArrows : MonoBehaviour
     {
-        public Color color = new Color(1f, 0.74f, 0.16f, 1f);
+        public Color color = new Color(0.95f, 0.16f, 0.12f, 1f); // rojo: por acá viene la gente
         readonly List<(Transform t, Material m, int lane)> arrows = new List<(Transform, Material, int)>();
         int lastCount = -1;
         readonly HashSet<int> fresh = new HashSet<int>();
@@ -17,7 +17,7 @@ namespace Argensimia
             var slots = PoliceSlots.I;
             if (!slots) { enabled = false; return; }
             var mesh = ArrowMesh(1.7f, 0.02f); var outline = ArrowMesh(1.9f, 0f);
-            var dark = new Material(GameAssets.I.unlit); dark.SetColor("_BaseColor", new Color(0.16f, 0.08f, 0.02f));
+            var dark = new Material(GameAssets.I.unlit); dark.SetColor("_BaseColor", new Color(0.18f, 0.02f, 0.02f));
             for (int l = 0; l < slots.LaneCount; l++)
             {
                 var go = new GameObject("LaneArrow_" + l);
