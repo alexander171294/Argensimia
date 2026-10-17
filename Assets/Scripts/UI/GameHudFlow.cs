@@ -18,6 +18,7 @@ namespace Argensimia.UI
         int lastGov = -1, lastCabinet = -1;
         string lastPreview;
         bool flowBusy;
+        TextMeshProUGUI previewTitle;
         // reloj de la previa: 30 s para decidir; al agotarse arranca solo (no corre en el cierre con las 3 cartas)
         const float StartTime = 30f;
         RectTransform clockRt;
@@ -156,11 +157,17 @@ namespace Argensimia.UI
             bool previa = gs.phase == Phase.Previa;
             startBtn.gameObject.SetActive(previa);
             UpdateClock(previa);
-            previewPanel.gameObject.SetActive(previa);
-            if (previa)
+            // previa: qué viene; oleada: cuántos quedan (por entrar + en la Plaza)
+            bool wave = gs.phase == Phase.Oleada;
+            previewPanel.gameObject.SetActive(previa || wave);
+            if (previa) startSub.text = L.F("MANDATO {0}", gs.mandate);
+            if (previa || wave)
             {
-                startSub.text = "MANDATO " + gs.mandate;
-                var t = WaveDirector.I ? WaveDirector.I.PreviewText() : "";
+                if (!previewTitle) previewTitle = previewPanel.Find("Title").GetComponent<TextMeshProUGUI>();
+                string title = L.T(previa ? "PRÓXIMA OLEADA" : "MANIFESTANTES RESTANTES");
+                if (wave && WaveDirector.I) title += "  <color=#ffffff>" + WaveDirector.I.RemainingCount + "</color>";
+                if (previewTitle.text != title) previewTitle.text = title;
+                var t = WaveDirector.I ? (previa ? WaveDirector.I.PreviewText() : WaveDirector.I.RemainingText()) : "";
                 if (t != lastPreview)
                 {
                     lastPreview = t;
@@ -183,7 +190,7 @@ namespace Argensimia.UI
                     activateBtn.anchoredPosition = new Vector2(-200, a.y);
                     evadeBtn.anchoredPosition = new Vector2(200, a.y);
                     bool ok = gs.CanAfford(zoomed.def.cost);
-                    evadeTxt.text = ok ? "EVITAR $" + GameState.Money(zoomed.def.cost) : "FALTA $" + GameState.Money(zoomed.def.cost - gs.money + 0.999f);
+                    evadeTxt.text = ok ? L.T("EVITAR $") + GameState.Money(zoomed.def.cost) : L.T("FALTA $") + GameState.Money(zoomed.def.cost - gs.money + 0.999f);
                     evadeTxt.color = ok ? Color.white : UiKit.RedSoft;
                 }
                 else if (Mathf.Abs(a.x) > 1) activateBtn.anchoredPosition = new Vector2(0, a.y);
@@ -248,7 +255,7 @@ namespace Argensimia.UI
                 var m = gs.cabinet[i];
                 var chip = UiKit.Img(cabinetRow, "Min", UiKit.RR, UiKit.Shade(m.color, 0.85f), 12);
                 chip.RT().At(Vector2.one, new Vector2(-i * 130, 0), new Vector2(124, 38));
-                var t = UiKit.Txt(chip.transform, "T", m.title.Replace("Min. ", "").ToUpperInvariant(), 15, Color.white, TextAlignmentOptions.Center, true);
+                var t = UiKit.Txt(chip.transform, "T", L.CardTitle(m).Replace("Min. ", "").Replace(" Min.", "").ToUpperInvariant(), 15, Color.white, TextAlignmentOptions.Center, true);
                 t.RT().Fill(6, 6, 0, 0);
                 t.enableAutoSizing = true; t.fontSizeMin = 10; t.fontSizeMax = 15;
                 StartCoroutine(Pulse(chip.RT()));
@@ -328,7 +335,7 @@ namespace Argensimia.UI
             for (int i = 0; i < cards.Length; i++) if (!cards[i]) empty.Add(i);
             if (empty.Count > 0)
             {
-                if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
+                if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(L.CardHeadline(crisis)));
                 Snd.Ui("crisis", 1, 1, 0.8f);
                 yield return DrawInto(empty[Random.Range(0, empty.Count)], new CardInst(crisis));
                 busy = false;
@@ -343,7 +350,7 @@ namespace Argensimia.UI
             deck.ReturnToDeck(new CardInst(old.def, old.level)); // la carta pisada vuelve al fondo del mazo
             StartCoroutine(FlyAway(old, hand.InverseTransformPoint(deckTop.position)));
             yield return new WaitForSecondsRealtime(0.3f);
-            if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
+            if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(L.CardHeadline(crisis)));
                 Snd.Ui("crisis", 1, 1, 0.8f);
             yield return DrawInto(slot, new CardInst(crisis));
             busy = false;
@@ -386,13 +393,13 @@ namespace Argensimia.UI
             int salary = gs.CloseMandate();
             StartCoroutine(SndLater("coin", 0.9f));
             var o = MakeOverlay();
-            UiKit.Txt(o, "Title", "FIN DEL MANDATO " + gs.mandate, 64, Color.white, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(1200, 80), new Vector2(0.5f, 1));
+            UiKit.Txt(o, "Title", L.F("FIN DEL MANDATO {0}", gs.mandate), 64, Color.white, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(1200, 80), new Vector2(0.5f, 1));
             int arr = WaveDirector.I ? WaveDirector.I.ArrivedThisWave : 0;
-            string heal = gs.LastHealed > 0 ? "    ·    Policía <color=#7be36a>+" + Mathf.RoundToInt(gs.CloseHeal * 100) + "% vida</color>" : "";
+            string heal = gs.LastHealed > 0 ? L.F("    ·    Policía <color=#7be36a>+{0}% vida</color>", Mathf.RoundToInt(gs.CloseHeal * 100)) : "";
             UiKit.Txt(o, "Sub", "Sueldo <color=#7be36a>+$" + GameState.Money(salary) + "</color>    ·    Llegaron al vallado: <color=#ff7a70>" + arr + "</color>    ·    Gobernabilidad " + gs.governability + "/" + gs.maxGovernability + heal,
                 28, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody).RT().At(new Vector2(0.5f, 1), new Vector2(0, -132), new Vector2(1500, 40), new Vector2(0.5f, 1));
             var picks = deck.RollPicks(deck.rewardCount, gs.mandate);
-            UiKit.Txt(o, "Pick", "OBTUVISTE " + picks.Count + " CARTAS PARA TU MAZO", 34, UiKit.Gold, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(1200, 48), new Vector2(0.5f, 1));
+            UiKit.Txt(o, "Pick", L.F("OBTUVISTE {0} CARTAS PARA TU MAZO", picks.Count), 34, UiKit.Gold, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(1200, 48), new Vector2(0.5f, 1));
             if (gs.LastHealed > 0) Headlines.Say("close");
             FloatText(moneyPanel, "+$" + GameState.Money(salary), UiKit.Green, 0.2f);
             rewards.Clear();
@@ -429,7 +436,7 @@ namespace Argensimia.UI
             r.face = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex("#2f6fd6"), 18);
             r.face.RT().Fill(0, 0, 0, 6);
             UiKit.Img(r.face.transform, "Icon", UiKit.Refresh, Color.white).RT().At(new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(34, 34), new Vector2(0, 0.5f));
-            r.label = UiKit.Txt(r.face.transform, "T", "CAMBIAR $" + GameState.Money(deck.rerollCost), 26, Color.white, TextAlignmentOptions.Center, true);
+            r.label = UiKit.Txt(r.face.transform, "T", L.T("CAMBIAR $") + GameState.Money(deck.rerollCost), 26, Color.white, TextAlignmentOptions.Center, true);
             r.label.RT().Fill(44, 8, 0, 0);
             r.btn = b;
             var t = b.gameObject.AddComponent<Tap>();
@@ -443,12 +450,12 @@ namespace Argensimia.UI
             if (!gs.Spend(deck.rerollCost))
             {
                 StartCoroutine(Shake(r.btn));
-                FloatText(r.btn, "FALTA $" + GameState.Money(deck.rerollCost - gs.money + 0.999f), UiKit.RedSoft, 0);
+                FloatText(r.btn, L.T("FALTA $") + GameState.Money(deck.rerollCost - gs.money + 0.999f), UiKit.RedSoft, 0);
                 return;
             }
             FloatText(moneyPanel, "-$" + GameState.Money(deck.rerollCost), UiKit.RedSoft, 0);
             r.rerolled = true;
-            r.label.text = "CAMBIADA";
+            r.label.text = L.T("CAMBIADA");
             r.face.color = UiKit.Hex("#7b8494");
             r.bas.color = UiKit.Hex("#4a5160");
             r.btn.GetComponent<Tap>().interactable = false;
@@ -491,7 +498,7 @@ namespace Argensimia.UI
                 if (!cv) continue;
                 deck.AddToDeck(cv.def);
                 Snd.Ui("card_draw", 0.9f, 1.1f, 0);
-                names.Add(cv.def.title);
+                names.Add(L.CardTitle(cv.def));
                 Vector3 from = cv.transform.localPosition;
                 float s0 = cv.transform.localScale.x;
                 StartCoroutine(UiKit.Tween(0.55f, t =>
@@ -507,7 +514,7 @@ namespace Argensimia.UI
             yield return new WaitForSecondsRealtime(0.5f);
             StartCoroutine(Pulse(deckRt));
             if (names.Count > 0)
-                Headlines.Say("new_cards", (names.Count == 1 ? names[0] : string.Join(", ", names.GetRange(0, names.Count - 1)) + " y " + names[names.Count - 1]));
+                Headlines.Say("new_cards", (names.Count == 1 ? names[0] : string.Join(", ", names.GetRange(0, names.Count - 1)) + (L.En ? " and " : " y ") + names[names.Count - 1]));
             var bg = overlay.GetComponent<Image>();
             var ov = overlay;
             yield return UiKit.Tween(0.25f, t => { if (bg) bg.color = new Color(0.02f, 0.04f, 0.1f, 0.78f * (1 - t)); });

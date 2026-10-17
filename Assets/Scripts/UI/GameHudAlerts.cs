@@ -26,7 +26,7 @@ namespace Argensimia.UI
                     if (at.HasValue) WorldFloat(at.Value, "-" + Pct(amount) + "%", UiKit.RedSoft);
                     break;
                 case "gov":
-                    if (at.HasValue) WorldFloat(at.Value, "-" + Mathf.RoundToInt(amount) + " GOB", UiKit.RedSoft);
+                    if (at.HasValue) WorldFloat(at.Value, "-" + Mathf.RoundToInt(amount) + L.T(" GOB"), UiKit.RedSoft);
                     break;
                 case "money":
                     FloatText(moneyPanel, "-$" + GameState.Money(amount), UiKit.RedSoft, 0.1f);
@@ -156,7 +156,7 @@ namespace Argensimia.UI
                 if (crisisWarn.gameObject.activeSelf != show) crisisWarn.gameObject.SetActive(show);
                 if (show)
                 {
-                    crisisWarnTxt.text = crises.Count == 1 ? "1 CRISIS SE APLICA AL ARRANCAR" : crises.Count + " CRISIS SE APLICAN AL ARRANCAR";
+                    crisisWarnTxt.text = crises.Count == 1 ? L.T("1 CRISIS SE APLICA AL ARRANCAR") : L.F("{0} CRISIS SE APLICAN AL ARRANCAR", crises.Count);
                     crisisWarn.localScale = Vector3.one * (1 + w * 0.05f);
                 }
             }
@@ -172,7 +172,7 @@ namespace Argensimia.UI
                 .RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, 210), new Vector2(1400, 80));
             var lines = new System.Text.StringBuilder();
             foreach (var cv in crises)
-                lines.Append("<b>").Append(cv.def.title.ToUpperInvariant()).Append("</b>   ").Append(cv.def.EffectSummary()).Append('\n');
+                lines.Append("<b>").Append(L.CardTitle(cv.def).ToUpperInvariant()).Append("</b>   ").Append(cv.def.EffectSummary()).Append('\n');
             UiKit.Txt(o, "List", lines.ToString(), 32, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
                 .RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, 110), new Vector2(1400, 110));
             UiKit.Txt(o, "Ask", "Se van a aplicar las cartas de crisis forzadas. ¿Seguro que querés comenzar?\n<size=24>Podés evitarlas pagando desde la carta.</size>", 30, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody)

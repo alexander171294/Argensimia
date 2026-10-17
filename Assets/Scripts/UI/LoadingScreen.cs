@@ -46,7 +46,7 @@ namespace Argensimia.UI
         void Update()
         {
             if (sun) sun.localRotation = Quaternion.Euler(0, 0, -Time.unscaledTime * 90f);
-            if (label) label.text = "CARGANDO" + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3);
+            if (label) label.text = L.T("CARGANDO") + new string('.', 1 + (int)(Time.unscaledTime * 3f) % 3);
         }
 
         // Espera hasta que haya ~15 cuadros seguidos fluidos (mínimo minT, máximo maxT segundos).

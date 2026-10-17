@@ -521,13 +521,13 @@ namespace Argensimia.UI
         {
             if (zoomed.def.kind == CardKind.Crisis)
             {
-                activateTxt.text = "ACEPTAR"; activateTxt.fontSize = 42;
+                activateTxt.text = L.T("ACEPTAR"); activateTxt.fontSize = 42;
                 activateFace.color = UiKit.Hex("#d9534a"); activateBase.color = UiKit.Hex("#7a231d");
                 return;
             }
             bool locked = zoomed.def.previaOnly && gs.phase != Phase.Previa;
             bool blocked = Blocked(zoomed.def), ok = !blocked && !locked && gs.CanAfford(zoomed.def.cost);
-            activateTxt.text = ok ? "ACTIVAR" : locked ? "SOLO EN PREVIA" : blocked ? "SIN LUGAR" : "FALTA $" + GameState.Money(zoomed.def.cost - gs.money + 0.999f);
+            activateTxt.text = ok ? L.T("ACTIVAR") : locked ? L.T("SOLO EN PREVIA") : blocked ? L.T("SIN LUGAR") : L.T("FALTA $") + GameState.Money(zoomed.def.cost - gs.money + 0.999f);
             activateTxt.fontSize = ok ? 42 : 34;
             activateFace.color = ok ? UiKit.Hex("#43c157") : UiKit.Hex("#7b8494");
             activateBase.color = ok ? UiKit.Hex("#1d6b2a") : UiKit.Hex("#4a5160");
@@ -610,7 +610,7 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.65f) / 0.35f);
             });
-            if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", gone.title, def.title); }
+            if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", L.CardTitle(gone), L.CardTitle(def)); }
             else gs.ApplyEffect(def);
             StartCoroutine(Pulse(target));
             EffectSound(def);
@@ -672,7 +672,7 @@ namespace Argensimia.UI
             });
             cv.gameObject.SetActive(false);
             dim.gameObject.SetActive(false);
-            placeTxt.text = (Defense.AnyUpgradable(cv.def) ? "Elegí un lugar o tocá una igual para mejorarla: " : "Elegí un lugar en el camino para ") + "<color=#f2c14e>" + cv.def.title.ToUpperInvariant() + "</color>";
+            placeTxt.text = L.T(Defense.AnyUpgradable(cv.def) ? "Elegí un lugar o tocá una igual para mejorarla: " : "Elegí un lugar en el camino para ") + "<color=#f2c14e>" + L.CardTitle(cv.def).ToUpperInvariant() + "</color>";
             if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
             Defense.ShowHints(cv.def, true);
             placeBanner.gameObject.SetActive(true);
@@ -719,7 +719,7 @@ namespace Argensimia.UI
             if (!up && target == null) return false;
             if (!gs.Spend(d0.cost))
             {
-                FloatText(moneyPanel, "FALTA $" + GameState.Money(d0.cost - gs.money + 0.999f), UiKit.RedSoft, 0);
+                FloatText(moneyPanel, L.T("FALTA $") + GameState.Money(d0.cost - gs.money + 0.999f), UiKit.RedSoft, 0);
                 StartCoroutine(Shake(moneyPanel));
                 return false;
             }
@@ -727,15 +727,15 @@ namespace Argensimia.UI
             if (up)
             {
                 up.Upgrade();
-                WorldFloat(up.transform.position + Vector3.up * 5.5f, "¡NIVEL " + up.level + "!", UiKit.Gold);
-                Headlines.Say("upgrade", d0.title.ToLowerInvariant(), up.level);
+                WorldFloat(up.transform.position + Vector3.up * 5.5f, L.F("¡NIVEL {0}!", up.level), UiKit.Gold);
+                Headlines.Say("upgrade", L.CardTitle(d0).ToLowerInvariant(), up.level);
             }
             else
             {
                 var placed = Defense.Place(d0, cv.level, target, second).gameObject;
                 PoliceSlots.I.Occupy(target, placed);
                 if (second != null) PoliceSlots.I.Occupy(second, placed);
-                if (!string.IsNullOrEmpty(d0.headline)) gs.PushHeadline(Headlines.PickVariant(d0.headline));
+                if (!string.IsNullOrEmpty(d0.headline)) gs.PushHeadline(Headlines.PickVariant(L.CardHeadline(d0)));
             }
             int slot = cv.slot;
             cards[slot] = null;

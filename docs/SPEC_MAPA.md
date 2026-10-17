@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.1.0** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
 | 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
 | 2026-10-17 | Niveles bufeados (vida ×2/×3,5, daño ×1,75/×3, ritmo, alcance y golpe múltiple de infantería); slots circulares; pantalla de carga al arrancar. |
 | 2026-10-17 | Arte de las 32 cartas (Nano Banana 2 Lite, recortes completados con edit); Refuerzo federal pasa a Refuerzo militar. |
 | 2026-10-17 | Cartas colocables con badges VIDA/DAÑO/RITMO/ALCANCE sobre el arte ("gobernabilidad" de la policía pasó a llamarse vida) y sin la aclaración de niveles en la descripción. Audio: menú sin cacerolas, helicóptero mudo al empezar y protagonista al perder (arranque de turbina), nuevo cierre de derrota, toc de ajedrez al colocar, golpe seco en vallas y caída de agente. |
-| 2026-10-17 | Efectos de sonido: 45 clips sintetizados por código (`sfx_gen.py`), motor `Snd` con pool, paneo y enfriamiento; ambiente de multitud, bombo, cacerolas y helicóptero según la partida; arreglada la excepción del titular al arrancar la oleada. |
 
 ## Resumen
 
@@ -62,7 +62,7 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `Assets/Editor/IconBuilder.cs` | Ícono de la app (menú 7): renderiza en Play la "A" con bandera sobre el Sol de Mayo a `Assets/Art/Icon/AppIcon.png` y lo asigna en Player Settings. |
 | `Assets/Editor/SlotBuilder.cs` | Genera los slots policiales desde lanes, sus texturas y materiales (menú 6). |
 | `Assets/Shaders/TiltShift.shader` | Desenfoque de bordes (Full Screen Pass) y blur circular del menú (globales `_MenuBlur`, `_MenuCenter`). |
-| `Assets/Scripts/Game/` | `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
+| `Assets/Scripts/Game/` | `Loc` (idioma `L`: español/inglés, interfaz, cartas, unidades y titulares), `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
 | `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
 | `Assets/Resources/` | `Cards/`, `Units/`, `Music/` (5 temas MP3, streaming), `SFX/` (45 WAV), `UI/` (fuentes), `FX/`, `GameAssets.asset`. |
 
@@ -186,8 +186,8 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 - **Menú → partida:** el juego abre en el menú. NUEVA PARTIDA panea la cámara (6,5 s, curva por arriba del mapa) hasta la vista de juego mientras el helicóptero aterriza; al llegar aparece el HUD. Si ya se jugó, la escena se recarga en la pose del menú (estado inicial limpio) y arranca el paneo: el corte no se nota.
 - **Mandato:** previa de planificación con reloj de 30 s a la izquierda de ¡ARRANCAR! (se pausa con la pausa y en los paneos; tictac los últimos 5 s; al agotarse cierra zoom/colocación/confirmación y arranca, aplicando las crisis); el cierre con las 3 cartas no tiene tiempo (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
 - **Cierre:** sueldo + efecto de los ministros + la policía en el mapa recupera hasta 25% de su vida máxima (30% con Min. Seguridad, solo a las que les falta) → pantalla OBTUVISTE 3 CARTAS PARA TU MAZO (ver Sistema de cartas) → CONTINUAR → se completa la mano con lo que haya en el mazo → crisis forzadas.
-- **Fin:** al perder la gobernabilidad, o al RENUNCIAR desde la pausa, se oculta el HUD, aparece la multitud en el helipuerto, la cámara panea hasta la vista del menú y el helicóptero despega y se detiene justo en la pose de flotación. El menú queda con la cinta del resultado ("PERDISTE LA GOBERNABILIDAD" / "EL PRESIDENTE RENUNCIÓ") y el detalle debajo ("Se fue en helicóptero en el mandato N").
-- **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos sobrevividos (el que perdiste no cuenta; mín. 1) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 10 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING a la izquierda del menú.
+- **Fin:** al perder la gobernabilidad, o al RENUNCIAR desde la pausa (cuando el helicóptero queda suspendido se recarga la escena para cortar la partida de fondo y el menú arranca con el resultado), se oculta el HUD, aparece la multitud en el helipuerto, la cámara panea hasta la vista del menú y el helicóptero despega y se detiene justo en la pose de flotación. El menú queda con la cinta del resultado ("PERDISTE LA GOBERNABILIDAD" / "EL PRESIDENTE RENUNCIÓ") y el detalle debajo ("Se fue en helicóptero en el mandato N").
+- **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos sobrevividos (el que perdiste no cuenta; mín. 1) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 5 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING del menú.
 - **Vender carta:** en el zoom, el tacho arriba a la izquierda descarta la carta (no vuelve al mazo) a cambio de $100; no aplica a crisis.
 - **Valores iniciales:** $2.500, +$40/s (solo durante la oleada), 78% de popularidad (TRANQUI), gobernabilidad 20/20, mazo de 15 (quedan 10 tras repartir la mano de 5).
 - **Sueldo de cierre:** $2.000 + $40 × popularidad (+$500 con Super Ministro).
@@ -236,7 +236,7 @@ Todas ocupan slots, frenan al 100% y se rompen al quedar sin gobernabilidad (vid
 
 | Defensa | Vida | Qué hace | Diseño NV1 → NV2 → NV3 |
 | --- | --- | --- | --- |
-| Vallado | 300 | Vallas en L al fondo (oeste) del slot. Al recibir golpes se inclinan hacia atrás y vibran. | 1 línea de `valla_l` × 2 → doble línea → + bloques de hormigón con franja amarilla adelante |
+| Vallado | 300 | Vallas en L al fondo (oeste) del slot. Al recibir golpes se inclinan hacia atrás y vibran. | 1 línea de `valla_l` × 2 → doble línea + bolsas de arena + reja alta antidisturbios → + muro New Jersey con franjas, chapas policiales y balizas |
 | Infantería | 600 | Cuerpo a cuerpo (8 de daño, 1/s, 1,5 m). No llega detrás de un vallado. | 6 agentes (2 filas de 3) → 8 → 10 |
 | Escopeteros | 400 | Dispara en su carril hasta 2 casilleros (9 de daño, 1,2/s); prioriza a los que golpean un vallado adelante, después a los que frenan otra defensa, después al más cercano. Trazador rápido con impacto. | Misma formación sin escudo, escopetas con guardamano naranja: 6 → 8 → 10 |
 | Lanzagases | 120 | Granada de gas hasta 3 casilleros, al azar entre su carril y los vecinos (los que tengan gente), al grupo más denso: 4 dps en 3,5 m y −40% de velocidad. Tira un agente al azar. | 1 agente → 2 → 3 + cajones de granadas |
@@ -255,7 +255,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 
 | Zona | Contenido |
 | --- | --- |
-| Arriba izquierda | Presupuesto con moneda e ingreso por segundo. Debajo, en la previa, PRÓXIMA OLEADA con la lista de unidades (especiales en rojo). |
+| Arriba izquierda | Presupuesto con moneda e ingreso por segundo. Debajo, en la previa, PRÓXIMA OLEADA con la lista de unidades (especiales en rojo); durante la oleada pasa a MANIFESTANTES RESTANTES con el total y el detalle por tipo (por entrar + en la Plaza). |
 | Arriba centro | MANDATO N con barra de progreso de la oleada y GOBERNABILIDAD x/20. |
 | Arriba derecha | POPULARIDAD % con barra y cinta de estado (TRANQUI / TENSO / CALLE CALIENTE / ESTALLIDO). Gabinete de ministros y botón de menú (hamburguesa) que abre la pausa. |
 | Abajo | Mano de 5 cartas en abanico leve (quedan huecos si el mazo se vació). Mazo a la izquierda con contador (rojo en 0; con 0 el mazo se atenúa y arriba aparece MAZO VACÍO con 1 CARTA $500 y 10 CARTAS $4.200); CAMBIAR MANO ($300) y ¡ARRANCAR! a la derecha. |
@@ -273,7 +273,8 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Vista:** cámara del menú (ver Coordenadas) con blur circular: nítidos el helicóptero y el helipuerto, todo lo demás desenfocado.
 - **Helicóptero:** recién despegado, inclinado y saliendo hacia la derecha de la pantalla (offset (−3, 8,4, −5,5) desde el helipuerto, rotación (13, −120, 10)). Suspendido con una flotación muy sutil (~20 cm, 1–2° de balanceo) y el rotor en "cámara lenta" (230°/s). Si se mueve a mano en Play, flota alrededor de la nueva pose.
 - **Ambiente:** ~170 manifestantes en anillo alrededor del helipuerto y ~80 de relleno a los costados (quedan desenfocados), 5 gomas prendidas con humo, el hidrante tirando agua en arco a la multitud sur con la sirena encendida, y los patrulleros en barricada.
-- **Ranking:** panel RANKING a la izquierda con el top 10 (medallas, nombre, puntaje, mandatos).
+- **Ranking:** panel RANKING abajo a la izquierda (28 px de margen) con el top 5 (medallas, nombre, puntaje, mandatos).
+- **Derecha (abajo):** botón GITHUB (abre el repo), botón de idioma ENGLISH/ESPAÑOL (recarga la escena) y debajo la versión en blanco.
 - **UI:** logo ARGENSIMIA (ARG con la bandera, ENSIMIA banana, ondita por letra); cinta roja inclinada con filetes dorados "¡DEFENDÉ LA CASA ROSADA!" (entra sellada con rebote y pulsa cada 2,4 s; tras una partida muestra el resultado y el detalle abajo, con el contorno TMP por defecto); MÚSICA y EFECTOS en contenedores individuales flotantes; NUEVA PARTIDA.
 
 ## Audio
@@ -287,6 +288,11 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
   - Otros: `boo` (abucheo al perder popularidad), `clock_tick` (reloj de la previa), `unit_down` (cae un agente), `heli_start` (turbina al perder).
   - Manifestantes: `poof` (sale de escena), `boing` (salto del encapuchado), `gate_bang` (llega al vallado), `mortar_launch`, `explosion`, `fire_ignite` (goma).
 - **Ambiente (loops):** `loop_crowd` (multitud sintetizada), `loop_bombo` (murga a 120 bpm), `loop_cacerola`, `loop_heli`. Menú: multitud + bombo + cacerolas + helicóptero (tono según `GameFlow.RotorSpeed`). Oleada: multitud y bombo crecen con la cantidad de manifestantes y la bronca, cacerolas si hay caceroleros, paneados a la izquierda (este). Previa y cierre: murmullo lejano que sube con la bronca.
+
+## Idioma
+
+- `L.En` (PlayerPrefs `lang`): el código está en español y `L.T("texto")` devuelve el inglés si hay traducción; `UiKit.Txt` lo aplica solo a los textos fijos y los dinámicos usan `L.T`/`L.F`. Cartas (`L.CardTitle/CardDesc/CardHeadline`), unidades (`L.UnitName`) y titulares (`L.Headlines`, `L.Filler`) tienen su banco en inglés.
+- Al cambiar de idioma se recarga la escena. Texto nuevo: escribirlo en español y sumar la traducción en `Loc.cs`.
 
 ## Marquesina (titulares)
 

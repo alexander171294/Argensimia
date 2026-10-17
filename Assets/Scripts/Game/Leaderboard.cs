@@ -6,7 +6,7 @@ namespace Argensimia
     // Ranking local de partidas (top 10), guardado en PlayerPrefs como JSON.
     public static class Leaderboard
     {
-        public const int Size = 10;
+        public const int Size = 5;
         const string Key = "leaderboard_v1", KeyName = "leaderboard_last_name";
 
         [System.Serializable]

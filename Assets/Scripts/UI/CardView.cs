@@ -71,7 +71,7 @@ namespace Argensimia.UI
             gloss.anchorMin = new Vector2(0, 0.55f); gloss.anchorMax = Vector2.one;
             gloss.offsetMin = new Vector2(7, 0); gloss.offsetMax = new Vector2(-7, -7);
 
-            var title = UiKit.Txt(f, "Title", def.title.ToUpperInvariant(), 40, Color.white, TextAlignmentOptions.Center, true);
+            var title = UiKit.Txt(f, "Title", L.CardTitle(def).ToUpperInvariant(), 40, Color.white, TextAlignmentOptions.Center, true);
             title.RT().At(new Vector2(0.5f, 1), new Vector2(0, -12), new Vector2(W - 36, 58), new Vector2(0.5f, 1));
             title.enableAutoSizing = true; title.fontSizeMin = 22; title.fontSizeMax = 40;
 
@@ -90,7 +90,7 @@ namespace Argensimia.UI
             }
             else
             {
-                UiKit.Txt(art.transform, "Placeholder", def.title.Substring(0, 1).ToUpperInvariant(), 170, new Color(1, 1, 1, 0.45f)).RT().Fill();
+                UiKit.Txt(art.transform, "Placeholder", L.CardTitle(def).Substring(0, 1).ToUpperInvariant(), 170, new Color(1, 1, 1, 0.45f)).RT().Fill();
                 UiKit.Txt(art.transform, "Hint", "ARTE PENDIENTE", 16, new Color(1, 1, 1, 0.6f))
                     .RT().At(new Vector2(0.5f, 0), new Vector2(0, def.kind == CardKind.Colocar ? 66 : 10), new Vector2(220, 22), new Vector2(0.5f, 0));
             }
@@ -107,7 +107,7 @@ namespace Argensimia.UI
             {
                 var lv = UiKit.Img(artFrame.transform, "Level", UiKit.RR, UiKit.Gold, 12);
                 lv.RT().At(new Vector2(1, 1), new Vector2(-12, -50), new Vector2(90, 34), new Vector2(1, 1));
-                UiKit.Txt(lv.transform, "T", "NV " + level, 22, UiKit.Hex("#5a3a06")).RT().Fill();
+                UiKit.Txt(lv.transform, "T", L.T("NV ") + level, 22, UiKit.Hex("#5a3a06")).RT().Fill();
             }
 
             if (def.kind == CardKind.Colocar) StatBadges(artFrame.transform);
@@ -117,7 +117,7 @@ namespace Argensimia.UI
             descBg.anchorMin = Vector2.zero; descBg.anchorMax = Vector2.one;
             descBg.offsetMin = new Vector2(16, 86); descBg.offsetMax = new Vector2(-16, -306);
             var summary = def.EffectSummary(level);
-            var desc = UiKit.Txt(descBg, "Desc", string.IsNullOrEmpty(summary) ? def.description : summary + "\n" + def.description,
+            var desc = UiKit.Txt(descBg, "Desc", string.IsNullOrEmpty(summary) ? L.CardDesc(def) : summary + "\n" + L.CardDesc(def),
                 21, UiKit.Hex("#3a2a1a"), TextAlignmentOptions.Center, false, UiKit.FontBody);
             desc.RT().Fill(12, 12, 6, 6);
             desc.textWrappingMode = TextWrappingModes.Normal;

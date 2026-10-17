@@ -82,7 +82,7 @@ namespace Argensimia.UI
             if (!gs.Spend(cost))
             {
                 StartCoroutine(Shake(btn));
-                FloatText(moneyPanel, "FALTA $" + GameState.Money(cost - gs.money + 0.999f), UiKit.RedSoft, 0);
+                FloatText(moneyPanel, L.T("FALTA $") + GameState.Money(cost - gs.money + 0.999f), UiKit.RedSoft, 0);
                 return;
             }
             FloatText(moneyPanel, "-$" + GameState.Money(cost), UiKit.RedSoft, 0);

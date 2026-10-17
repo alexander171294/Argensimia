@@ -228,7 +228,7 @@ public static class PlazaBuilder
 
     public static string SimulateFX()
     {
-        foreach (var ps in Object.FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None)) { ps.Simulate(4f, true, true); }
+        foreach (var ps in Object.FindObjectsByType<ParticleSystem>()) { ps.Simulate(4f, true, true); }
         SceneView.RepaintAll();
         return "fx simulated";
     }

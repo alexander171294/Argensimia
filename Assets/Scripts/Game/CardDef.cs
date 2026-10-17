@@ -74,7 +74,7 @@ namespace Argensimia
             float rate = stats.rate * (defense == DefenseKind.Detencion ? m : LevelRate(level));
             if (stats.rate > 0) l.Add(("RITMO", Names.Num(Mathf.Round(rate * 100) / 100) + "/s"));
             float range = stats.range + LevelRange(level);
-            if (stats.range > 0) l.Add(("ALCANCE", range >= 6 ? Mathf.RoundToInt(range / 6.8f) + " cas." : Names.Num(range) + " m"));
+            if (stats.range > 0) l.Add(("ALCANCE", range >= 6 ? Mathf.RoundToInt(range / 6.8f) + L.T(" cas.") : Names.Num(range) + " m"));
             return l;
         }
 
@@ -85,20 +85,20 @@ namespace Argensimia
             if (kind == CardKind.Colocar) return ""; // los stats van como badges sobre el arte (StatList)
             if (moneyDelta != 0) parts.Add(Tag(moneyDelta > 0, (moneyDelta > 0 ? "+$" : "-$") + GameState.Money(moneyDelta)));
             if (incomeDelta != 0) parts.Add(Tag(incomeDelta > 0, (incomeDelta > 0 ? "+$" : "-$") + GameState.Money(incomeDelta) + "/s"));
-            if (popularityDelta != 0) parts.Add(Tag(popularityDelta > 0, (popularityDelta > 0 ? "+" : "-") + Mathf.Abs(popularityDelta).ToString("0") + "% popularidad"));
-            if (popPerMandate != 0) parts.Add(Tag(popPerMandate > 0, (popPerMandate > 0 ? "+" : "-") + Mathf.Abs(popPerMandate).ToString("0") + "%/mandato"));
-            if (defenseHpBonus != 0) parts.Add(Tag(true, "+" + Mathf.RoundToInt(defenseHpBonus * 100) + "% vida policía"));
-            if (moneyMultiplier < 1) parts.Add(Tag(false, "-" + Mathf.RoundToInt((1 - moneyMultiplier) * 100) + "% del dinero"));
-            if (extraColumns > 0) parts.Add(Tag(false, "+" + extraColumns + " columna"));
-            if (nextWaveReduction > 0) parts.Add(Tag(true, "oleada -" + Mathf.RoundToInt(nextWaveReduction * 100) + "%"));
-            if (salaryDelta != 0) parts.Add(Tag(salaryDelta > 0, (salaryDelta > 0 ? "+$" : "-$") + GameState.Money(salaryDelta) + " sueldo"));
-            if (maxGovDelta > 0 && govDelta == maxGovDelta) parts.Add(Tag(true, "+" + govDelta + " gobernabilidad (y máx.)"));
+            if (popularityDelta != 0) parts.Add(Tag(popularityDelta > 0, (popularityDelta > 0 ? "+" : "-") + Mathf.Abs(popularityDelta).ToString("0") + "%" + L.T(" popularidad")));
+            if (popPerMandate != 0) parts.Add(Tag(popPerMandate > 0, (popPerMandate > 0 ? "+" : "-") + Mathf.Abs(popPerMandate).ToString("0") + L.T("%/mandato")));
+            if (defenseHpBonus != 0) parts.Add(Tag(true, "+" + Mathf.RoundToInt(defenseHpBonus * 100) + L.T("% vida policía")));
+            if (moneyMultiplier < 1) parts.Add(Tag(false, "-" + Mathf.RoundToInt((1 - moneyMultiplier) * 100) + L.T("% del dinero")));
+            if (extraColumns > 0) parts.Add(Tag(false, "+" + extraColumns + L.T(" columna")));
+            if (nextWaveReduction > 0) parts.Add(Tag(true, L.T("oleada -") + Mathf.RoundToInt(nextWaveReduction * 100) + "%"));
+            if (salaryDelta != 0) parts.Add(Tag(salaryDelta > 0, (salaryDelta > 0 ? "+$" : "-$") + GameState.Money(salaryDelta) + L.T(" sueldo")));
+            if (maxGovDelta > 0 && govDelta == maxGovDelta) parts.Add(Tag(true, "+" + govDelta + L.T(" gobernabilidad (y máx.)")));
             else
             {
-                if (govDelta != 0) parts.Add(Tag(govDelta > 0, (govDelta > 0 ? "+" : "-") + Mathf.Abs(govDelta) + " gobernabilidad"));
-                if (maxGovDelta != 0) parts.Add(Tag(maxGovDelta > 0, (maxGovDelta > 0 ? "+" : "-") + Mathf.Abs(maxGovDelta) + " gob. máx."));
+                if (govDelta != 0) parts.Add(Tag(govDelta > 0, (govDelta > 0 ? "+" : "-") + Mathf.Abs(govDelta) + L.T(" gobernabilidad")));
+                if (maxGovDelta != 0) parts.Add(Tag(maxGovDelta > 0, (maxGovDelta > 0 ? "+" : "-") + Mathf.Abs(maxGovDelta) + L.T(" gob. máx.")));
             }
-            if (govPerMandate != 0) parts.Add(Tag(govPerMandate > 0, "+" + govPerMandate + " gob./mandato"));
+            if (govPerMandate != 0) parts.Add(Tag(govPerMandate > 0, "+" + govPerMandate + L.T(" gob./mandato")));
             if (healNow > 0) parts.Add(Tag(true, "policía +" + Mathf.RoundToInt(healNow * 100) + "% vida"));
             if (healBonus > 0) parts.Add(Tag(true, "recupera " + Mathf.RoundToInt((GameState.BaseCloseHeal + healBonus) * 100) + "% al cierre"));
             return string.Join("   ", parts);

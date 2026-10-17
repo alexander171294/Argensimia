@@ -133,17 +133,32 @@ namespace Argensimia
         {
             var counts = new Dictionary<UnitDef, int>();
             foreach (var e in plan) { counts.TryGetValue(e.unit, out int n); counts[e.unit] = n + 1; }
+            return CountText(counts, plan.Exists(e => e.side != 0));
+        }
+
+        // Durante la oleada: los que faltan entrar más los que siguen en la Plaza.
+        public string RemainingText()
+        {
+            var counts = new Dictionary<UnitDef, int>();
+            foreach (var q in queue) { counts.TryGetValue(q.e.unit, out int n); counts[q.e.unit] = n + 1; }
+            foreach (var en in Enemy.All) if (en && !en.Dead && en.def) { counts.TryGetValue(en.def, out int n); counts[en.def] = n + 1; }
+            return counts.Count == 0 ? "—" : CountText(counts, false);
+        }
+
+        public int RemainingCount { get { int n = queue.Count; foreach (var en in Enemy.All) if (en && !en.Dead) n++; return n; } }
+
+        string CountText(Dictionary<UnitDef, int> counts, bool sides)
+        {
             var keys = new List<UnitDef>(counts.Keys);
             keys.Sort((a, b) => a.cost.CompareTo(b.cost));
             var sb = new StringBuilder();
             foreach (var u in keys)
             {
                 if (sb.Length > 0) sb.Append('\n');
-                string name = counts[u] == 1 ? u.title : Plural(u.title);
+                string name = L.UnitName(u, counts[u] != 1, Plural);
                 sb.Append(u.special ? "<color=#ff8a70>" : "").Append(counts[u]).Append(' ').Append(name).Append(u.special ? "</color>" : "");
             }
-            bool sides = plan.Exists(e => e.side != 0);
-            if (sides) sb.Append("\n<color=#f2c14e>También por norte y sur</color>");
+            if (sides) sb.Append("\n<color=#f2c14e>").Append(L.T("También por norte y sur")).Append("</color>");
             return sb.ToString();
         }
 

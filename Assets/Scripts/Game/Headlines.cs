@@ -216,7 +216,10 @@ namespace Argensimia
 
         public static string Pick(string key, params object[] args)
         {
-            if (!pool.TryGetValue(key, out var v) || v.Length == 0) return null;
+            string[] v = null;
+            if (L.En) L.Headlines.TryGetValue(key, out v); // en inglés, si hay banco propio
+            if (v == null && !pool.TryGetValue(key, out v)) return null;
+            if (v.Length == 0) return null;
             return string.Format(PickOne(key, v), args);
         }
 
@@ -254,14 +257,16 @@ namespace Argensimia
         // Relleno sin repetir hasta agotar la lista (bolsa barajada).
         public static string NextFiller()
         {
+            var filler = L.En ? L.Filler : Filler;
+            if (fillerBag.Count == 0 || fillerBag[fillerBag.Count - 1] >= filler.Length) fillerBag.Clear();
             if (fillerBag.Count == 0)
             {
-                for (int i = 0; i < Filler.Length; i++) fillerBag.Add(i);
+                for (int i = 0; i < filler.Length; i++) fillerBag.Add(i);
                 for (int i = fillerBag.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (fillerBag[i], fillerBag[j]) = (fillerBag[j], fillerBag[i]); }
             }
             int k = fillerBag[fillerBag.Count - 1];
             fillerBag.RemoveAt(fillerBag.Count - 1);
-            return Filler[k];
+            return filler[k];
         }
     }
 }

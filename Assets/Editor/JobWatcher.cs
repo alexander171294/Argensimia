@@ -49,7 +49,7 @@ public static class JobWatcher
     {
         var cam = Camera.main;
         if (cam == null) return "no main camera";
-        foreach (var ps in Object.FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None)) ps.Simulate(4f, true, true);
+        foreach (var ps in Object.FindObjectsByType<ParticleSystem>()) ps.Simulate(4f, true, true);
         var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
         var prev = cam.targetTexture;
         cam.targetTexture = rt; cam.Render(); cam.targetTexture = prev;

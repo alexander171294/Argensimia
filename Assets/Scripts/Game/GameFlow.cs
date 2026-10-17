@@ -18,6 +18,10 @@ namespace Argensimia
 
         public static GameFlow I { get; private set; }
         static bool autoStart; // NUEVA PARTIDA tras recargar la escena
+        // Fin de partida: cuando el helicóptero queda suspendido se recarga la escena (así no sigue corriendo la
+        // partida de fondo) y el menú arranca con el resultado y el puntaje.
+        static string pendingSub;
+        static int pendingScore = -1, pendingMandates;
 
         public State state;
         public bool HudVisible => state == State.Playing;
@@ -111,7 +115,13 @@ namespace Argensimia
             yield return LoadingScreen.WaitStable();
             yield return load.FadeOut(0.45f);
             if (autoStart) { autoStart = false; StartCoroutine(ToGame()); }
-            else menu.Show(true, 0.6f, "¡Defendé la Casa Rosada!");
+            else if (pendingSub != null)
+            {
+                menu.Show(true, 0.6f, pendingSub);
+                if (pendingScore >= 0) menu.OfferScore(pendingScore, pendingMandates);
+                pendingSub = null; pendingScore = -1;
+            }
+            else menu.Show(true, 0.6f, L.T("¡Defendé la Casa Rosada!"));
         }
 
         void OnDestroy() { if (I == this) I = null; }
@@ -151,8 +161,8 @@ namespace Argensimia
             var gs = GameState.I;
             TakeScore();
             string sub = win
-                ? "<color=#f2c14e>¡COMPLETASTE EL PERÍODO!</color>\nPopularidad final: " + Mathf.RoundToInt(gs ? gs.popularity : 0) + "%"
-                : "<color=#ff7a70>PERDISTE LA GOBERNABILIDAD</color>\nLa Plaza quedó en manos de la calle en el mandato " + (gs ? gs.mandate : 0);
+                ? L.F("<color=#f2c14e>¡COMPLETASTE EL PERÍODO!</color>\nPopularidad final: {0}%", Mathf.RoundToInt(gs ? gs.popularity : 0))
+                : L.F("<color=#ff7a70>PERDISTE LA GOBERNABILIDAD</color>\nLa Plaza quedó en manos de la calle en el mandato {0}", gs ? gs.mandate : 0);
             StartCoroutine(ToMenuRoutine(sub));
         }
 
@@ -163,7 +173,7 @@ namespace Argensimia
             Time.timeScale = 1;
             var gs = GameState.I;
             TakeScore();
-            StartCoroutine(ToMenuRoutine("<color=#ff7a70>EL PRESIDENTE RENUNCIÓ</color>\nSe fue en helicóptero en el mandato " + (gs ? gs.mandate : 0)));
+            StartCoroutine(ToMenuRoutine(L.F("<color=#ff7a70>EL PRESIDENTE RENUNCIÓ</color>\nSe fue en helicóptero en el mandato {0}", gs ? gs.mandate : 0)));
             if (WaveDirector.I) WaveDirector.I.Lose(); // corta la oleada; el HUD no muestra nada porque ya no está en partida
         }
 
@@ -177,7 +187,7 @@ namespace Argensimia
 
         IEnumerator ToMenuRoutine(string sub)
         {
-            sub += "  ·  Puntaje <color=#f2c14e>" + GameState.Money(lastScore) + "</color>";
+            sub += L.F("  ·  Puntaje <color=#f2c14e>{0}</color>", GameState.Money(lastScore));
             state = State.ToMenu;
             var hud = FindAnyObjectByType<GameHud>();
             if (hud) hud.SetHudVisible(false, 0.5f);
@@ -188,9 +198,12 @@ namespace Argensimia
             StartCoroutine(Delayed(Mathf.Max(0, panTime - takeoff), TakeOff()));
             yield return Pan(cam.transform.position, GroundLook(cam.transform), menuCamPos, MenuLook, panTime);
             while (!hovering) yield return null;
-            state = State.Menu;
-            menu.Show(true, 0.6f, sub);
-            menu.OfferScore(lastScore, lastMandates);
+            // recarga limpia: la partida de fondo (manifestantes, defensas, oleada) deja de correr
+            pendingSub = sub;
+            pendingScore = lastScore;
+            pendingMandates = lastMandates;
+            Time.timeScale = 1;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         IEnumerator ToGame()

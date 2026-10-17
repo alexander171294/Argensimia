@@ -58,7 +58,7 @@ namespace Argensimia
         // Multiplicador de cantidad para las oleadas: 0,6 con 100% de popularidad, 2 con 0%.
         public float Difficulty => Mathf.Lerp(0.6f, 2f, 1f - popularity / 100f);
         public int MoodIndex => popularity >= 70 ? 0 : popularity >= 50 ? 1 : popularity >= 30 ? 2 : 3;
-        public string Mood => MoodNames[MoodIndex];
+        public string Mood => L.T(MoodNames[MoodIndex]);
         public int Salary
         {
             get { int s = salaryBase + Mathf.RoundToInt(salaryPerPop * popularity); foreach (var c in cabinet) s += c.salaryDelta; return s; }
@@ -118,7 +118,7 @@ namespace Argensimia
                 WaveDirector.I.extraColumns += c.extraColumns;
                 WaveDirector.I.reduction = Mathf.Max(WaveDirector.I.reduction, c.nextWaveReduction);
             }
-            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(c.headline));
+            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(L.CardHeadline(c)));
             MoodHeadline(before);
         }
 
@@ -157,7 +157,7 @@ namespace Argensimia
             money = Mathf.Max(0, money + c.moneyDelta);
             income = Mathf.Max(0, income + c.incomeDelta);
             AddPopularity(c.popularityDelta);
-            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(c.headline));
+            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(L.CardHeadline(c)));
             if (c.defenseHpBonus > 0) foreach (var d in Defense.All) d.RefreshHp();
             return removed;
         }

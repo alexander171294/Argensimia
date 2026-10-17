@@ -415,7 +415,7 @@ namespace Argensimia.UI
             // textos grandes con contorno (títulos, botones, cifras grandes) van en la fuente display
             t.font = f ? f : outline && size >= 36 ? FontDisplay : Font;
             if (outline) t.fontSharedMaterial = OutlineFor(t.font);
-            t.text = text; t.fontSize = size; t.color = color; t.alignment = align;
+            t.text = L.T(text); t.fontSize = size; t.color = color; t.alignment = align;
             t.raycastTarget = false; t.richText = true;
             t.textWrappingMode = TextWrappingModes.NoWrap;
             t.overflowMode = TextOverflowModes.Overflow;

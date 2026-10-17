@@ -74,15 +74,67 @@ namespace Argensimia.UI
             m.StartCoroutine(m.Breathe(b));
             m.root = root;
             m.RefreshBoard(-1);
+            m.BuildSideButtons();
             return m;
         }
 
-        // ------------------------------------------------------------------ ranking (top 10, a la izquierda)
+        // ------------------------------------------------------------------ botones de la derecha: GitHub e idioma
+
+        public const string RepoUrl = "https://github.com/alexander171294/Argensimia";
+
+        void BuildSideButtons()
+        {
+            // idioma (abajo) y GitHub (arriba), con el mismo margen que el ranking
+            var lang = SideButton("Lang", L.En ? "ESPAÑOL" : "ENGLISH", "#2f6fd6", "#163a7a", 50);
+            var flag = UiKit.Rect("Flag", lang).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(46, 32), new Vector2(0, 0.5f));
+            if (L.En)
+            {
+                // a español: bandera argentina
+                UiKit.Img(flag, "C1", null, UiKit.Celeste).RT().Fill(0, 0, 0, 21);
+                UiKit.Img(flag, "W", null, Color.white).RT().Fill(0, 0, 11, 11);
+                UiKit.Img(flag, "C2", null, UiKit.Celeste).RT().Fill(0, 0, 21, 0);
+                UiKit.Img(flag, "Sun", UiKit.Circle, UiKit.Hex("#f6b40e")).RT().At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(8, 8));
+            }
+            else
+            {
+                // a inglés: "EN" en una pastilla blanca
+                var pill = UiKit.Img(flag, "Pill", UiKit.RR, Color.white, 6).RT(); pill.Fill();
+                UiKit.Txt(pill, "T", "EN", 20, UiKit.Hex("#163a7a"), TextAlignmentOptions.Center).RT().Fill();
+            }
+            lang.GetComponent<Tap>().onTap = () =>
+            {
+                L.En = !L.En;
+                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            };
+            var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", 50 + 84 + 14);
+            // versión, debajo del botón de idioma
+            UiKit.Txt(root, "Version", "v" + Application.version, 20, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
+                .RT().At(new Vector2(1, 0), new Vector2(-28, 16), new Vector2(280, 26), new Vector2(1, 0));
+            var ic = UiKit.Img(gh, "Icon", UiKit.Circle, Color.white).RT();
+            ic.At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 40), new Vector2(0, 0.5f));
+            UiKit.Txt(ic, "T", "</>", 17, UiKit.Hex("#0d1117"), TextAlignmentOptions.Center).RT().Fill();
+            gh.GetComponent<Tap>().onTap = () => Application.OpenURL(RepoUrl);
+        }
+
+        RectTransform SideButton(string name, string label, string faceHex, string baseHex, float y)
+        {
+            var b = UiKit.Rect(name, root).At(new Vector2(1, 0), new Vector2(-28, y), new Vector2(280, 84), new Vector2(1, 0));
+            UiKit.Img(b, "Base", UiKit.RR, UiKit.Hex(baseHex), 22, true).RT().Fill();
+            var face = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex(faceHex), 22).RT().Fill(0, 0, 0, 8);
+            UiKit.Txt(face, "T", label, 36, Color.white, TextAlignmentOptions.Center, true).RT().Fill(70, 14, 0, 0);
+            var t = b.gameObject.AddComponent<Tap>();
+            t.visual = b;
+            return b;
+        }
+
+        // ------------------------------------------------------------------ ranking (top 5, abajo a la izquierda)
 
         void RefreshBoard(int highlight)
         {
             if (board) Destroy(board.gameObject);
-            board = UiKit.Panel(root, "Ranking", 18).At(new Vector2(0, 0.5f), new Vector2(28, -20), new Vector2(370, 560), new Vector2(0, 0.5f));
+            int rows = Mathf.Min(Leaderboard.Size, Mathf.Max(1, Leaderboard.Top.Count));
+            float h = Leaderboard.Top.Count == 0 ? 170 : 92 + rows * 46;
+            board = UiKit.Panel(root, "Ranking", 18).At(Vector2.zero, new Vector2(28, 28), new Vector2(370, h), Vector2.zero); // abajo a la izquierda
             UiKit.Txt(board, "Title", "RANKING", 40, UiKit.Gold, TextAlignmentOptions.Center, true)
                 .RT().At(new Vector2(0.5f, 1), new Vector2(0, -10), new Vector2(340, 48), new Vector2(0.5f, 1));
             UiKit.Txt(board, "Head", "MEJORES GOBIERNOS", 15, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody)
@@ -91,10 +143,10 @@ namespace Argensimia.UI
             if (top.Count == 0)
             {
                 UiKit.Txt(board, "Empty", "Todavía no hay partidas.\n¡Sé el primero en aguantar!", 20, new Color(1, 1, 1, 0.75f), TextAlignmentOptions.Center, false, UiKit.FontBody)
-                    .RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, -10), new Vector2(330, 80));
+                    .RT().At(new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(330, 60), new Vector2(0.5f, 0));
                 return;
             }
-            for (int i = 0; i < top.Count; i++)
+            for (int i = 0; i < top.Count && i < Leaderboard.Size; i++)
             {
                 var e = top[i];
                 float y = -86 - i * 46;
@@ -108,7 +160,7 @@ namespace Argensimia.UI
                 nm.RT().Fill(46, 120, 0, 0);
                 nm.overflowMode = TextOverflowModes.Ellipsis;
                 UiKit.Txt(row, "Score", GameState.Money(e.score), 22, UiKit.Gold, TextAlignmentOptions.Right).RT().Fill(200, 10, 0, 14);
-                UiKit.Txt(row, "Mand", e.mandates + (e.mandates == 1 ? " mandato" : " mandatos"), 12, new Color(1, 1, 1, 0.6f), TextAlignmentOptions.Right, false, UiKit.FontBody)
+                UiKit.Txt(row, "Mand", e.mandates + L.T(e.mandates == 1 ? " mandato" : " mandatos"), 12, new Color(1, 1, 1, 0.6f), TextAlignmentOptions.Right, false, UiKit.FontBody)
                     .RT().At(new Vector2(1, 0), new Vector2(-10, 2), new Vector2(140, 16), new Vector2(1, 0));
             }
         }
@@ -122,9 +174,9 @@ namespace Argensimia.UI
             prompt = dim.RT();
             prompt.Fill();
             var p = UiKit.Panel(prompt, "Box", 22).At(new Vector2(0.5f, 0.5f), new Vector2(0, 20), new Vector2(620, 330));
-            UiKit.Txt(p, "Title", "¡ENTRASTE AL TOP 10!", 46, UiKit.Gold, TextAlignmentOptions.Center, true)
+            UiKit.Txt(p, "Title", "¡ENTRASTE AL TOP 5!", 46, UiKit.Gold, TextAlignmentOptions.Center, true)
                 .RT().At(new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(580, 56), new Vector2(0.5f, 1));
-            UiKit.Txt(p, "Score", "Puntaje <color=#f2c14e>" + GameState.Money(score) + "</color>  ·  " + mandates + (mandates == 1 ? " mandato" : " mandatos"), 26, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
+            UiKit.Txt(p, "Score", L.T("Puntaje") + " <color=#f2c14e>" + GameState.Money(score) + "</color>  ·  " + mandates + L.T(mandates == 1 ? " mandato" : " mandatos"), 26, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
                 .RT().At(new Vector2(0.5f, 1), new Vector2(0, -80), new Vector2(580, 34), new Vector2(0.5f, 1));
             // campo de texto
             var box = UiKit.Img(p, "Input", UiKit.RR, UiKit.Cream, 14, true);

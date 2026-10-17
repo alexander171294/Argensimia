@@ -130,7 +130,9 @@ namespace Argensimia
             {
                 case DefenseKind.Vallado:
                 {
-                    // NV1: una línea de vallas en L al fondo (oeste) del slot. NV2: doble línea. NV3: + bloques de hormigón adelante.
+                    // NV1: una línea de vallas en L al fondo (oeste) del slot.
+                    // NV2: doble línea + bolsas de arena adelante + reja alta antidisturbios atrás.
+                    // NV3: + muro de hormigón tipo New Jersey con franjas, chapas policiales y balizas.
                     float fx = -(HalfLen - 1.35f);
                     var rows = new List<float> { fx };
                     if (level >= 2) rows.Add(fx - 1.0f);
@@ -142,19 +144,56 @@ namespace Argensimia
                             vallas.Add(v.transform); vallaPos.Add(v.transform.localPosition); vallaRot.Add(v.transform.localRotation);
                         }
                     faceOff = fx + 1.0f;
+                    if (level >= 2)
+                    {
+                        // reja alta: postes, travesaños y barrotes
+                        var steel = new Color(0.16f, 0.17f, 0.2f);
+                        float gx = fx - 1.3f;
+                        foreach (float z in new[] { -1.95f, -0.65f, 0.65f, 1.95f })
+                            FxKit.Prim(PrimitiveType.Cylinder, model, new Vector3(gx, 1.15f, z), new Vector3(0.11f, 1.15f, 0.11f), steel);
+                        foreach (float y in new[] { 0.25f, 1.25f, 2.22f })
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(gx, y, 0), new Vector3(0.07f, 0.07f, 3.95f), steel);
+                        for (int k = 0; k < 20; k++)
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(gx, 1.2f, -1.85f + k * 0.195f), new Vector3(0.035f, 2.0f, 0.035f), steel);
+                        // bolsas de arena adelante (dos hileras)
+                        var sand = new Color(0.72f, 0.64f, 0.45f);
+                        var sand2 = new Color(0.64f, 0.56f, 0.38f);
+                        float sx = fx + 0.75f;
+                        for (int k = 0; k < 7; k++)
+                            FxKit.Prim(PrimitiveType.Sphere, model, new Vector3(sx, 0.17f, -1.8f + k * 0.6f), new Vector3(0.5f, 0.3f, 0.66f), k % 2 == 0 ? sand : sand2);
+                        for (int k = 0; k < 6; k++)
+                            FxKit.Prim(PrimitiveType.Sphere, model, new Vector3(sx - 0.04f, 0.42f, -1.5f + k * 0.6f), new Vector3(0.46f, 0.28f, 0.62f), k % 2 == 0 ? sand2 : sand);
+                        faceOff = sx + 0.26f;
+                    }
                     if (level >= 3)
                     {
-                        var conc = new Color(0.66f, 0.64f, 0.6f);
-                        var cap = new Color(0.58f, 0.56f, 0.53f);
-                        var stripe = new Color(0.95f, 0.75f, 0.12f);
-                        float bx = fx + 1.45f;
-                        foreach (float z in new[] { -1.15f, 1.15f })
+                        var conc = new Color(0.7f, 0.68f, 0.64f);
+                        var concD = new Color(0.58f, 0.56f, 0.53f);
+                        var yel = new Color(0.98f, 0.78f, 0.1f);
+                        var blk = new Color(0.08f, 0.08f, 0.09f);
+                        float bx = fx + 1.55f;
+                        foreach (float z in new[] { -1.05f, 1.05f })
                         {
-                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.42f, z), new Vector3(0.62f, 0.84f, 2.1f), conc);
-                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.9f, z), new Vector3(0.36f, 0.14f, 2.04f), cap);
-                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx + 0.32f, 0.55f, z), new Vector3(0.03f, 0.16f, 1.96f), stripe);
+                            // New Jersey: base ancha + cuerpo + tapa
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.2f, z), new Vector3(0.9f, 0.4f, 2.0f), concD);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.68f, z), new Vector3(0.5f, 0.6f, 2.0f), conc);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 1.02f, z), new Vector3(0.42f, 0.1f, 1.96f), concD);
+                            // franjas amarillas y negras sobre la cara este
+                            for (int k = 0; k < 6; k++)
+                                FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx + 0.26f, 0.68f, z - 0.83f + k * 0.333f), new Vector3(0.03f, 0.22f, 0.32f), k % 2 == 0 ? yel : blk);
                         }
-                        faceOff = bx + 0.31f;
+                        // chapas azules con franja blanca arriba de la reja
+                        var navy = new Color(0.1f, 0.2f, 0.48f);
+                        float gx = fx - 1.3f;
+                        foreach (float z in new[] { -1.3f, 0f, 1.3f })
+                        {
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(gx + 0.06f, 1.55f, z), new Vector3(0.05f, 0.9f, 1.2f), navy);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(gx + 0.09f, 1.55f, z), new Vector3(0.02f, 0.14f, 1.2f), Color.white);
+                        }
+                        // balizas en las puntas del muro
+                        FxKit.Prim(PrimitiveType.Sphere, model, new Vector3(bx, 1.17f, -2.0f), Vector3.one * 0.2f, new Color(1f, 0.15f, 0.1f));
+                        FxKit.Prim(PrimitiveType.Sphere, model, new Vector3(bx, 1.17f, 2.0f), Vector3.one * 0.2f, new Color(0.2f, 0.4f, 1f));
+                        faceOff = bx + 0.45f;
                     }
                     break;
                 }
@@ -763,7 +802,7 @@ namespace Argensimia
             Dead = true;
             All.Remove(this);
             blocking.Clear();
-            if (def.defense == DefenseKind.Vallado) Headlines.Say("fence_break", 10f); else Headlines.Say("defense_break", 4f, def.title.ToLowerInvariant());
+            if (def.defense == DefenseKind.Vallado) Headlines.Say("fence_break", 10f); else Headlines.Say("defense_break", 4f, L.CardTitle(def).ToLowerInvariant());
             // vallado y camión se desarman; los agentes caen
             bool thing = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Hidrante;
             Snd.At(thing ? "break_crash" : "unit_down", transform.position, 1, 0.1f, 0.08f);
