@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.1.0** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.1.1** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
 | 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
 | 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
 | 2026-10-17 | Niveles bufeados (vida ×2/×3,5, daño ×1,75/×3, ritmo, alcance y golpe múltiple de infantería); slots circulares; pantalla de carga al arrancar. |
 | 2026-10-17 | Arte de las 32 cartas (Nano Banana 2 Lite, recortes completados con edit); Refuerzo federal pasa a Refuerzo militar. |
-| 2026-10-17 | Cartas colocables con badges VIDA/DAÑO/RITMO/ALCANCE sobre el arte ("gobernabilidad" de la policía pasó a llamarse vida) y sin la aclaración de niveles en la descripción. Audio: menú sin cacerolas, helicóptero mudo al empezar y protagonista al perder (arranque de turbina), nuevo cierre de derrota, toc de ajedrez al colocar, golpe seco en vallas y caída de agente. |
 
 ## Resumen
 
@@ -187,7 +187,7 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 - **Mandato:** previa de planificación con reloj de 30 s a la izquierda de ¡ARRANCAR! (se pausa con la pausa y en los paneos; tictac los últimos 5 s; al agotarse cierra zoom/colocación/confirmación y arranca, aplicando las crisis); el cierre con las 3 cartas no tiene tiempo (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
 - **Cierre:** sueldo + efecto de los ministros + la policía en el mapa recupera hasta 25% de su vida máxima (30% con Min. Seguridad, solo a las que les falta) → pantalla OBTUVISTE 3 CARTAS PARA TU MAZO (ver Sistema de cartas) → CONTINUAR → se completa la mano con lo que haya en el mazo → crisis forzadas.
 - **Fin:** al perder la gobernabilidad, o al RENUNCIAR desde la pausa (cuando el helicóptero queda suspendido se recarga la escena para cortar la partida de fondo y el menú arranca con el resultado), se oculta el HUD, aparece la multitud en el helipuerto, la cámara panea hasta la vista del menú y el helicóptero despega y se detiene justo en la pose de flotación. El menú queda con la cinta del resultado ("PERDISTE LA GOBERNABILIDAD" / "EL PRESIDENTE RENUNCIÓ") y el detalle debajo ("Se fue en helicóptero en el mandato N").
-- **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos sobrevividos (el que perdiste no cuenta; mín. 1) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 5 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING del menú.
+- **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos jugados (el que estabas jugando cuenta) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 5 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING del menú.
 - **Vender carta:** en el zoom, el tacho arriba a la izquierda descarta la carta (no vuelve al mazo) a cambio de $100; no aplica a crisis.
 - **Valores iniciales:** $2.500, +$40/s (solo durante la oleada), 78% de popularidad (TRANQUI), gobernabilidad 20/20, mazo de 15 (quedan 10 tras repartir la mano de 5).
 - **Sueldo de cierre:** $2.000 + $40 × popularidad (+$500 con Super Ministro).

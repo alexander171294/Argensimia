@@ -36,8 +36,8 @@ namespace Argensimia
         public float killPoints;
 
         public void AddKill(float cost) { kills++; killPoints += pointsPerCost * Mathf.Max(1, cost); }
-        public int MandatesSurvived => Mathf.Max(0, mandate - 1); // el mandato en el que caíste no cuenta
-        // (eliminados + dinero/10) × mandatos sobrevividos (mín. 1) × popularidad (mín. 10%)
+        public int MandatesSurvived => Mathf.Max(1, mandate); // mandatos jugados: el que estabas jugando cuenta
+        // (eliminados + dinero/10) × mandatos jugados × popularidad (mín. 10%)
         public int Score => Mathf.RoundToInt((killPoints + money / moneyPerPoint) * Mathf.Max(1, MandatesSurvived) * Mathf.Max(0.1f, popularity / 100f));
 
         [Header("Gabinete")]
