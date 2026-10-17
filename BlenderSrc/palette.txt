@@ -19,8 +19,8 @@ M_ShopGlow #6e5a48 0
 M_AwningRed #b8322b 0
 M_AwningGreen #2f6b47 0
 M_Iron #1e2124 0
-M_Rosada #e8a092 0
-M_RosadaDark #cc8577 0
+M_Rosada #f4838a 0
+M_RosadaDark #d9646e 0
 M_RoofGreen #4f8c72 0 T_roof 2
 M_Marble #f1ebe2 0 T_marble 2
 M_Bark #6b4a33 0 T_bark 1
@@ -72,8 +72,8 @@ M_TrafficRed #ff2a1a 3.0
 M_TrafficOff #3b3a2a 0
 M_Gold #c9a24a 0
 M_RoofFlat #8a8f96 0
-M_CR_Wall #e3979a 0 T_plaster 3
-M_CR_Dark #c97c7c 0 T_stone 2
+M_CR_Wall #f4838a 0 T_plaster 3
+M_CR_Dark #d9646e 0 T_stone 2
 M_CR_Trim #f7d2c2 0 T_plaster 2
 M_CR_Roof #5f9e86 0 T_roof 3
 M_Soil #6b4a32 0 T_leaves 1.5
@@ -87,3 +87,6 @@ M_Leaf3 #3f6e2a 0 T_leaves 2
 M_Disc #e9dfd0 0 T_marble 2
 M_AwningBlue #2f5d8a 0
 M_Zinc #7d8a8f 0
+M_StoneDark #5e5650 0 T_stone 2
+M_Rust #6b4630 0 T_stone 1
+M_SteelDark #4a4643 0 T_stone 1

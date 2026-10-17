@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: dolar_soja
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: dolar_soja
+  title: "D\xF3lar soja"
+  kind: 1
+  cost: 0
+  description: 'Tipo de cambio especial para el campo: entra mucha plata de golpe.
+    Solo en la previa.'
+  art: {fileID: 0}
+  color: {r: 0.6039216, g: 0.65882355, b: 0.22745098, a: 1}
+  copies: 0
+  headline: "Nuevo d\xF3lar soja: liquidan r\xE9cord en una semana"
+  rarity: 1
+  inPool: 1
+  popularityDelta: -2
+  moneyDelta: 4000
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 1
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 1
+  defense: 0
+  stats:
+    hp: 0
+    damage: 0
+    rate: 0
+    range: 0
+    area: 0
+    speed: 0
+  maxBlock: 0
+  slow: 0
+  slowTime: 0
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1

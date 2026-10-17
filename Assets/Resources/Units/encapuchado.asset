@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ea0d9068a5ce4eb9a04bafc5299f8bf, type: 3}
+  m_Name: encapuchado
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.UnitDef
+  id: encapuchado
+  title: Encapuchado
+  kind: 3
+  cost: 2
+  stats:
+    hp: 50
+    damage: 15
+    rate: 1.2
+    range: 1
+    area: 0
+    speed: 2
+  govDamage: 2
+  minMandate: 2
+  weight: 1.6
+  special: 1
+  popOnHit: 0
+  popOnArrive: 0
+  fenceMultiplier: 3
+  pushResist: 0
+  auraSpeed: 0
+  auraRadius: 4
+  tireEvery: 0
+  shirt: 7
+  hair: 3
+  scale: 1
+  members: 1
+  prop: hood

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ea0d9068a5ce4eb9a04bafc5299f8bf, type: 3}
+  m_Name: cacerolero
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.UnitDef
+  id: cacerolero
+  title: Cacerolero
+  kind: 1
+  cost: 1
+  stats:
+    hp: 30
+    damage: 0
+    rate: 0
+    range: 0
+    area: 0
+    speed: 1.2
+  govDamage: 1
+  minMandate: 1
+  weight: 2.2
+  special: 0
+  popOnHit: 0
+  popOnArrive: 1
+  fenceMultiplier: 1
+  pushResist: 0
+  auraSpeed: 0
+  auraRadius: 4
+  tireEvery: 0
+  shirt: 1
+  hair: -1
+  scale: 1
+  members: 1
+  prop: pot

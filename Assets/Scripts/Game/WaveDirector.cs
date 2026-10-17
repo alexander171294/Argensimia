@@ -1,0 +1,277 @@
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+
+namespace Argensimia
+{
+    // Mandatos (= oleadas): previa de planificación sin timer → oleada → cierre (sueldo + 1 de 3).
+    // La oleada se arma gastando un presupuesto = base del mandato × Difficulty (popularidad); la Bronca
+    // (estado de ánimo) multiplica las stats al spawnear.
+    public class WaveDirector : MonoBehaviour
+    {
+        public static WaveDirector I { get; private set; }
+
+        public int[] baseBudget = { 20, 32, 48, 68, 100 };
+        [Tooltip("Endless: crecimiento del presupuesto y de la vida por mandato")] public float endlessGrowth = 1.18f, endlessHp = 1.08f;
+        [Tooltip("Multiplicador global de velocidad de los manifestantes")] public float speedScale = 1.3f;
+        public float spawnInterval = 0.75f;
+        [Tooltip("Pausa entre pulsos con ESTALLIDO")] public float pulseGap = 9f;
+
+        [HideInInspector] public int extraColumns;
+        [HideInInspector] public float reduction;
+
+        public struct Entry { public UnitDef unit; public int side; } // side: 0 = este (Av. de Mayo), 1 = norte, 2 = sur
+
+        public readonly List<Entry> plan = new List<Entry>();
+        readonly List<UnitDef> units = new List<UnitDef>();
+        readonly Queue<(Entry e, float delay)> queue = new Queue<(Entry, float)>();
+        float spawnT, lastPlanPop = -1;
+        int total, gone, arrived;
+        public int ArrivedThisWave => arrived;
+        public int PlannedCount => plan.Count;
+        public float Progress => total <= 0 || !GameState.I || GameState.I.phase != Phase.Oleada ? 0 : (float)gone / total;
+        readonly List<GameObject> previews = new List<GameObject>();
+
+        GameState gs => GameState.I;
+
+        void Awake()
+        {
+            I = this;
+            units.AddRange(Resources.LoadAll<UnitDef>("Units"));
+            units.Sort((a, b) => a.cost.CompareTo(b.cost));
+        }
+
+        void Start()
+        {
+            if (!GetComponent<LaneArrows>()) gameObject.AddComponent<LaneArrows>();
+            gs.SetPhase(Phase.Previa);
+            Plan();
+        }
+
+        void Update()
+        {
+            if (gs.phase == Phase.Previa)
+            {
+                // la oleada se recalcula en vivo con la popularidad hasta tocar ARRANCAR
+                if (Mathf.Abs(gs.popularity - lastPlanPop) > 0.01f) Plan();
+                return;
+            }
+            if (gs.phase != Phase.Oleada) return;
+            spawnT -= Time.deltaTime;
+            while (queue.Count > 0 && spawnT <= 0)
+            {
+                var (e, delay) = queue.Dequeue();
+                SpawnOne(e);
+                spawnT += delay;
+            }
+            if (queue.Count == 0 && Enemy.All.Count == 0 && gone >= total) EndWave();
+        }
+
+        // ------------------------------------------------------------------ armado de la oleada
+
+        public float Budget(int m)
+        {
+            if (m <= baseBudget.Length) return baseBudget[Mathf.Max(0, m - 1)];
+            return baseBudget[baseBudget.Length - 1] * Mathf.Pow(endlessGrowth, m - baseBudget.Length);
+        }
+
+        public bool IsFinal => gs.totalMandates > 0 && !gs.endless && gs.mandate == gs.totalMandates;
+
+        // Carriles activos: mandato 1 = uno, mandato 2 = dos, desde el 3 los cuatro (da tiempo a armar la defensa).
+        public static readonly int[] LaneOrder = { 1, 3, 0, 2 }; // interiores primero (norte, sur), después exteriores
+        public int ActiveLaneCount => gs.mandate <= 1 ? 1 : gs.mandate == 2 ? 2 : 4;
+        public bool LaneActive(int l) => System.Array.IndexOf(LaneOrder, l) < ActiveLaneCount;
+
+        public void Plan()
+        {
+            lastPlanPop = gs.popularity;
+            var rnd = new System.Random(gs.mandate * 7919 + 17); // misma oleada para la misma popularidad
+            plan.Clear();
+            int m = gs.mandate;
+            float budget = Budget(m) * gs.Difficulty * (1 - reduction);
+            var avail = units.FindAll(u => u.minMandate <= m);
+            UnitDef col = units.Find(u => u.kind == UnitKind.Columna);
+            int cols = extraColumns + (IsFinal ? 3 : 0);
+            for (int i = 0; i < cols && col; i++) { plan.Add(new Entry { unit = col }); budget -= col.cost; }
+            if (gs.MoodIndex >= 2)
+            {
+                var specials = avail.FindAll(u => u.special && u.kind != UnitKind.Columna);
+                if (specials.Count > 0) { var s = specials[rnd.Next(specials.Count)]; plan.Add(new Entry { unit = s }); budget -= s.cost; }
+            }
+            int guard = 0;
+            while (guard++ < 500)
+            {
+                var afford = avail.FindAll(u => u.cost <= budget);
+                if (afford.Count == 0) break;
+                float tw = 0;
+                foreach (var u in afford) tw += u.weight;
+                float r = (float)rnd.NextDouble() * tw;
+                var pick = afford[afford.Count - 1];
+                foreach (var u in afford) { r -= u.weight; if (r <= 0) { pick = u; break; } }
+                plan.Add(new Entry { unit = pick });
+                budget -= pick.cost;
+            }
+            // por dónde entran: mandatos 1-2 solo Av. de Mayo; desde el 3 se abren norte y sur
+            for (int i = 0; i < plan.Count; i++)
+            {
+                var e = plan[i];
+                double roll = rnd.NextDouble();
+                float sideChance = m <= 2 ? 0 : m == 3 ? 0.3f : 0.5f;
+                e.side = roll < sideChance ? (rnd.NextDouble() < 0.5 ? 1 : 2) : 0;
+                plan[i] = e;
+            }
+            // orden: especiales más hacia el final
+            var ordered = new List<(Entry e, double k)>();
+            foreach (var e in plan) ordered.Add((e, rnd.NextDouble() + (e.unit.special ? 0.45 : 0)));
+            ordered.Sort((a, b) => a.k.CompareTo(b.k));
+            plan.Clear();
+            foreach (var o in ordered) plan.Add(o.e);
+            RefreshPreviews();
+        }
+
+        public string PreviewText()
+        {
+            var counts = new Dictionary<UnitDef, int>();
+            foreach (var e in plan) { counts.TryGetValue(e.unit, out int n); counts[e.unit] = n + 1; }
+            var keys = new List<UnitDef>(counts.Keys);
+            keys.Sort((a, b) => a.cost.CompareTo(b.cost));
+            var sb = new StringBuilder();
+            foreach (var u in keys)
+            {
+                if (sb.Length > 0) sb.Append('\n');
+                string name = counts[u] == 1 ? u.title : Plural(u.title);
+                sb.Append(u.special ? "<color=#ff8a70>" : "").Append(counts[u]).Append(' ').Append(name).Append(u.special ? "</color>" : "");
+            }
+            bool sides = plan.Exists(e => e.side != 0);
+            if (sides) sb.Append("\n<color=#f2c14e>También por norte y sur</color>");
+            return sb.ToString();
+        }
+
+        static string Plural(string s)
+        {
+            if (s.Contains(" ")) { var w = s.Split(' '); w[0] = Plural(w[0]); for (int i = 1; i < w.Length; i++) w[i] = Plural(w[i]); return string.Join(" ", w); }
+            if (s.EndsWith("z")) return s.Substring(0, s.Length - 1) + "ces";
+            if ("aeiouáéó".IndexOf(s[s.Length - 1]) >= 0) return s + "s";
+            return s + "es";
+        }
+
+        // Especiales a la vista en la esquina por donde van a entrar (telegrafía).
+        void RefreshPreviews()
+        {
+            foreach (var p in previews) if (p) Destroy(p);
+            previews.Clear();
+            var shown = new HashSet<UnitDef>();
+            int k = 0;
+            foreach (var e in plan)
+            {
+                if (!e.unit.special || shown.Contains(e.unit)) continue;
+                shown.Add(e.unit);
+                var pos = e.side == 0 ? SpawnPoint(0, LaneOrder[k++ % ActiveLaneCount]) : SpawnPoint(e.side, 0);
+                if (e.side == 0) pos.x -= 1.5f;
+                var en = Enemy.Spawn(e.unit, new List<Vector3> { pos }, 0, 1, 1, 0);
+                Enemy.All.Remove(en);
+                en.enabled = false;
+                en.transform.rotation = Quaternion.Euler(0, e.side == 0 ? -90 : e.side == 1 ? 180 : 0, 0);
+                en.name = "Preview_" + e.unit.id;
+                previews.Add(en.gameObject);
+            }
+        }
+
+        // ------------------------------------------------------------------ fases
+
+        public void StartWave()
+        {
+            if (gs.phase != Phase.Previa) return;
+            Plan();
+            foreach (var p in previews) if (p) Destroy(p);
+            previews.Clear();
+            queue.Clear();
+            int pulses = gs.MoodIndex >= 3 ? 3 : 1;
+            int per = Mathf.CeilToInt(plan.Count / (float)pulses);
+            for (int i = 0; i < plan.Count; i++)
+            {
+                bool endPulse = pulses > 1 && (i + 1) % per == 0 && i < plan.Count - 1;
+                queue.Enqueue((plan[i], endPulse ? pulseGap : spawnInterval * Random.Range(0.6f, 1.4f)));
+            }
+            total = plan.Count; gone = 0; arrived = 0;
+            spawnT = 1f;
+            extraColumns = 0;
+            reduction = 0;
+            gs.SetPhase(Phase.Oleada);
+            gs.PushHeadline(IsFinal ? "ESTALLIDO: todas las columnas marchan sobre la Casa Rosada" :
+                "Arranca el mandato " + gs.mandate + ": columnas avanzan por Av. de Mayo");
+        }
+
+        public void OnEnemyGone(Enemy e, bool arr)
+        {
+            gone++;
+            if (arr) arrived++;
+        }
+
+        void EndWave()
+        {
+            if (gs.phase != Phase.Oleada) return;
+            if (IsFinal) { gs.SetPhase(Phase.Victoria); gs.PushHeadline("Terminó el período: el Gobierno completa su mandato"); return; }
+            gs.SetPhase(Phase.Cierre);
+        }
+
+        // Lo llama el HUD tras elegir la carta del cierre.
+        public void NextMandate()
+        {
+            gs.NextMandate();
+            gs.SetPhase(Phase.Previa);
+            Plan();
+        }
+
+        public void StartEndless()
+        {
+            gs.endless = true;
+            NextMandate();
+        }
+
+        public void Lose()
+        {
+            queue.Clear();
+            gs.SetPhase(Phase.Derrota);
+        }
+
+        // ------------------------------------------------------------------ spawn
+
+        // Todo aparece sobre las líneas de los carriles donde tocan la calle (borde de la plaza):
+        // extremo este de cada carril (Av. de Mayo) y, desde el mandato 3, arriba del refuerzo norte/sur (x = 0).
+        Vector3 SpawnPoint(int side, int lane)
+        {
+            var slots = PoliceSlots.I;
+            if (side == 0) return slots.LanePoint(lane, slots.EastX(lane) - 0.5f);
+            float sz = side == 1 ? 1 : -1;
+            return new Vector3(Random.Range(-1f, 1f), 0.16f, sz * 25.5f);
+        }
+
+        void SpawnOne(Entry e)
+        {
+            var slots = PoliceSlots.I;
+            int m = gs.MoodIndex;
+            float endlessK = gs.mandate > baseBudget.Length ? Mathf.Pow(endlessHp, gs.mandate - baseBudget.Length) : 1;
+            var path = new List<Vector3>();
+            int lane;
+            if (e.side == 0)
+            {
+                lane = LaneOrder[Random.Range(0, ActiveLaneCount)];
+                path.Add(SpawnPoint(0, lane));
+            }
+            else
+            {
+                // bajan por el refuerzo (x = 0) y toman un carril de su lado
+                float sz = e.side == 1 ? 1 : -1;
+                var sideLanes = new List<int>();
+                for (int l = 0; l < slots.LaneCount; l++) if (Mathf.Sign(slots.LaneZ(l, 0)) == sz && LaneActive(l)) sideLanes.Add(l);
+                if (sideLanes.Count == 0) { e.side = 0; SpawnOne(e); return; }
+                lane = sideLanes[Random.Range(0, sideLanes.Count)];
+                path.Add(SpawnPoint(e.side, lane));
+                path.Add(slots.LanePoint(lane, Random.Range(-0.5f, 0.5f)));
+            }
+            var en = Enemy.Spawn(e.unit, path, lane, GameState.HpMul[m] * endlessK, GameState.DmgMul[m], GameState.SpdMul[m]);
+            en.PopIn();
+        }
+    }
+}

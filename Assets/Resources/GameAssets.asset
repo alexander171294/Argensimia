@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3e1d66d630d840a3967ec0e47752422, type: 3}
+  m_Name: GameAssets
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.GameAssets
+  people:
+  - {fileID: 919132149155446097, guid: 986210502412d442b995c73ee84910c8, type: 3}
+  - {fileID: 919132149155446097, guid: e4b4e8104c39b42fb949ee618e9a64cd, type: 3}
+  - {fileID: 919132149155446097, guid: ba536aa5ca68a4bc8be78cc12498100d, type: 3}
+  - {fileID: 919132149155446097, guid: dc049938401864bcf83b4556db2a7940, type: 3}
+  officer: {fileID: 919132149155446097, guid: cbf3fe04653ca4e58a27f8799cbb1824, type: 3}
+  truck: {fileID: 919132149155446097, guid: 67fc295ec6f0a42e385b932f97a77dad, type: 3}
+  valla: {fileID: 919132149155446097, guid: 83eb1f7c7f9494cf1b67fc47261ed282, type: 3}
+  flagArg: {fileID: 919132149155446097, guid: e32eb650f5bdc4cc88a879d775a3c5cc, type: 3}
+  flagRed: {fileID: 919132149155446097, guid: d9814f55b6b1549e69e06bc57cbf3385, type: 3}
+  banner: {fileID: 919132149155446097, guid: 2ec9dc442991c49708c61c7254245568, type: 3}
+  shirts:
+  - {fileID: 2100000, guid: 3714f00c3a24840308e5edb32eb8b8c5, type: 2}
+  - {fileID: 2100000, guid: 13c73dce818734560bef2b4977aff589, type: 2}
+  - {fileID: 2100000, guid: f61250beb44614165ba182c557fadb42, type: 2}
+  - {fileID: 2100000, guid: b4b6d568106bc420d84c9ad8ddf53d21, type: 2}
+  - {fileID: 2100000, guid: b5e56ff5d8a944b6b8ad995d5dc29e9c, type: 2}
+  - {fileID: 2100000, guid: 4f0fd7db20cf643ad949b9ecd297d6a1, type: 2}
+  - {fileID: 2100000, guid: 491ec97a1953b4c04a08c084c97ff06c, type: 2}
+  - {fileID: 2100000, guid: ffb55d9b3c2384208814f87b2337101e, type: 2}
+  - {fileID: 2100000, guid: fc932990e5e0b483f866d38a0c0a6858, type: 2}
+  - {fileID: 2100000, guid: d36e80bbb7d8440799913670b44c2d8e, type: 2}
+  pants:
+  - {fileID: 2100000, guid: 2bba9db93c8f340a5946d0eb4fd0d7ed, type: 2}
+  - {fileID: 2100000, guid: 9d8f7585587664030b6af9744e9c2b48, type: 2}
+  - {fileID: 2100000, guid: 0c1db0cd245184534bd2b2e6e13bcf01, type: 2}
+  - {fileID: 2100000, guid: 14478a6761cbd4b628664ea178c4031d, type: 2}
+  - {fileID: 2100000, guid: 9d75c4102c5ac463dac63cb964705056, type: 2}
+  skins:
+  - {fileID: 2100000, guid: db8f0823618984a238f470f3f30d4607, type: 2}
+  - {fileID: 2100000, guid: c5b89034ca8e14cbdb5a66723488d9ae, type: 2}
+  - {fileID: 2100000, guid: 7c2c5589c78dc4e2cb977bc9b6ec72ed, type: 2}
+  - {fileID: 2100000, guid: 173e32874bc78471c9f97348996d8e40, type: 2}
+  - {fileID: 2100000, guid: ec9e5a3e8c99242a4843e2bbe317ee4f, type: 2}
+  hairs:
+  - {fileID: 2100000, guid: 199aa742d47e741408d7476367ece497, type: 2}
+  - {fileID: 2100000, guid: 2d11cad5ba73a4db4b5fcd34ae567746, type: 2}
+  - {fileID: 2100000, guid: fe681b337ea574595b04e307ff00e5fd, type: 2}
+  - {fileID: 2100000, guid: 6329c43039f004b5eaa1602a1666fff4, type: 2}
+  - {fileID: 2100000, guid: d1b60379c2350473589cb370d7597f89, type: 2}
+  - {fileID: 2100000, guid: cf058fcdac96943b9a7307e67716e475, type: 2}
+  lit: {fileID: 2100000, guid: 75965071276af4933a25089e44585bed, type: 2}
+  unlit: {fileID: 2100000, guid: cf01f5bb6a5e049e09f33d2c26667897, type: 2}
+  smoke: {fileID: 2100000, guid: b5381bb5d331b42e9a703c57bbfb95e7, type: 2}
+  fire: {fileID: 2100000, guid: 6b86b79e3411440ee91be3aecf1f7016, type: 2}
+  water: {fileID: 2100000, guid: 1bf03187f719741cea6bcbb39a511ee1, type: 2}

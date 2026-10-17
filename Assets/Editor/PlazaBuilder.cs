@@ -300,10 +300,11 @@ public static class PlazaBuilder
         BuildCity();
         BuildCasaRosada();
         BuildPlaza();
-        BuildPolice();
+        // Sin policía ni patrulleros fijos: toda la policía la coloca el jugador con cartas (Defense.cs)
         BuildCrowds();
         BuildTraffic();
         BuildLightingAndCamera();
+        HudSetup.AddGameObjects(); // Game: estado, mazo y HUD (UI generada en runtime)
 
         Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(scene, ScenePath);
@@ -348,10 +349,10 @@ public static class PlazaBuilder
 
     static void BuildCity()
     {
-        string[] kinds = { "building_a", "building_b", "building_c", "building_it_a", "building_it_b", "building_it_c", "building_nv_a", "building_nv_b", "building_dc_a", "building_dc_b" };
+        string[] kinds = { "building_a", "building_b", "building_c", "building_it_a", "building_it_b", "building_it_c", "building_nv_a", "building_nv_b", "building_dc_a", "building_dc_b", "building_pt_a", "building_pt_b", "building_pt_c", "building_pt_a", "building_pt_c" };
         string last = "";
         // fila de enfrente (lado sur, mirando a la plaza): secuencia curada, nunca dos estilos iguales seguidos
-        string[] frontKinds = { "building_it_b", "building_nv_b", "building_a", "building_dc_a", "building_it_a", "building_nv_a", "building_c", "building_dc_b", "building_b", "building_it_c" };
+        string[] frontKinds = { "building_pt_a", "building_nv_b", "building_pt_c", "building_it_b", "building_pt_b", "building_nv_a", "building_pt_a", "building_dc_b", "building_pt_c", "building_it_c" };
         int frontIdx = 0;
         foreach (var b in Blocks())
         {
@@ -374,21 +375,39 @@ public static class PlazaBuilder
                     if (nz == 1) yaw = 180; // single-row blocks face south (camera side)
                     bool near = b.z >= 36 && b.z < 80; // fila norte (bajo la cámara): más alta para que asome desenfocada en el borde inferior
                     bool corner = (i == 0 || i == nx - 1) && (j == 0 || j == nz - 1) && new Vector2(cx, cz).magnitude < 95 && nx > 1 && nz > 1 && Vector2.Distance(new Vector2(cx, cz), Vector2.zero) <= MinCornerDist(x0, x1, z0, z1, cw, ch) + 0.1f;
-                    var k = corner ? "building_corner" : kinds[rng.Next(kinds.Length)];
+                    var k = corner ? (near ? (cx < 0 ? "building_terrace" : "building_corner") : "building_otto") : kinds[rng.Next(kinds.Length)]; // bajo la cámara, esquina oeste: terraza con vista a la plaza // la esquina Otto (alta, con agujas) nunca bajo la cámara
                     while (!corner && k == last) k = kinds[rng.Next(kinds.Length)];
                     last = k;
                     bool front = b.z == -70 && j == nz - 1;
                     if (front && !corner) k = frontKinds[frontIdx++ % frontKinds.Length];
                     bool round = b.x == 5 && b.z == -70 && i == nx - 1 && j == nz - 1; // esquina de enfrente a la izquierda: torre circular
                     if (round) { k = "building_round"; corner = false; }
+                    // al lado de la terraza: edificio adelantado sobre la vereda apoyado en una recova (encuadre a mano en la Game view)
+                    bool recova = near && Mathf.Abs(cx + 30.25f) < 1f && cz < 50;
+                    if (recova) { k = "building_dc_b"; corner = false; }
                     // corner building: rotate so its rounded corner (local front-left) points at the plaza
                     if (corner) { float ang = Mathf.Atan2(-cx, -cz) * Mathf.Rad2Deg; yaw = Mathf.Round((ang + 45f) / 90f) * 90f; }
+                    if (k == "building_terrace") yaw = 180; // el voladizo de la terraza avanza sobre la calle hacia la plaza
                     var go = Place(k, new Vector3(cx, 0.15f, cz), yaw, blk);
-                    var fac = k.Contains("_it_") ? Pick(facadesWarm) : (k.Contains("_dc_") || k == "building_round") ? Pick(facadesStone) : Pick(facades); var rf = Pick(roofs); var aw = Pick(awnings);
+                    var fac = k.Contains("_it_") ? Pick(facadesWarm) : (k.Contains("_dc_") || k.Contains("_pt_") || k == "building_otto" || k == "building_terrace" || k == "building_round") ? Pick(facadesStone) : Pick(facades); var rf = Pick(roofs); var aw = Pick(awnings);
                     Swap(go, new Dictionary<string, Material> { { "M_Facade", fac }, { "M_Facade2", fac }, { "M_Facade3", fac }, { "M_Roof", rf }, { "M_AwningRed", aw }, { "M_AwningGreen", aw }, { "M_AwningBlue", aw } });
-                    float s = Mathf.Min(cw, ch) / (k == "building_corner" ? 18f : 14f);
+                    float s = Mathf.Min(cw, ch) / (k == "building_corner" || k == "building_otto" ? 18f : 14f);
                     go.transform.localScale = new Vector3(Mathf.Min(1.05f, s * 1.02f), near ? R(1.35f, 1.6f) : R(0.95f, 1.08f), Mathf.Min(1.05f, s * 1.02f));
                     if (round) go.transform.localScale = Vector3.one * (Mathf.Min(cw, ch) / 15f);
+                    if (k == "building_terrace") { go.transform.localScale = Vector3.one; go.transform.position = new Vector3(-15.91f, 0.15f, 47.55f); TerracePeople(go.transform); } // posición ajustada a mano para que la terraza entre en cámara
+                    if (recova)
+                    {
+                        go.transform.SetPositionAndRotation(new Vector3(cx, 0.15f + RecovaH, RecovaZ), Quaternion.Euler(0, 180, 0));
+                        go.transform.localScale = new Vector3(1.02f, 1.41f, 1.02f);
+                        var rb = Place("recova_base", new Vector3(cx, 0.15f, RecovaZ), 180, blk);
+                        rb.transform.localScale = new Vector3(1.02f, 1f, 1.02f);
+                        // lado que da al roof-top: medianera ciega, sin ventanas (cuerpo bajo y escalonamiento)
+                        foreach (var (model, wx, y0) in new[] { ("medianera_a", -22.98f, 21.9f), ("medianera_b", -24.88f, 31.0f) }) // a medida (porteno_kit.medianera), sin escalar: textura en metros
+                        {
+                            var wall = Place(model, new Vector3(wx, y0, RecovaZ), 0, blk);
+                            Swap(wall, new Dictionary<string, Material> { { "M_Facade3", fac } });
+                        }
+                    }
                 }
             // street furniture on sidewalks
             if (b.x > 140 || b.w < -80 || b.z > 80) continue;
@@ -396,6 +415,7 @@ public static class PlazaBuilder
             float in_ = 1.1f;
             for (float x = b.x + 5; x < b.y - 4; x += 12)
             {
+                if (b.x == -100 && b.z == 36 && x > -44 && x < -18) continue; // vereda ocupada por la recova
                 Place("lamp", new Vector3(x, 0.15f, b.z + in_), 0, furn);
                 Place("lamp", new Vector3(x, 0.15f, b.w - in_), 0, furn);
                 Place(rng.NextDouble() < 0.2 ? "tree_jacaranda" : (rng.NextDouble() < 0.5 ? "tree" : "tree_b"), new Vector3(x + 6, 0.15f, b.z + in_ + 0.4f), R(0, 360), furn, true, R(0.8f, 1.0f));
@@ -403,6 +423,32 @@ public static class PlazaBuilder
             }
         }
     }
+
+    // Gente en la terraza: prensa con trípodes en el borde que mira a la plaza y clientes del bar.
+    // Coordenadas de Blender (x, y) del modelo building_terrace; local de Unity = (-x, z, -y).
+    static void TerracePeople(Transform t)
+    {
+        const float deck = 4.4f + 3.8f + 4 * 3.3f + 0.38f; // = porteno_kit.terrace (4 pisos)
+        var g = new GameObject("TerracePeople").transform; g.SetParent(t.parent);
+        GameObject P(float bx, float by, float worldYaw, Material shirt, float lean = 0)
+        {
+            var pos = t.TransformPoint(new Vector3(-bx, deck, -by));
+            var go = Place(rng.NextDouble() < 0.5 ? "person_a" : "person_b", pos, worldYaw, g, false, PeopleScale);
+            go.transform.rotation = Quaternion.Euler(lean, worldYaw, 0);
+            Swap(go, new Dictionary<string, Material> { { "M_Skin", Pick(skins) }, { "M_Hair", Pick(hairs) } });
+            var rend = go.GetComponentInChildren<MeshRenderer>(); var sm = rend.sharedMaterials;
+            for (int i = 0; i < sm.Length; i++) { if (sm[i] == null) continue; if (sm[i].name == "M_Shirt") sm[i] = shirt ?? shirts[rng.Next(shirts.Count)]; else if (sm[i].name == "M_Pants") sm[i] = pants[rng.Next(pants.Count)]; }
+            rend.sharedMaterials = sm;
+            return go;
+        }
+        // camarógrafo detrás del trípode (porteno_kit.TERRACE_CAM: x -4.94, y -13.43, rumbo 221°), mirando a la Casa Rosada
+        float ry = 221f * Mathf.Deg2Rad;
+        P(-4.94f - Mathf.Cos(ry) * 1.25f, -13.43f - Mathf.Sin(ry) * 1.25f, Mathf.Atan2(Mathf.Cos(ry), Mathf.Sin(ry)) * Mathf.Rad2Deg, shirts[7]);
+        // persona apoyada en la baranda del frente, mirando hacia abajo a la plaza
+        P(5.37f, -14.37f, 180, null, 14);
+    }
+
+    const float RecovaH = 6.66f, RecovaZ = 40.54f; // = porteno_kit.recova (alto de la arcada) y frente sobre la vereda
 
     static float MinCornerDist(float x0, float x1, float z0, float z1, float cw, float ch)
     {
@@ -543,21 +589,85 @@ public static class PlazaBuilder
         }
     }
 
+    // Decorado de manifestantes en las calles (fuera del área de juego). StreetMood los va prendiendo según la popularidad:
+    // Crowd_Bocacalles = bocacalles (sueltos arriba de 70%, llenas, sin amontonarse, desde ~65%);
+    // Crowd_Calles = calles que rodean la plaza (se llenan de 70% a 30%). El orden de los hijos es el orden de aparición.
+    static readonly Vector2[] CrowdAvoid = { new Vector2(-15, -28.5f) }; // taxi estacionado
+
     static void BuildCrowds()
     {
-        Crowd("AvDeMayo_Column", new Vector3(63, 0.02f, 0), new Vector2(26, 10), 170, -90, 0.14f);
-        Place("banner", new Vector3(48.5f, 0.02f, 0), -90, crowd, false);
-        Crowd("North_March", new Vector3(24, 0.02f, 31), new Vector2(30, 8), 140, -90, 0.14f);
-        Place("banner", new Vector3(8.5f, 0.02f, 31), -90, crowd, false);
-        Crowd("South_March", new Vector3(32, 0.02f, -31), new Vector2(22, 8), 100, -90, 0.14f);
-        Crowd("South_Street", new Vector3(0, 0.02f, -50), new Vector2(8, 24), 80, 0, 0.12f);
-        Place("banner", new Vector3(0, 0.02f, -37.5f), 0, crowd, false);
-        Crowd("Plaza_East", new Vector3(32, 0.16f, 5.2f), new Vector2(12, 3.4f), 40, -90, 0.12f); // sobre el carril interior norte
-        Crowd("Plaza_South_Gate", new Vector3(0, 0.16f, -20), new Vector2(5, 8), 30, 0, 0.12f);
+        var boca = new GameObject("Crowd_Bocacalles").transform; boca.SetParent(crowd);
+        var calles = new GameObject("Crowd_Calles").transform; calles.SetParent(crowd);
+        var mouths = new List<Vector2> { new Vector2(1.5f, 31), new Vector2(0, -40), new Vector2(45, -40), new Vector2(57, -30.6f), new Vector2(53, 0) };
+        var a = new List<(Vector3 p, float yaw, float key)>();
+        // bocacalles: la de x=0 norte queda abajo de la cámara principal (el montoncito en primer plano)
+        Area(a, -6, 9, 27.5f, 35, 1.55f, 180, null);           // montoncito en primer plano de la cámara (calle norte, frente a x=0)
+        Area(a, -4.5f, 4.5f, -60, -37.5f, 1.55f, 0, null);     // sur x=0
+        // (las bocacalles norte quedan fuera de cámara: esa gente pasó a la calle sur, al este de x=50)
+        Area(a, 50.8f, 65, -34.2f, -27, 1.55f, 0, null);       // calle sur pasando la esquina de x=45 (arriba a la izquierda en cámara)
+        Area(a, 41, 49, -55, -37.5f, 1.55f, 0, null);          // sur x=45
+        Area(a, 51, 70.5f, -5, 5, 1.55f, -90, null);           // Av. de Mayo (lo que entra en cámara)
+        Spawn(boca, a, 0.14f);
+        var b = new List<(Vector3 p, float yaw, float key)>();
+        Area(b, -14, -6.5f, 27, 35, 1.2f, 180, mouths);        // calle norte (sin el montoncito de la cámara; al oeste queda tapada por la terraza)
+        Area(b, -56, -40.4f, -35, -26.2f, 1.2f, 0, mouths);    // calle sur frente a la Casa Rosada (gente reubicada desde la calle norte)
+        Area(b, 9.5f, 40, 27, 35, 1.2f, 180, mouths);
+        Area(b, -40, 40, -35, -27, 1.2f, 0, mouths);           // calle sur
+        Area(b, 41, 49, -35.5f, 35.5f, 1.2f, -90, mouths);     // calle este
+        // continuaciones que se ven al fondo desde la cámara (arriba a la izquierda y arriba): también se llenan al 30%
+        Area(b, -4.5f, 4.5f, -79, -60, 1.2f, 0, mouths);      // sur x=0 hasta la calle de atrás
+        Area(b, 41, 49, -79, -55, 1.2f, 0, mouths);            // sur x=45
+
+        Spawn(calles, b, 0.1f);
+        foreach (var (pos, yaw) in new[] { (new Vector3(0, 0.02f, 38.5f), 180f), (new Vector3(0, 0.02f, -38.5f), 0f), (new Vector3(45, 0.02f, 38.5f), 180f), (new Vector3(45, 0.02f, -38.5f), 0f), (new Vector3(51.5f, 0.02f, 0), -90f), (new Vector3(20, 0.02f, 30.5f), 180f), (new Vector3(-22, 0.02f, -30.5f), 0f), (new Vector3(45, 0.02f, 16), -90f) })
+            Place("banner", pos, yaw, crowd, false);
         foreach (var p in new[] { new Vector3(52, 0, 6), new Vector3(30, 0, -26.5f), new Vector3(42, 0, 28) })
         {
             var s = new GameObject("Smoke"); s.transform.SetParent(fx); s.transform.position = p; s.transform.rotation = Quaternion.Euler(-90, 0, 0);
             MakeParticles(s, new Color(0.92f, 0.9f, 0.88f, 0.35f), 1.2f, 6f, 2.5f, 4.5f, 6, 25f, -0.02f);
+        }
+    }
+
+    // Grilla con jitter (sin amontonar). key = orden de aparición: en las calles, primero cerca de las bocacalles.
+    static void Area(List<(Vector3 p, float yaw, float key)> o, float x0, float x1, float z0, float z1, float sp, float yaw, List<Vector2> mouths)
+    {
+        for (float x = x0 + sp * 0.5f; x < x1; x += sp)
+            for (float z = z0 + sp * 0.5f; z < z1; z += sp)
+            {
+                var q = new Vector2(x + R(-0.3f, 0.3f) * sp, z + R(-0.3f, 0.3f) * sp);
+                bool ok = true; foreach (var v in CrowdAvoid) if ((v - q).sqrMagnitude < 9) ok = false;
+                if (!ok) continue;
+                float key = (float)rng.NextDouble();
+                if (mouths != null) { float d = 1e9f; foreach (var m in mouths) d = Mathf.Min(d, (m - q).magnitude); key = d + R(0, 14); }
+                o.Add((new Vector3(q.x, 0.02f, q.y), yaw, key));
+            }
+    }
+
+    static void Spawn(Transform parent, List<(Vector3 p, float yaw, float key)> pts, float flagChance)
+    {
+        pts.Sort((x, y) => x.key.CompareTo(y.key));
+        foreach (var e in pts) CrowdPerson(parent, e.p, e.yaw + R(-25, 25), flagChance);
+    }
+
+    static void CrowdPerson(Transform t, Vector3 pos, float y, float flagChance)
+    {
+        double roll = rng.NextDouble();
+        string model = roll < 0.5 ? "person_a" : roll < 0.75 ? "person_b" : roll < 0.9 ? "person_c" : "person_d";
+        var go = Place(model, pos, y, t, false, R(0.92f, 1.08f) * PeopleScale);
+        Swap(go, new Dictionary<string, Material> { { "M_Skin", Pick(skins) }, { "M_Hair", Pick(hairs) } });
+        var rend = go.GetComponentInChildren<MeshRenderer>();
+        var sm = rend.sharedMaterials;
+        for (int i = 0; i < sm.Length; i++)
+        {
+            if (sm[i] == null) continue;
+            if (sm[i].name == "M_Shirt") sm[i] = shirts[rng.Next(shirts.Count)];
+            else if (sm[i].name == "M_Pants") sm[i] = pants[rng.Next(pants.Count)];
+        }
+        rend.sharedMaterials = sm;
+        if ((model == "person_a" || model == "person_b") && rng.NextDouble() < flagChance * 1.6)
+        {
+            var f = Place(rng.NextDouble() < 0.55 ? "flag_arg" : "flag_red", pos, 0, go.transform, false);
+            f.transform.localPosition = new Vector3(-0.3f, 0, 0.1f); f.transform.localRotation = Quaternion.Euler(0, R(-30, 30), 0); f.transform.localScale = Vector3.one;
         }
     }
 
@@ -569,7 +679,7 @@ public static class PlazaBuilder
             ("taxi", new Vector3(42.5f, 0, 60), 180), ("taxi", new Vector3(47.5f, 0, 85), 0), ("taxi", new Vector3(47.5f, 0, -60), 0),
             ("taxi", new Vector3(-55, 0, 28.5f), 90), ("taxi", new Vector3(-50, 0, -33.5f), 90), ("taxi", new Vector3(-15, 0, -28.5f), -90),
             ("taxi", new Vector3(100, 0, -3), 90), ("taxi", new Vector3(135, 0, 3), -90), ("taxi", new Vector3(-105 + 2.5f, 0, 50), 0),
-            ("bus", new Vector3(-25, 0, 33.5f), -90), ("bus", new Vector3(85, 0, -3), 90), ("taxi", new Vector3(80, 0, -33.5f), 90),
+            ("bus", new Vector3(-82, 0, 33.5f), -90), ("bus", new Vector3(85, 0, -3), 90), ("taxi", new Vector3(80, 0, -33.5f), 90),
         };
         foreach (var e in v) Place(e.m, e.p, e.y, traffic, false);
         var tl = new GameObject("TrafficLights").transform; tl.SetParent(traffic);

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ea0d9068a5ce4eb9a04bafc5299f8bf, type: 3}
+  m_Name: piquetero
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.UnitDef
+  id: piquetero
+  title: Piquetero
+  kind: 4
+  cost: 3
+  stats:
+    hp: 80
+    damage: 6
+    rate: 1
+    range: 1
+    area: 0
+    speed: 1.2
+  govDamage: 2
+  minMandate: 3
+  weight: 1.1
+  special: 1
+  popOnHit: 0
+  popOnArrive: 0
+  fenceMultiplier: 1
+  pushResist: 0
+  auraSpeed: 0
+  auraRadius: 4
+  tireEvery: 10
+  shirt: 5
+  hair: -1
+  scale: 1
+  members: 1
+  prop: tire

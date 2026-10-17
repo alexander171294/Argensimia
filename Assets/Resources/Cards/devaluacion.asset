@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: devaluacion
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: devaluacion
+  title: "Devaluaci\xF3n"
+  kind: 3
+  cost: 1500
+  description: "Salto del d\xF3lar: perd\xE9s el 30% de la plata. Aceptala o pag\xE1
+    para evitarla."
+  art: {fileID: 0}
+  color: {r: 0.47843137, g: 0.1764706, b: 0.1764706, a: 1}
+  copies: 0
+  headline: "Disparada del d\xF3lar: el Gobierno habla de \xABreacomodamiento\xBB"
+  rarity: 0
+  inPool: 0
+  popularityDelta: 0
+  moneyDelta: 0
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 0.7
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 0
+  defense: 0
+  stats:
+    hp: 0
+    damage: 0
+    rate: 0
+    range: 0
+    area: 0
+    speed: 0
+  maxBlock: 0
+  slow: 0
+  slowTime: 0
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1

@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: impuestazo
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: impuestazo
+  title: Impuestazo
+  kind: 1
+  cost: 0
+  description: "La AFIP sale a recaudar. Entra plata, pero la calle se calienta y
+    las columnas llegan m\xE1s enojadas."
+  art: {fileID: 0}
+  color: {r: 0.84705883, g: 0.27058825, b: 0.18431373, a: 1}
+  copies: 2
+  headline: "AFIP anuncia un nuevo impuesto \xABtransitorio\xBB"
+  rarity: 0
+  inPool: 1
+  popularityDelta: -8
+  moneyDelta: 3000
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 1
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 0
+  defense: 0
+  stats:
+    hp: 0
+    damage: 0
+    rate: 0
+    range: 0
+    area: 0
+    speed: 0
+  maxBlock: 0
+  slow: 0
+  slowTime: 0
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1

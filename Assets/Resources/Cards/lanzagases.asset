@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: lanzagases
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: lanzagases
+  title: Lanzagases
+  kind: 0
+  cost: 1300
+  description: "Tira granadas de gas de lejos al grupo m\xE1s denso: da\xF1o por
+    segundo en un \xE1rea y -40% de velocidad."
+  art: {fileID: 0}
+  color: {r: 0.42745098, g: 0.49019608, b: 0.18039216, a: 1}
+  copies: 1
+  headline: 'Gases en la Plaza: vecinos denuncian ardor en los ojos'
+  rarity: 1
+  inPool: 1
+  popularityDelta: 0
+  moneyDelta: 0
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 1
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 0
+  defense: 2
+  stats:
+    hp: 120
+    damage: 4
+    rate: 0.4
+    range: 12
+    area: 3
+    speed: 0
+  maxBlock: 0
+  slow: 0.4
+  slowTime: 3
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1
