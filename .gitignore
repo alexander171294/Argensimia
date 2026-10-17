@@ -112,3 +112,17 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Blender bridge scratch
+BlenderSrc/*_out.*
+BlenderSrc/__pycache__/
+BlenderSrc/preview_*.png
+BlenderSrc/job.py
+BlenderSrc/probe.py
+BlenderSrc/unity_job.txt
+BlenderSrc/*.blend1
+.DS_Store
+
+# Capturas de trabajo de la escena
+/[Aa]ssets/_Shots/
+/[Aa]ssets/_Shots.meta

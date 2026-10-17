@@ -1,0 +1,89 @@
+M_Asphalt #4f4b4a 0 T_asphalt 4
+M_Sidewalk #cfb09c 0 T_sidewalk 2.5
+M_PlazaPaving #ddb59c 0 T_paving 4
+M_PathStone #c99a80 0 T_paving 3
+M_Curb #9c8474 0 T_stone 1.5
+M_Lawn #6c9f2e 0 T_grass 3
+M_LawnSide #4a6b2c 0
+M_Hedge #3f6b1f 0 T_leaves 1.5
+M_RoadWhite #e8e6dc 0
+M_RoadYellow #e6b631 0
+M_Facade #ead8c0 0 T_plaster 3
+M_Facade2 #e3c9a6 0 T_plaster 3
+M_Facade3 #ddd3c6 0 T_plaster 3
+M_FacadeDark #c9b298 0 T_stone 2
+M_Cornice #f4ead9 0 T_plaster 2
+M_Roof #525563 0 T_roof 2
+M_Window #2b3240 0
+M_ShopGlow #6e5a48 0
+M_AwningRed #b8322b 0
+M_AwningGreen #2f6b47 0
+M_Iron #1e2124 0
+M_Rosada #e8a092 0
+M_RosadaDark #cc8577 0
+M_RoofGreen #4f8c72 0 T_roof 2
+M_Marble #f1ebe2 0 T_marble 2
+M_Bark #6b4a33 0 T_bark 1
+M_PalmTrunk #9b7a55 0 T_bark 1
+M_PalmLeaf #5f9330 0 T_leaves 1.2
+M_Leaf #4a7a26 0 T_leaves 2
+M_Leaf2 #9cc23f 0 T_leaves 2
+M_Jacaranda #9b6fd6 0 T_leaves 2
+M_LampGlow #f4efe4 0
+M_Wood #9a6338 0 T_wood 1
+M_FlowerPink #e86aa8 0
+M_FlowerPurple #8e5ad6 0
+M_FlowerYellow #f2c53d 0
+M_FlowerRed #d8413a 0
+M_Metal #9aa1a8 0
+M_PoliceBlue #1d3f8f 0
+M_PoliceNavy #18233d 0
+M_HelmetBlack #121418 0
+M_Shield #2e4f9e 0
+M_White #f4f4f2 0
+M_Dark #23262b 0
+M_Tire #151515 0
+M_Glass #2c3b4c 0
+M_LightRed #ff3030 2.0
+M_LightBlue #3070ff 2.0
+M_Skin #d9a27c 0
+M_Hair #3a2a1f 0
+M_Shirt #c8c8c8 0
+M_Pants #33405a 0
+M_Celeste #75b8e8 0
+M_FlagRed #cc2a2a 0
+M_SunYellow #f2b632 0
+M_TaxiBlack #1b1b1d 0
+M_TaxiYellow #f2c230 0
+M_BusWhite #eef0f0 0
+M_BusBlue #2a64c6 0
+M_WindowLit #2b3240 0
+M_Chimney #9c5a43 0
+M_Plinth #9e8a70 0
+M_PathStone2 #b88f78 0 T_marble 2
+M_Border #a8826c 0 T_stone 2
+M_DrumWhite #f2efe6 0
+M_Sign #f7f3e8 0
+M_Shoe #26221f 0
+M_Coconut #6b4a2a 0
+M_PalmTrunk2 #7d6040 0 T_bark 1
+M_PatrolWhite #f1f3f4 0
+M_TrafficRed #ff2a1a 3.0
+M_TrafficOff #3b3a2a 0
+M_Gold #c9a24a 0
+M_RoofFlat #8a8f96 0
+M_CR_Wall #e3979a 0 T_plaster 3
+M_CR_Dark #c97c7c 0 T_stone 2
+M_CR_Trim #f7d2c2 0 T_plaster 2
+M_CR_Roof #5f9e86 0 T_roof 3
+M_Soil #6b4a32 0 T_leaves 1.5
+M_FlowerWhite #f4f0ea 0
+M_GlobeGlow #f4efe4 0
+M_Slate #4f5260 0 T_roof 2
+M_Shutter #4d5f4c 0
+M_Shutter2 #5d6878 0
+M_ShopSign #2e3a33 0
+M_Leaf3 #3f6e2a 0 T_leaves 2
+M_Disc #e9dfd0 0 T_marble 2
+M_AwningBlue #2f5d8a 0
+M_Zinc #7d8a8f 0
