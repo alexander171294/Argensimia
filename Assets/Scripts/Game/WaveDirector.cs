@@ -79,7 +79,7 @@ namespace Argensimia
 
         // Carriles activos: mandato 1 = uno, mandato 2 = dos, desde el 3 los cuatro (da tiempo a armar la defensa).
         public static readonly int[] LaneOrder = { 1, 3, 0, 2 }; // interiores primero (norte, sur), después exteriores
-        public int ActiveLaneCount => gs.mandate <= 1 ? 1 : gs.mandate == 2 ? 2 : 4;
+        public int ActiveLaneCount => Mathf.Clamp(gs.mandate, 1, 4); // un carril más por mandato: 1, 2, 3 y desde el 4 los cuatro
         public bool LaneActive(int l) => System.Array.IndexOf(LaneOrder, l) < ActiveLaneCount;
 
         public void Plan()
@@ -198,7 +198,9 @@ namespace Argensimia
             extraColumns = 0;
             reduction = 0;
             gs.SetPhase(Phase.Oleada);
-            if (IsFinal) Headlines.Say("wave_final"); else Headlines.Say("wave_start", gs.mandate);
+            Snd.Ui("wave_start");
+            // 0f explícito: con un int como 2º argumento se elegía la sobrecarga (key, cooldown) y el {0} del titular tiraba excepción
+            if (IsFinal) Headlines.Say("wave_final"); else Headlines.Say("wave_start", 0f, gs.mandate);
         }
 
         public void OnEnemyGone(Enemy e, bool arr)
@@ -231,6 +233,7 @@ namespace Argensimia
         public void Lose()
         {
             queue.Clear();
+            if (gs.phase != Phase.Derrota) Snd.Ui("gameover");
             gs.SetPhase(Phase.Derrota);
         }
 

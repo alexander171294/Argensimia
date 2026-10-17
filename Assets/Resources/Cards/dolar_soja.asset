@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 0
   description: 'Tipo de cambio especial para el campo: entra mucha plata de golpe.
     Solo en la previa.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 58f74064ecd014da59451ecb0aa8ef13, type: 3}
   color: {r: 0.6039216, g: 0.65882355, b: 0.22745098, a: 1}
   copies: 0
   headline: "Nuevo d\xF3lar soja: liquidan r\xE9cord en una semana|El campo liquida

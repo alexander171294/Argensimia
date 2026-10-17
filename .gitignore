@@ -131,3 +131,6 @@ BlenderSrc/*.blend1
 *.lock
 !packages-lock.json
 stale-*
+
+# arte de cartas en revisión (generado)
+CardArt/review/

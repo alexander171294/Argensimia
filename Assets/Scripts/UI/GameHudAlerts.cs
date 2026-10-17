@@ -80,6 +80,8 @@ namespace Argensimia.UI
             return l;
         }
 
+        readonly Dictionary<CardView, Image> upgradeGlow = new Dictionary<CardView, Image>();
+
         void UpdateAlerts()
         {
             FlushLoss();
@@ -107,6 +109,35 @@ namespace Argensimia.UI
             var dead = new List<CardView>();
             foreach (var kv in crisisGlow) if (!kv.Key || !crises.Contains(kv.Key)) { if (kv.Value) Destroy(kv.Value.gameObject); dead.Add(kv.Key); }
             foreach (var k in dead) crisisGlow.Remove(k);
+
+            // halo dorado + cartel en las colocables que pueden mejorar una defensa igual del mapa
+            var ups = new List<CardView>();
+            if (gs.phase == Phase.Previa || gs.phase == Phase.Oleada)
+                foreach (var cv in cards)
+                    if (cv && cv.def.kind == CardKind.Colocar && Defense.AnyUpgradable(cv.def)) ups.Add(cv);
+            float wf = Mathf.Pow(0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 9f), 1.5f);
+            foreach (var cv in ups)
+            {
+                if (!upgradeGlow.TryGetValue(cv, out var g) || !g)
+                {
+                    g = UiKit.Img(cv.Rt, "UpgradeGlow", UiKit.RR, UiKit.Gold, 34);
+                    g.raycastTarget = false;
+                    g.RT().At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(CardView.W + 48, CardView.H + 48));
+                    g.transform.SetAsFirstSibling();
+                    var tag = UiKit.Img(g.transform, "Tag", UiKit.RR, UiKit.Hex("#8a5a06"), 18);
+                    tag.raycastTarget = false;
+                    tag.RT().At(new Vector2(0.5f, 1), new Vector2(0, 42), new Vector2(CardView.W + 30, 76), new Vector2(0.5f, 0));
+                    UiKit.Txt(tag.transform, "T", "¡SUBILE EL NIVEL\nA UNA DEL MAPA!", 30, Color.white, TextAlignmentOptions.Center, true).RT().Fill();
+                    upgradeGlow[cv] = g;
+                }
+                var col = UiKit.Gold; col.a = Mathf.Lerp(0.2f, 1f, wf);
+                g.color = col;
+                var tg = g.transform.Find("Tag");
+                if (tg && tg.gameObject.activeSelf != (cv != zoomed)) tg.gameObject.SetActive(cv != zoomed); // en zoom no entra arriba
+            }
+            var goneUp = new List<CardView>();
+            foreach (var kv in upgradeGlow) if (!kv.Key || !ups.Contains(kv.Key)) { if (kv.Value) Destroy(kv.Value.gameObject); goneUp.Add(kv.Key); }
+            foreach (var k in goneUp) upgradeGlow.Remove(k);
 
             // cartel sobre ¡ARRANCAR!
             if (!crisisWarn && startBtn)

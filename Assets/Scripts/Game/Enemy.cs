@@ -64,7 +64,6 @@ namespace Argensimia
         {
             new Vector3(-1.4f, 0, 1.2f), new Vector3(0, 0, 1.2f), new Vector3(1.4f, 0, 1.2f),
             new Vector3(-0.7f, 0, 0), new Vector3(0.7f, 0, 0),
-            new Vector3(0, 0, -1.2f),
         };
 
         int uniformShirt = -1; // columna: todos con la misma remera
@@ -108,7 +107,7 @@ namespace Argensimia
             {
                 case UnitKind.Jubilado: body = new Vector3(0.95f, 0.88f, 0.95f); lean = 14; break;
                 case UnitKind.Piquetero: body = new Vector3(0.66f, 1.1f, 0.66f); break;
-                case UnitKind.Mortero: body = new Vector3(1.55f, 0.8f, 1.45f); lean = 12; break;
+                case UnitKind.Mortero: body = new Vector3(1.32f, 0.84f, 1.25f); lean = 6; break; // grandote y agazapado, piernas abiertas
             }
             bool column = def.kind == UnitKind.Columna;
             p.transform.localPosition = lp;
@@ -124,6 +123,19 @@ namespace Argensimia
                     if (sm[k] == null) continue;
                     if (allBlack) { sm[k] = FxKit.Mat(Black); continue; }
                     string nm = sm[k].name;
+                    if (def.kind == UnitKind.Columna)
+                    {
+                        // columna militante: todos de rojo, jean oscuro
+                        if (nm.StartsWith("M_Shirt")) { sm[k] = FxKit.Mat(ColumnRed); continue; }
+                        if (nm.StartsWith("M_Pants")) { sm[k] = FxKit.Mat(new Color(0.16f, 0.17f, 0.22f)); continue; }
+                    }
+                    if (def.kind == UnitKind.Mortero)
+                    {
+                        // remera roja, jogging celeste, pelo castaño oscuro
+                        if (nm.StartsWith("M_Shirt")) { sm[k] = FxKit.Mat(new Color(0.82f, 0.16f, 0.12f)); continue; }
+                        if (nm.StartsWith("M_Pants")) { sm[k] = FxKit.Mat(new Color(0.52f, 0.62f, 0.78f)); continue; }
+                        if (nm.StartsWith("M_Hair")) { sm[k] = FxKit.Mat(MortarHair); continue; }
+                    }
                     if (nm.StartsWith("M_Shirt")) sm[k] = a.shirts[uniformShirt >= 0 ? uniformShirt : def.shirt >= 0 ? def.shirt : Random.Range(0, a.shirts.Length)];
                     else if (nm.StartsWith("M_Pants")) sm[k] = column ? a.pants[0] : a.pants[Random.Range(0, a.pants.Length)];
                     else if (nm.StartsWith("M_Skin")) sm[k] = a.skins[Random.Range(0, a.skins.Length)];
@@ -161,15 +173,11 @@ namespace Argensimia
                     FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0.38f, 0.75f, 0), new Vector3(0.55f, 0.1f, 0.55f), new Color(0.07f, 0.07f, 0.07f), Quaternion.Euler(0, 0, 90));
                     break;
                 case UnitKind.Mortero:
-                    // gordo, agachado, gorra y mortero casero (tubo con base) apuntando hacia adelante y arriba
-                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.72f, 0.04f), new Vector3(0.34f, 0.12f, 0.4f), new Color(0.75f, 0.2f, 0.15f));
-                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0, 0.95f, 0.45f), new Vector3(0.24f, 0.45f, 0.24f), new Color(0.22f, 0.26f, 0.2f), Quaternion.Euler(18, 0, 0));
-                    FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(0, 1.38f, 0.59f), new Vector3(0.28f, 0.05f, 0.28f), new Color(0.12f, 0.12f, 0.12f), Quaternion.Euler(18, 0, 0));
-                    FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 0.62f, 0.25f), new Vector3(0.36f, 0.06f, 0.3f), new Color(0.3f, 0.3f, 0.3f));
+                    MortarGuy(t);
                     break;
                 case UnitKind.Columna:
-                    // gorra igual para todos: se lee como grupo organizado
-                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.74f, 0.04f), new Vector3(0.36f, 0.12f, 0.42f), new Color(0.85f, 0.85f, 0.85f));
+                    // gorra roja igual para todos: se lee como grupo organizado
+                    FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.74f, 0.04f), new Vector3(0.36f, 0.12f, 0.42f), new Color(0.62f, 0.04f, 0.05f));
                     break;
                 default:
                     if (def.prop == "flag" && i % 2 == 0 && a.flagArg)
@@ -181,6 +189,48 @@ namespace Argensimia
                     }
                     break;
             }
+        }
+
+        static readonly Color ColumnRed = new Color(0.8f, 0.06f, 0.08f);
+        static readonly Color MortarHair = new Color(0.17f, 0.11f, 0.07f);
+        // caño cruzado al cuerpo: sale de la cadera izquierda hacia adelante, a la derecha y arriba
+        static readonly Quaternion MortarRot = Quaternion.Euler(62, 18, 0);
+        static readonly Vector3 MortarBase = new Vector3(-0.14f, 1.0f, 0.1f);
+        public static Vector3 MortarMuzzle => MortarBase + MortarRot * Vector3.up * 1.32f; // punta del caño (espacio de la persona)
+
+        // El "mortero" de la calle: rastas largas, anteojos, barba, mochila y un caño casero envuelto en cinta
+        // que sostiene con las dos manos a la altura de la cadera, apuntando adelante y arriba.
+        static void MortarGuy(Transform t)
+        {
+            var dark = new Color(0.07f, 0.07f, 0.08f);
+            // rastas: cuelgan de la nuca y los costados hasta los hombros
+            for (int k = 0; k < 11; k++)
+            {
+                float ang = Mathf.Lerp(80f, 280f, k / 10f) * Mathf.Deg2Rad;
+                var head = new Vector3(Mathf.Sin(ang) * 0.15f, 1.5f, Mathf.Cos(ang) * 0.15f);
+                FxKit.Prim(PrimitiveType.Capsule, t, head + new Vector3(Mathf.Sin(ang) * 0.03f, -0.1f, Mathf.Cos(ang) * 0.03f),
+                    new Vector3(0.055f, 0.2f + (k % 3) * 0.035f, 0.055f), MortarHair,
+                    Quaternion.Euler(Mathf.Cos(ang) * -14f, 0, Mathf.Sin(ang) * 14f));
+            }
+            // anteojos
+            FxKit.Prim(PrimitiveType.Cube, t, new Vector3(-0.065f, 1.63f, 0.165f), new Vector3(0.1f, 0.06f, 0.02f), dark);
+            FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0.065f, 1.63f, 0.165f), new Vector3(0.1f, 0.06f, 0.02f), dark);
+            FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 1.64f, 0.168f), new Vector3(0.05f, 0.015f, 0.015f), dark);
+            // barba
+            FxKit.Prim(PrimitiveType.Sphere, t, new Vector3(0, 1.48f, 0.13f), new Vector3(0.17f, 0.09f, 0.07f), MortarHair);
+            // mochila negra
+            FxKit.Prim(PrimitiveType.Cube, t, new Vector3(0, 1.18f, -0.22f), new Vector3(0.34f, 0.4f, 0.16f), dark);
+            // el caño: tubo de madera/cartón en diagonal, cinta ocre en la boca y en la empuñadura
+            var tube = new Color(0.58f, 0.5f, 0.4f);
+            var tape = new Color(0.82f, 0.66f, 0.3f);
+            var rot = MortarRot;
+            var a = MortarBase;
+            var dir = rot * Vector3.up;
+            FxKit.Prim(PrimitiveType.Cylinder, t, a + dir * 0.66f, new Vector3(0.075f, 0.66f, 0.075f), tube, rot);
+            FxKit.Prim(PrimitiveType.Cylinder, t, a + dir * 1.18f, new Vector3(0.11f, 0.12f, 0.11f), tape, rot);   // boca encintada
+            FxKit.Prim(PrimitiveType.Cylinder, t, a + dir * 0.86f, new Vector3(0.095f, 0.04f, 0.095f), tape, rot);  // vuelta de cinta
+            FxKit.Prim(PrimitiveType.Cylinder, t, a + dir * 0.14f, new Vector3(0.105f, 0.1f, 0.105f), tape, rot);  // culata encintada
+            FxKit.Prim(PrimitiveType.Cylinder, t, a + dir * 1.31f, new Vector3(0.065f, 0.02f, 0.065f), dark, rot);  // boca
         }
 
         // ------------------------------------------------------------------ lógica
@@ -227,7 +277,7 @@ namespace Argensimia
             else
             {
                 if (jumping) { Jump(dt); return; }
-                if (def.kind == UnitKind.Mortero && Mortar()) { }
+                if (def.kind == UnitKind.Mortero && MortarBlocked()) { }
                 else
                 {
                     var b = Defense.BlockerFor(this);
@@ -272,6 +322,7 @@ namespace Argensimia
             jumpFrom = x;
             jumpTo = d.WestFace - 1.2f;
             Headlines.Say("jump", 6f);
+            Snd.At("boing", transform.position, 1, 0.1f, 0.1f);
         }
 
         // Salto en arco por encima del retén (con giro), sin poder ser frenado en el aire.
@@ -326,30 +377,45 @@ namespace Argensimia
             return m;
         }
 
-        // Mortero: se planta y tira a la defensa más cercana dentro de su alcance (más lejos que el gas).
-        bool Mortar()
+        // Mortero: con la línea limpia avanza como cualquiera. Solo cuando un retén lo frena se planta y dispara:
+        // a veces al obstáculo que tiene adelante y a veces a la defensa más cercana a tiro en los carriles de al lado.
+        bool MortarBlocked()
         {
-            Defense best = null;
+            var b = Defense.BlockerFor(this);
+            if (!b) return false;
+            if (b != blocker) { if (blocker) blocker.Release(this); blocker = b; }
+            Defense side = null;
             float bd = range * range;
             foreach (var d in Defense.All)
             {
-                if (d.Dead || !d.Targetable) continue;
+                if (d.Dead || d == b || d.lane == lane || !d.Targetable) continue;
                 var dp = d.transform.position;
                 if (dp.x > x + 1) continue; // solo hacia adelante (oeste)
                 float dd = (dp - transform.position).sqrMagnitude;
-                if (dd < bd) { bd = dd; best = d; }
+                if (dd < bd) { bd = dd; side = d; }
             }
-            if (!best) return false;
+            if (!aimAt || aimAt.Dead || (aimAt != b && aimAt != side)) aimAt = side && Random.value < 0.5f ? side : b;
             if (atkCd <= 0)
             {
                 atkCd = 1f / rate;
-                MortarShell.Fire(transform.position + Vector3.up * 2f, best.transform.position, damage, def.stats.area);
-            Headlines.Say("mortar", 15f);
+                var person = model.childCount > 0 ? model.GetChild(0) : model;
+                var muzzle = person.TransformPoint(MortarMuzzle);
+                MortarShell.Fire(muzzle, aimAt.transform.position, damage, def.stats.area);
+                var puff = new GameObject("MortarPuff");
+                puff.transform.position = muzzle;
+                var ps = FxKit.Particles(puff.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.smoke, new Color(0.9f, 0.9f, 0.88f, 0.75f), 1.5f, 0.6f, 0.5f, 1.1f, 0, 50, -0.05f, 0.15f, 1.5f);
+                var em = ps.emission; em.SetBursts(new[] { new ParticleSystem.Burst(0, 10) });
+                Destroy(puff, 2f);
+                Snd.At("mortar_launch", transform.position, 1, 0.1f);
+                Headlines.Say("mortar", 15f);
                 punch = 1;
+                aimAt = side && Random.value < 0.5f ? side : b; // el próximo tiro vuelve a decidir
             }
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(best.transform.position - transform.position), Time.deltaTime * 5);
+            var to = aimAt.transform.position - transform.position; to.y = 0;
+            if (to.sqrMagnitude > 0.01f) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(to), Time.deltaTime * 5);
             return true;
         }
+        Defense aimAt;
 
         // ------------------------------------------------------------------ daño y efectos
 
@@ -394,6 +460,8 @@ namespace Argensimia
                 GameState.I.LoseGovernability(def.govDamage, transform.position + Vector3.up * 4.5f);
                 if (def.popOnArrive > 0) GameState.I.LosePopularity(def.popOnArrive, transform.position + Vector3.up * 4.5f);
                 if (def.kind == UnitKind.Columna) Headlines.Say("arrive_column", 8f); else Headlines.Say("arrive", 10f);
+                bool col = def.kind == UnitKind.Columna;
+                Snd.At("gate_bang", transform.position, col ? 1f : 0.75f, 0.15f, 0.08f, col ? 0.8f : 1f);
             }
             Die(false, true);
         }
@@ -402,9 +470,11 @@ namespace Argensimia
         {
             if (Dead) return;
             Dead = true;
+            if (!arrived && GameState.I) GameState.I.AddKill(Cost); // eliminado o detenido: suma al puntaje
             if (blocker) blocker.Release(this);
             All.Remove(this);
             if (WaveDirector.I) WaveDirector.I.OnEnemyGone(this, arrived);
+            if (!captured && !arrived) Snd.At("poof", transform.position, 1, 0.05f, 0.15f);
             StartCoroutine(Vanish(captured));
         }
 
@@ -446,6 +516,7 @@ namespace Argensimia
             if (t < 1) return;
             foreach (var d in Defense.All.ToArray())
                 if (!d.Dead && (d.transform.position - b).sqrMagnitude < (area + d.HalfLen) * (area + d.HalfLen)) d.TakeDamage(dmg);
+            Snd.At("explosion", b, 1, 0.1f);
             var fx = new GameObject("MortarHit");
             fx.transform.position = b;
             var ps = FxKit.Particles(fx.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.smoke, new Color(0.55f, 0.5f, 0.45f, 0.8f), 4, 0.9f, 0.8f, 1.6f, 0, 60, 0.3f, 0.6f, 2.2f);
@@ -471,6 +542,7 @@ namespace Argensimia
             FxKit.Smoke(go.transform, new Vector3(0, 0.6f, 0), 0.7f, new Color(0.18f, 0.17f, 0.17f, 0.7f), 5);
             go.AddComponent<TireFire>();
             slots.Occupy(s, go);
+            Snd.At("fire_ignite", s.position, 1, 0.2f);
             Destroy(go, 8f);
         }
     }

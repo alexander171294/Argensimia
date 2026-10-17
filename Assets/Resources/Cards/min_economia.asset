@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1850
   description: 'Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 2%
     de popularidad.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: f2cf6ce9b10ba4a35a1308b168854410, type: 3}
   color: {r: 0.72156864, g: 0.5254902, b: 0.043137256, a: 1}
   copies: 0
   headline: "Asume el nuevo ministro de Econom\xEDa: \xABno hay plata\xBB, advierte|Nuevo

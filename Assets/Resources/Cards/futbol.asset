@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 700
   description: Partidos gratis por TV abierta. La gente se queda en casa, pero sale
     caro mantenerlo.
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: ebc9f33a9929d4be1910d4aa52daee44, type: 3}
   color: {r: 0.18039216, g: 0.54509807, b: 0.7529412, a: 1}
   copies: 0
   headline: "Vuelve el f\xFAtbol gratis: la oposici\xF3n habla de \xABpan y circo\xBB|Vuelven

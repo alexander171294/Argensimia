@@ -18,8 +18,8 @@ MonoBehaviour:
   cost: 620
   description: "Una l\xEDnea de vallas al fondo del slot. Frena a todos hasta que
     la derriban; los encapuchados la rompen el triple de r\xE1pido. Las balas de
-    goma pueden disparar por detr\xE1s. Soltala sobre una igual: NV 2 y 3."
-  art: {fileID: 0}
+    goma pueden disparar por detr\xE1s."
+  art: {fileID: 21300000, guid: 88947d432d0d0484492ae584a03a0e79, type: 3}
   color: {r: 0.12156863, g: 0.64705884, b: 0.6039216, a: 1}
   copies: 3
   headline: "Vallan la Plaza: \xABes preventivo\xBB, explican desde Casa Rosada|M\xE1s

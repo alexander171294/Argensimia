@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
-| 2026-10-17 | Títulos de cartas cortos (≥33 pt en la carta): Escopeteros, Infantería, Detenciones, Vocero, Relevo, Pacto social, Min. Desarrollo; el detalle pasó a la descripción. |
-| 2026-10-17 | Mazo vacío: comprar 1 carta al azar por $500 o 10 por $4.200 (−16%). |
-| 2026-10-17 | Mazo inicial de 15 (10 quedan tras repartir); 5 temas en el loop de música; banco de titulares con variantes por evento y por carta + frases clásicas de relleno; ícono de menú en vez de pausa; textos del cierre (OBTUVISTE… / CONTINUAR). |
-| 2026-10-17 | Mazo finito de 10 (sin rebarajar); 3 cartas al mazo por cierre con CAMBIAR $100 (1 vez c/u); 12 cartas nuevas (Super Ministro, Min. del Interior, Vocero, Decretazo…) y Min. Seguridad rehecho; niveles 1–3 de las colocables soltando la carta sobre una igual del mapa; la policía recupera 25% al cierre; arreglado el texto ilegible del menú. |
-| 2026-10-17 | Menú principal y loop menú ↔ partida: helipuerto con helicóptero presidencial, multitud, hidrante y patrulleros, blur circular, paneos de cámara al perder, renunciar y empezar. |
+| 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
+| 2026-10-17 | Niveles bufeados (vida ×2/×3,5, daño ×1,75/×3, ritmo, alcance y golpe múltiple de infantería); slots circulares; pantalla de carga al arrancar. |
+| 2026-10-17 | Arte de las 32 cartas (Nano Banana 2 Lite, recortes completados con edit); Refuerzo federal pasa a Refuerzo militar. |
+| 2026-10-17 | Cartas colocables con badges VIDA/DAÑO/RITMO/ALCANCE sobre el arte ("gobernabilidad" de la policía pasó a llamarse vida) y sin la aclaración de niveles en la descripción. Audio: menú sin cacerolas, helicóptero mudo al empezar y protagonista al perder (arranque de turbina), nuevo cierre de derrota, toc de ajedrez al colocar, golpe seco en vallas y caída de agente. |
+| 2026-10-17 | Efectos de sonido: 45 clips sintetizados por código (`sfx_gen.py`), motor `Snd` con pool, paneo y enfriamiento; ambiente de multitud, bombo, cacerolas y helicóptero según la partida; arreglada la excepción del titular al arrancar la oleada. |
 
 ## Resumen
 
@@ -50,6 +50,8 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `BlenderSrc/porteno_kit.py` | Edificios porteños eclécticos (Otto Wulff, terraza con camarógrafo) y la valla policial en L (`valla_l`). |
 | `BlenderSrc/casa_v2.py` | Casa Rosada (alas de 2 vanos, pabellones, bloque central). |
 | `BlenderSrc/heli_kit.py` | Helipuerto (`helipad`), helicóptero presidencial caricaturesco y detallado (`helicopter`) y rotor aparte (`heli_rotor`). |
+| `BlenderSrc/sfx_gen.py` | Efectos de sonido sintetizados con numpy (sin samples): `build_all()` escribe los WAV en `Assets/Resources/SFX`. |
+| `BlenderSrc/card_art.py` | Arte de cartas: genera (`start`), completa recortes y retoca (`edit_image`, `crop_rows`) y arma la galería de revisión. Key en `~/.argensimia_atlas_key`. |
 | `BlenderSrc/palette.txt` | Una línea por material: `nombre hex emisión [textura metros_por_repetición]`. |
 | `BlenderSrc/plaza_map.svg` | Mapa limpio de la plaza (canteros, carriles, refuerzos). El boceto original está en `plaza_map_boceto.svg`. |
 | `BlenderSrc/plaza_design_v3.py` | Geometría armónica: carriles, refuerzos, conectores y canteros. Escribe `plaza_map.svg`. |
@@ -57,11 +59,12 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `BlenderSrc/plaza_design_v2.py` | Ubica los objetos de la plaza. Escribe `plaza_props.txt` y `plaza_layout.json`. |
 | `Assets/Editor/PlazaBuilder.cs` | Materiales, remapeo, post y renderer (`SetupRendering`), y armado de toda la escena (incluido el helipuerto y la escena del menú). |
 | `Assets/Editor/HudSetup.cs` | Fuentes TMP, cartas y unidades (menú 4: crea o actualiza los assets sin pisar el arte) y objeto Game en la escena (menú 5). |
+| `Assets/Editor/IconBuilder.cs` | Ícono de la app (menú 7): renderiza en Play la "A" con bandera sobre el Sol de Mayo a `Assets/Art/Icon/AppIcon.png` y lo asigna en Player Settings. |
 | `Assets/Editor/SlotBuilder.cs` | Genera los slots policiales desde lanes, sus texturas y materiales (menú 6). |
 | `Assets/Shaders/TiltShift.shader` | Desenfoque de bordes (Full Screen Pass) y blur circular del menú (globales `_MenuBlur`, `_MenuCenter`). |
-| `Assets/Scripts/Game/` | `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música y volúmenes), `Spin`, `FxKit`. |
-| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen`, `VolumeSlider`, `UiKit`. |
-| `Assets/Resources/` | `Cards/`, `Units/`, `Music/` (2 temas MP3, streaming), `UI/` (fuentes), `FX/`, `GameAssets.asset`. |
+| `Assets/Scripts/Game/` | `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
+| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
+| `Assets/Resources/` | `Cards/`, `Units/`, `Music/` (5 temas MP3, streaming), `SFX/` (45 WAV), `UI/` (fuentes), `FX/`, `GameAssets.asset`. |
 
 **Orden para regenerar todo**
 
@@ -179,10 +182,13 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 
 ## Loop de partida
 
+- **Arranque:** pantalla de carga (`LoadingScreen`) hasta que haya ~15 cuadros fluidos seguidos (mín. 0,6 s, máx. 8 s); recién ahí entra el menú con la cinta.
 - **Menú → partida:** el juego abre en el menú. NUEVA PARTIDA panea la cámara (6,5 s, curva por arriba del mapa) hasta la vista de juego mientras el helicóptero aterriza; al llegar aparece el HUD. Si ya se jugó, la escena se recarga en la pose del menú (estado inicial limpio) y arranca el paneo: el corte no se nota.
-- **Mandato:** previa de planificación sin timer (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
+- **Mandato:** previa de planificación con reloj de 30 s a la izquierda de ¡ARRANCAR! (se pausa con la pausa y en los paneos; tictac los últimos 5 s; al agotarse cierra zoom/colocación/confirmación y arranca, aplicando las crisis); el cierre con las 3 cartas no tiene tiempo (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
 - **Cierre:** sueldo + efecto de los ministros + la policía en el mapa recupera hasta 25% de su vida máxima (30% con Min. Seguridad, solo a las que les falta) → pantalla OBTUVISTE 3 CARTAS PARA TU MAZO (ver Sistema de cartas) → CONTINUAR → se completa la mano con lo que haya en el mazo → crisis forzadas.
 - **Fin:** al perder la gobernabilidad, o al RENUNCIAR desde la pausa, se oculta el HUD, aparece la multitud en el helipuerto, la cámara panea hasta la vista del menú y el helicóptero despega y se detiene justo en la pose de flotación. El menú queda con la cinta del resultado ("PERDISTE LA GOBERNABILIDAD" / "EL PRESIDENTE RENUNCIÓ") y el detalle debajo ("Se fue en helicóptero en el mandato N").
+- **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos sobrevividos (el que perdiste no cuenta; mín. 1) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 10 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING a la izquierda del menú.
+- **Vender carta:** en el zoom, el tacho arriba a la izquierda descarta la carta (no vuelve al mazo) a cambio de $100; no aplica a crisis.
 - **Valores iniciales:** $2.500, +$40/s (solo durante la oleada), 78% de popularidad (TRANQUI), gobernabilidad 20/20, mazo de 15 (quedan 10 tras repartir la mano de 5).
 - **Sueldo de cierre:** $2.000 + $40 × popularidad (+$500 con Super Ministro).
 
@@ -199,7 +205,7 @@ La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan
 
 - **Cantidad:** `GameState.Difficulty` = 0,6 con 100% hasta 2 con 0%; multiplica el presupuesto de la oleada.
 - **Decorado (`StreetMood`):** menos popularidad = calles más llenas, gomas, humo y fuego, siempre fuera de la plaza y de la Casa Rosada.
-- **Dónde baja:** cartas (Impuestazo −16%, Privatización −10%, La maquinita −8%, Blanqueo −6%, Refuerzo federal −5%, Dólar soja −4%, Relevo −3%), crisis Escándalo −15%, ministros por mandato (Super Ministro −3%, Min. Economía −2%, Min. Seguridad −1%), jubilado golpeado o detenido −0,1% (máx. 1 vez/s por jubilado). El cacerolero que llega solo resta gobernabilidad.
+- **Dónde baja:** cartas (Impuestazo −16%, Privatización −10%, La maquinita −8%, Blanqueo −6%, Refuerzo militar −5%, Dólar soja −4%, Relevo −3%), crisis Escándalo −15%, ministros por mandato (Super Ministro −3%, Min. Economía −2%, Min. Seguridad −1%), jubilado golpeado o detenido −0,1% (máx. 1 vez/s por jubilado). El cacerolero que llega solo resta gobernabilidad.
 - **Dónde sube:** Aguinaldo +12%, Plan platita +10%, Fútbol para todos +6%, Cadena nacional +5%, Min. Desarrollo +3% y Vocero +2% por mandato.
 - **Números rojos:** toda pérdida se muestra flotando en rojo: sobre el manifestante (−% popularidad, −N GOB) y en el panel (popularidad agrupada cada 0,6 s; plata exacta de la Devaluación).
 
@@ -207,7 +213,7 @@ La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan
 
 `WaveDirector` arma cada oleada gastando un presupuesto por mandato: 20, 32, 48, 68, 100 y después ×1,18 por mandato (vida ×1,08). Se multiplica por la dificultad y se reduce con Feriado puente o Pacto social.
 
-- **Carriles activos:** mandato 1 = 1 carril, mandato 2 = 2, desde el 3 los 4 (primero los interiores). Una flecha **roja** en el extremo este marca cada carril activo; los nuevos titilan fuerte en la previa.
+- **Carriles activos:** uno más por mandato: 1, 2, 3 y desde el mandato 4 los 4 (primero los interiores). Una flecha **roja** en el extremo este marca cada carril activo; los nuevos titilan fuerte en la previa.
 - **Entradas norte y sur:** recién desde el mandato 5 (50% de la oleada entra por el refuerzo, x = 0, y toma un carril de su lado).
 - **Especiales:** salen más hacia el final de la oleada y se ven en la esquina por donde van a entrar durante la previa. Columnas extra con Paro general.
 - **Retención:** todo retén policial (vallado, infanterías, motorizada en espera, hidrante, brigada) frena al **100%** a los que llegan, sin tope. La única excepción es el encapuchado.
@@ -219,8 +225,8 @@ La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan
 | Jubilado | 1 | 25 | 2 | 0,5/s | 0,8 | 1 | M2 | 1,5 | — | −0,1% popularidad al ser golpeado o detenido | Bajo y encorvado, boina, anteojos, bastón, bolsa |
 | Encapuchado | 2 | 50 | 15 | 1,2/s | 2,0 | 2 | M2 | 1,6 | Sí | Daño ×3 a vallas; 30% de saltar cada retén (salto en arco con giro, titular en la marquesina) | Todo negro, pasamontañas con ranura, palo |
 | Piquetero | 3 | 80 | 6 | 1/s | 1,2 | 2 | M3 | 1,1 | Sí | Cada 10 s prende una goma que bloquea 8 s el slot libre más cercano | Flaco y alto, gorra, pañuelo rojo, palo largo, goma |
-| Mortero | 4 | 35 | 25 (área 2 m) | 0,25/s | 1,0 | 3 | M3 | 0,8 | Sí | Se planta y le tira a la defensa más cercana a 14 m | Gordo y agachado, gorra roja, tubo de mortero |
-| Columna organizada | 6 | 600 | 10 | 1/s | 0,7 | 5 | M4 | 0,5 | Sí | 6 personas; +20% de velocidad a los que tiene a 4 m; resiste 50% del empuje | Triángulo rígido 3-2-1, misma remera y gorra blanca, bandera adelante |
+| Mortero | 4 | 35 | 25 (área 2 m) | 0,25/s | 1,0 | 3 | M3 | 0,8 | Sí | Con la línea libre avanza; solo cuando un retén lo frena se planta y dispara, a veces al obstáculo de adelante y a veces a la defensa más cercana a tiro (14 m) en los carriles de al lado | Grandote y agazapado: rastas largas, anteojos, barba, mochila, remera roja y jogging celeste; caño casero encintado cruzado al cuerpo (el disparo sale de la boca con humo) |
+| Columna organizada | 6 | 600 | 10 | 1/s | 0,7 | 5 | M4 | 0,5 | Sí | 5 personas; +20% de velocidad a los que tiene a 4 m; resiste 50% del empuje | Bloque rígido de dos filas (3 + 2), remera y gorra rojas, jean oscuro, bandera adelante |
 
 Velocidades base; en juego se multiplican por 1,3 (`speedScale`). Datos en `Assets/Resources/Units/` (`UnitDef`, con `jumpChance`).
 
@@ -238,7 +244,7 @@ Todas ocupan slots, frenan al 100% y se rompen al quedar sin gobernabilidad (vid
 | Motorizada | 300 | Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: 40 de daño, empuja 3 m y aturde 1 s; en el slot aparece otra recargando. | 2 motos → 3 → 4 (primitivas) |
 | Camión hidrante | 900 | Cañón giratorio en el techo, hasta 4 casilleros, en su carril o los vecinos, apuntando solo al más cercano: moja, empuja 2 m/s, −60% de velocidad, 3 dps. Tanque de 8 s que se gasta solo mientras moja; vacío, recarga 6 s. Sirena roja y azul titilando. Ocupa 2 slots. | `police_truck` × 1,25 → + chapas laterales con franja y paragolpes → + jaula en el techo y cañón ×1,3 |
 
-- **Niveles:** nivel 2 = +40% al stat principal; nivel 3 = ×2 y +30% de vida. En vallado e infantería el stat principal es la vida. Los agentes crecen 5% por nivel.
+- **Niveles:** vida ×2 / ×3,5; daño ×1,75 / ×3; ritmo ×1,25 / ×1,6 (Detenciones usa el de daño: cada 4 s → 2,3 s → 1,3 s). NV3 suma 1 casillero de alcance a Escopeteros, Lanzagases e Hidrante. La infantería pega a 1 / 2 / 3 manifestantes por golpe; el gas agranda su área 20% por nivel; el hidrante empuja +25% y su tanque dura más. Los agentes crecen 5% por nivel.
 - **Mejora:** se suelta una carta igual sobre la defensa del mapa (arrastrando desde la mano, o tocándola en modo colocar). Cobra el costo de la carta y la consume. La vida máxima sube y la vida actual suma la diferencia. Estallido de partículas doradas y "¡NIVEL N!" flotando.
 - **Marcas:** rombos de nivel sobre la defensa, mirando a cámara (plateados en NV2, dorados en NV3). Mientras se arrastra una carta, las defensas mejorables de ese tipo muestran un óvalo dorado pulsante y una flecha; la que está bajo el dedo se agranda.
 - **Curación:** `Defense.HealAll(frac)`: al cierre de cada mandato (25%, o 30% con Min. Seguridad) y con Relevo (40%); partículas verdes en cada una curada.
@@ -259,7 +265,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Crisis forzadas:** cada crisis de la mano tiene un halo rojo pulsante y el cartel "CRISIS: SE APLICA AL ARRANCAR"; sobre ¡ARRANCAR! aparece "N CRISIS SE APLICA(N) AL ARRANCAR". Al arrancar con crisis en la mano se pide confirmación ("Se van a aplicar las cartas de crisis forzadas. ¿Seguro que querés comenzar?") con VOLVER y COMENZAR.
 - **Escala:** referencia 1600×900. Teléfonos (≥16:10) escalan por alto; tablets 4:3 por ancho.
 - **Input:** módulo UI del Input System. Todos los botones tienen feedback de presión.
-- **Fuentes:** Roboto Black y Bold como TMP SDF dinámicas en `Resources/UI/`.
+- **Fuentes:** TMP SDF dinámicas en `Resources/UI/`: Roboto Black y Bold (texto general), Lilita One (OFL; títulos, botones y todo texto con contorno ≥ 36 pt, vía `UiKit.Txt`) y Luckiest Guy (Apache 2.0; el logo ARGENSIMIA con `UiKit.Logo`: degradé dorado→naranja, contorno marrón, sombra dura y ondita por letra con `LogoWave`). TTF y licencias en `Assets/UI/Fonts/`.
 - **Sprites:** procedurales (redondeados, sombra, íconos), sin assets de imagen.
 
 ## Menú principal
@@ -267,12 +273,20 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Vista:** cámara del menú (ver Coordenadas) con blur circular: nítidos el helicóptero y el helipuerto, todo lo demás desenfocado.
 - **Helicóptero:** recién despegado, inclinado y saliendo hacia la derecha de la pantalla (offset (−3, 8,4, −5,5) desde el helipuerto, rotación (13, −120, 10)). Suspendido con una flotación muy sutil (~20 cm, 1–2° de balanceo) y el rotor en "cámara lenta" (230°/s). Si se mueve a mano en Play, flota alrededor de la nueva pose.
 - **Ambiente:** ~170 manifestantes en anillo alrededor del helipuerto y ~80 de relleno a los costados (quedan desenfocados), 5 gomas prendidas con humo, el hidrante tirando agua en arco a la multitud sur con la sirena encendida, y los patrulleros en barricada.
-- **UI:** ARGENSIMIA con sombra dura; cinta roja inclinada con filetes dorados "¡DEFENDÉ LA CASA ROSADA!" (entra sellada con rebote y pulsa cada 2,4 s; tras una partida muestra el resultado y el detalle abajo, con el contorno TMP por defecto); MÚSICA y EFECTOS en contenedores individuales flotantes; NUEVA PARTIDA.
+- **Ranking:** panel RANKING a la izquierda con el top 10 (medallas, nombre, puntaje, mandatos).
+- **UI:** logo ARGENSIMIA (ARG con la bandera, ENSIMIA banana, ondita por letra); cinta roja inclinada con filetes dorados "¡DEFENDÉ LA CASA ROSADA!" (entra sellada con rebote y pulsa cada 2,4 s; tras una partida muestra el resultado y el detalle abajo, con el contorno TMP por defecto); MÚSICA y EFECTOS en contenedores individuales flotantes; NUEVA PARTIDA.
 
 ## Audio
 
 - **Música (`GameAudio`):** 5 temas en `Resources/Music/` (MP3, importados como Vorbis q 0,6 en streaming), en este orden de loop (`GameAudio.Playlist`): La Marcha del Balcón → Fuerzas de la Plaza → Candombe en la Plaza → La Gran Marcha → Corte de Calle. Temas nuevos que no estén en la lista van al final. Pasa de uno a otro con fundido cruzado de 2,5 s. Objeto persistente (`DontDestroyOnLoad`): la música no se corta entre menú y partida ni al recargar.
-- **Volúmenes:** música (70% por defecto) y efectos (80%) guardados en `PlayerPrefs`. Efectos todavía no tiene sonidos asignados.
+- **Volúmenes:** música (70% por defecto) y efectos (80%) guardados en `PlayerPrefs`. Al mover EFECTOS suena un tap de muestra.
+- **Efectos (`Snd`):** `Snd.Ui(id)` para interfaz (sigue sonando en pausa) y `Snd.At(id, pos)` para eventos del mapa (se pausan con `AudioListener.pause`). Pool de 24 voces 2D, máx. 4 iguales a la vez, enfriamiento por clip, leve variación de tono y paneo según la posición en pantalla (fuera de cuadro, 45%). Volumen relativo por clip en `GameAudio.Gain`.
+- **Clips (`Resources/SFX`, generados por `BlenderSrc/sfx_gen.py`, mono, Vorbis; cortos descomprimidos al cargar, loops comprimidos en memoria):**
+  - Interfaz: `ui_tap` (todos los `Tap`), `ui_error` (sacudón), `card_draw/flip/zoom/play/shuffle`, `coin` (cha-ching), `spend` (moneda), `pop_up` (marimba), `pop_down` (wah-wah), `mood_down` (sube la bronca), `stamp` (ministro, cinta del menú), `upgrade`, `heal`, `crisis` (cortina de noticiero), `evade`, `wave_start` (pitazo + multitud + bombo), `fanfare` (fin de mandato), `gameover` (trombón triste).
+  - Policía: `place` (pisotones) + extra por tipo (valla, sirena del hidrante, moto, silbato), `shotgun`, `rubber_hit`, `baton`, `fence_clang` y `defense_hit` (golpes recibidos), `gas_launch`, `gas_hiss`, `cuffs` + `whistle_short` (detención), `moto_pass`, `break_crash`, `siren_yelp`, `loop_water` (chorro del hidrante, con `SndLoop`).
+  - Otros: `boo` (abucheo al perder popularidad), `clock_tick` (reloj de la previa), `unit_down` (cae un agente), `heli_start` (turbina al perder).
+  - Manifestantes: `poof` (sale de escena), `boing` (salto del encapuchado), `gate_bang` (llega al vallado), `mortar_launch`, `explosion`, `fire_ignite` (goma).
+- **Ambiente (loops):** `loop_crowd` (multitud sintetizada), `loop_bombo` (murga a 120 bpm), `loop_cacerola`, `loop_heli`. Menú: multitud + bombo + cacerolas + helicóptero (tono según `GameFlow.RotorSpeed`). Oleada: multitud y bombo crecen con la cantidad de manifestantes y la bronca, cacerolas si hay caceroleros, paneados a la izquierda (este). Previa y cierre: murmullo lejano que sube con la bronca.
 
 ## Marquesina (titulares)
 
@@ -298,11 +312,11 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el sueldo del cierre y por cartas que bajan la popularidad.
 
 - **Tipos:** Colocar (policía en slots), Efecto, Ministro (pasivo, gabinete de 3; si está lleno reemplaza al más viejo) y Crisis (entran solas a la mano desde el mandato 2; se evitan pagando su costo o se aplican al arrancar).
-- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece arriba del mazo el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR MANO ($300) devuelve la mano al fondo del mazo y roba otra. La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
+- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR MANO ($300) devuelve la mano al fondo del mazo y roba otra. La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
 - **Cartas del cierre:** al cerrar cada mandato entran 3 cartas al mazo (pantalla OBTUVISTE 3 CARTAS PARA TU MAZO) (Común 60 / Poco común 30 / Rara 10, raras ×1,8 desde el mandato 4, sin repetir en la tanda). Cada una tiene CAMBIAR $100: gira y aparece otra al azar distinta de las que están en pantalla; se puede usar una sola vez por carta (queda CAMBIADA). CONTINUAR las mete en lugares al azar del mazo.
 - **Colocables:** se juegan con tap → ACTIVAR → tocar el mapa, o arrastrando la carta desde la mano al mapa (chica y por arriba del dedo; soltar sobre la mano la devuelve). Sobre una defensa igual la sube de nivel; si no, ocupa el slot libre más cercano. No hay fusión en la mano. Una colocable se ve deshabilitada solo si no hay slot libre ni defensa igual para mejorar.
 - **Datos:** `CardDef` (ScriptableObject) en `Assets/Resources/Cards/`, creados o actualizados por `HudSetup` (menú 4) sin pisar el arte. Campos nuevos: `salaryDelta`, `govDelta`, `maxGovDelta`, `govPerMandate`, `healNow`, `healBonus`.
-- **Arte:** se diseña aparte en HTML y se asigna en `art`. Sin arte se dibuja la inicial con "ARTE PENDIENTE".
+- **Arte:** generado con `BlenderSrc/card_art.py` (Nano Banana 2 Lite en Atlas Cloud; prompts en `docs/CARD_ART_PROMPTS.md`). Revisión en `CardArt/review/index.html` (no versionado); las elegidas (`_selected.json`) se copian a `Assets/Art/Cards/<id>.jpg` (sprite, máx. 1024) y se asignan en `CardDef.art`. Marco 3:2 de 320×218. Sin arte se dibuja la inicial con "ARTE PENDIENTE".
 - **Zoom:** tap en la carta → centro con inclinación 3D, ACTIVAR y X (las crisis suman EVITAR $X). Sin plata "FALTA $X"; sin slots ni mejora posible "SIN LUGAR".
 
 **Cartas** (precios: base +30% y después −5%, redondeados a $10). Copias iniciales = mazo de 15; las de 0 solo entran por el cierre.
@@ -328,7 +342,7 @@ Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el
 | Feriado puente | Efecto | Poco común | $1.520 | Próxima oleada −20% (solo en la previa) | 0 |
 | Dólar soja | Efecto | Poco común | Gratis | +$4.000, −4% popularidad (solo en la previa) | 0 |
 | Préstamo FMI | Efecto | Rara | Gratis | +$5.000, −$15/s | 0 |
-| Refuerzo federal | Efecto | Rara | $2.800 | +3 gobernabilidad y +3 al máximo, −5% popularidad | 0 |
+| Refuerzo militar | Efecto | Rara | $2.800 | +3 gobernabilidad y +3 al máximo, −5% popularidad | 0 |
 | Privatización | Efecto | Rara | Gratis | +$7.000, −10% popularidad, −$10/s | 0 |
 | Pacto social | Efecto | Rara | $2.600 | Próxima oleada −30%, −$10/s (solo en la previa) | 0 |
 | Min. Economía | Ministro | Poco común | $1.850 | +$25/s, −2% por mandato | 0 |
@@ -350,7 +364,7 @@ Todo elemento policial de una carta ocupa un slot y solo se coloca sobre el cami
 
 | Parámetro | Valor |
 | --- | --- |
-| Tamaño | 5,4 m a lo largo del carril × 4,0 m de ancho (carril de 4,6 m) |
+| Tamaño | 5,4 m a lo largo del carril × 4,0 m de ancho (carril de 4,6 m); la marca es un círculo de 4 m |
 | Separación | ~1,4 m entre slots (1 casillero = 6,8 m entre centros) |
 | Tramo | x −36 a 31. Al este queda libre la entrada de las columnas |
 | Orientación | Alineado a la tangente del carril (yaw guardado por slot) |
@@ -365,8 +379,7 @@ Todo elemento policial de una carta ocupa un slot y solo se coloca sobre el cami
 
 ## Pendientes y problemas conocidos
 
-- [ ] Efectos de sonido (el volumen de efectos ya existe y se guarda)
-- [ ] Arte de cartas (diseño en HTML → sprites en `CardDef.art`) y balance fino de costos, sobre todo de la tanda nueva
+- [ ] Balance fino de costos, sobre todo de la tanda nueva
 - [ ] Modelos de Blender para las motos (hoy primitivas) y prefabs dedicados de defensas (los niveles hoy suman primitivas)
 - [ ] Cabildo y Catedral Metropolitana como edificios emblema alrededor de la plaza
 - [ ] Vida en las calles: árboles de vereda, mesas de bar, quioscos, peatones, más tránsito
@@ -376,10 +389,13 @@ Todo elemento policial de una carta ocupa un slot y solo se coloca sobre el cami
 - [x] Sistema de oleadas real, unidades con habilidades y columnas organizadas
 - [x] Menú principal, loop menú ↔ partida, pausa y música
 - [x] Mazo finito, cartas del cierre con CAMBIAR, niveles en el mapa y curación del cierre
+- [x] Arte de las 32 cartas
+- [x] Efectos de sonido y ambiente sonoro (sintetizados; reemplazables por samples con el mismo nombre en `Resources/SFX`)
 
 **Problemas conocidos**
 
 - Los italianizantes y art nouveau superan los 18.000 polígonos cada uno (balaustradas). Si hay problemas de rendimiento en móvil, reducir la densidad de balaustres o usar LOD.
+- Unity está en **Recompile After Finished Playing** (Preferences > General > Script Changes While Playing): editar scripts con el juego en Play ya no rompe la partida; los cambios entran al salir.
 - El servidor MCP de Unity a veces corta la conexión después de un recompile, refresh o al entrar a Play; se resuelve reintentando.
 - `CanvasGroup` con alpha < 1 sobre `UiKit.Panel` mezcla el borde dorado con el interior (se ve marrón): no usarlo en paneles.
 - TMP: no subir `outlineWidth` por encima de 0,16 (el de `UiKit.OutlineMat`) en textos chicos; desborda el SDF y el texto se ve como bloques negros (pasó en el detalle del menú).

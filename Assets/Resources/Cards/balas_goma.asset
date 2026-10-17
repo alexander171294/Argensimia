@@ -17,10 +17,9 @@ MonoBehaviour:
   kind: 0
   cost: 1380
   description: "Infanter\xEDa sin escudo con escopetas antitumulto. Disparan balas
-    de goma hasta 2 casilleros adelante en su carril: desde atr\xE1s de un vallado
-    le tiran primero a los que lo est\xE1n golpeando. Tambi\xE9n frenan a todos los
-    que llegan. Soltala sobre una igual: NV 2 y 3."
-  art: {fileID: 0}
+    de goma en su carril; desde atr\xE1s de un vallado le tiran primero a los que
+    lo golpean. Tambi\xE9n frenan a los que llegan."
+  art: {fileID: 21300000, guid: 99466ac8d59be41d0a9ad394b9c24243, type: 3}
   color: {r: 0.7529412, g: 0.38039216, b: 0.16862746, a: 1}
   copies: 2
   headline: "Balas de goma en la Plaza: hay heridos y la oposici\xF3n pide un informe|Disparos

@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1520
   description: "Medio pa\xEDs se va a la costa: la pr\xF3xima oleada viene 20% m\xE1s
     chica. Solo en la previa."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: a6154801973f143d182960bf32aeef48, type: 3}
   color: {r: 0.8784314, g: 0.48235294, b: 0.16470589, a: 1}
   copies: 0
   headline: "Decretan feriado puente: rutas colapsadas hacia la costa|Fin de semana

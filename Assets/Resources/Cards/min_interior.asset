@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1900
   description: 'Ministro pasivo: negocia con gobernadores y recupera 1 de gobernabilidad
     al cerrar cada mandato. Las transferencias bajan el ingreso.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 31c915321f4654f258c04c4ebcc61c26, type: 3}
   color: {r: 0.3529412, g: 0.43137255, b: 0.22745098, a: 1}
   copies: 0
   headline: "El ministro del Interior cierra acuerdos con los gobernadores|El ministro

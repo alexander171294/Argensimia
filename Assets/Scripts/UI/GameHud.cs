@@ -84,7 +84,7 @@ namespace Argensimia.UI
             StartCoroutine(DealHand(0.6f));
         }
 
-        void OnDestroy() { if (gs) { gs.Headline -= OnHeadline; gs.Lost -= OnLost; } Time.timeScale = 1; }
+        void OnDestroy() { if (gs) { gs.Headline -= OnHeadline; gs.Lost -= OnLost; } Time.timeScale = 1; AudioListener.pause = false; }
 
         static void EnsureEventSystem()
         {
@@ -254,7 +254,7 @@ namespace Argensimia.UI
 
         void BuildPlaceBanner()
         {
-            placeBanner = UiKit.Panel(safe, "PlaceBanner", 18).At(new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(720, 66));
+            placeBanner = UiKit.Panel(safe, "PlaceBanner", 18).At(new Vector2(0.5f, 1), new Vector2(0, -196), new Vector2(720, 66)); // debajo de MANDATO + GOBERNABILIDAD
             bannerGroup = placeBanner.gameObject.AddComponent<CanvasGroup>();
             placeTxt = UiKit.Txt(placeBanner, "T", "", 26, Color.white, TextAlignmentOptions.Center, true);
             placeTxt.RT().Fill(18, 80, 0, 0);
@@ -453,6 +453,7 @@ namespace Argensimia.UI
             var inst = forced ?? deck.Draw();
             if (inst == null) { Headlines.Say("deck_empty", 90f); yield break; } // se pueden comprar (GameHudShop)
             var def = inst.def;
+            Snd.Ui("card_draw", 1, Random.Range(0.94f, 1.08f), 0.02f);
             var cv = CardView.Create(hand, def, inst.level);
             cv.slot = i;
             cards[i] = cv;
@@ -485,6 +486,10 @@ namespace Argensimia.UI
         {
             busy = true;
             zoomed = cv;
+            Snd.Ui("card_zoom");
+            // colocable: las defensas iguales que se pueden mejorar titilan; el fondo se oscurece menos para verlas
+            if (cv.def.kind == CardKind.Colocar) Defense.ShowHints(cv.def, true);
+            dimA = Defense.AnyHint ? 0.38f : 0.68f;
             cv.dimWhenPoor = false;
             dim.gameObject.SetActive(true);
             cv.transform.SetParent(zoomLayer, true);
@@ -494,7 +499,7 @@ namespace Argensimia.UI
             yield return UiKit.Tween(0.34f, t =>
             {
                 float e = Ease.OutCubic(t), arc = Mathf.Sin(t * Mathf.PI);
-                dim.color = new Color(0, 0, 0, 0.68f * e);
+                dim.color = new Color(0, 0, 0, dimA * e);
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
                 cv.transform.localScale = Vector3.one * Mathf.LerpUnclamped(s0, zoomScale, Ease.OutBack(t));
                 cv.transform.localRotation = Quaternion.Euler(-arc * 10f, -arc * 22f, Mathf.Lerp(z0, 0, e));
@@ -544,12 +549,14 @@ namespace Argensimia.UI
         {
             busy = true;
             HideZoomButtons();
+            Snd.Ui("card_flip", 0.7f);
+            Defense.ShowHints(null, false);
             Vector3 from = cv.transform.localPosition, to = zoomLayer.InverseTransformPoint(hand.TransformPoint(SlotPos(cv.slot)));
             float zEnd = SlotZ(cv.slot);
             yield return UiKit.Tween(0.26f, t =>
             {
                 float e = Ease.OutCubic(t), arc = Mathf.Sin(t * Mathf.PI);
-                dim.color = new Color(0, 0, 0, 0.68f * (1 - e));
+                dim.color = new Color(0, 0, 0, dimA * (1 - e));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
                 cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, handScale, e);
                 cv.transform.localRotation = Quaternion.Euler(arc * 8f, arc * 18f, Mathf.Lerp(0, zEnd, e));
@@ -587,6 +594,8 @@ namespace Argensimia.UI
             var def = cv.def;
             HideZoomButtons();
             if (!free) gs.Spend(def.cost);
+            Snd.Ui("card_play", 0.8f);
+            if (!free && def.cost > 0) Snd.Ui("spend", 0.8f);
             if (def.cost > 0 && !free) FloatText(moneyPanel, "-$" + GameState.Money(def.cost), UiKit.RedSoft, 0);
             yield return UiKit.Tween(0.14f, t => cv.transform.localScale = Vector3.one * zoomScale * (1 + Mathf.Sin(t * Mathf.PI) * 0.07f));
 
@@ -595,7 +604,7 @@ namespace Argensimia.UI
             yield return UiKit.Tween(0.45f, t =>
             {
                 float e = Ease.InCubic(t);
-                dim.color = new Color(0, 0, 0, 0.68f * (1 - Ease.OutCubic(t)));
+                dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
                 cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.06f, e);
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
@@ -604,6 +613,7 @@ namespace Argensimia.UI
             if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", gone.title, def.title); }
             else gs.ApplyEffect(def);
             StartCoroutine(Pulse(target));
+            EffectSound(def);
             FloatDeltas(def);
 
             int slot = cv.slot; // la carta se consume: el mazo no se rebaraja
@@ -614,6 +624,25 @@ namespace Argensimia.UI
             yield return new WaitForSecondsRealtime(0.15f);
             yield return DrawInto(slot);
             busy = false;
+        }
+
+        // Lo que suena cuando la carta impacta en el panel (la curación suena en Defense.HealAll).
+        void EffectSound(CardDef d)
+        {
+            if (d.kind == CardKind.Ministro) Snd.Ui("stamp", 0.85f);
+            if (d.kind == CardKind.Crisis) Snd.Ui("mood_down", 0.7f, 1, 0.5f);
+            if (d.moneyDelta > 0) Snd.Ui("coin");
+            if (d.popularityDelta > 0.01f) Snd.Ui("pop_up");
+            else if (d.popularityDelta < -0.01f) Snd.Ui("boo"); // la gente se enoja
+            else if (d.moneyMultiplier > 0 && d.moneyMultiplier < 1) Snd.Ui("pop_down");
+        }
+
+        float dimA = 0.68f; // oscurecido del zoom
+
+        IEnumerator SndLater(string id, float delay, float vol = 1)
+        {
+            yield return new WaitForSecondsRealtime(delay);
+            Snd.Ui(id, vol, 1, 0);
         }
 
         void FloatDeltas(CardDef d)
@@ -631,11 +660,12 @@ namespace Argensimia.UI
             HideZoomButtons();
             placing = cv;
             zoomed = null;
+            Snd.Ui("card_zoom", 0.8f, 0.8f);
             Vector3 from = cv.transform.localPosition, to = zoomLayer.InverseTransformPoint(placeBanner.position);
             yield return UiKit.Tween(0.3f, t =>
             {
                 float e = Ease.InCubic(t);
-                dim.color = new Color(0, 0, 0, 0.68f * (1 - Ease.OutCubic(t)));
+                dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
                 cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.12f, e);
                 cv.group.alpha = 1 - e;
@@ -693,7 +723,7 @@ namespace Argensimia.UI
                 StartCoroutine(Shake(moneyPanel));
                 return false;
             }
-            if (d0.cost > 0) FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0);
+            if (d0.cost > 0) { FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0); Snd.Ui("spend", 0.6f); }
             if (up)
             {
                 up.Upgrade();
@@ -733,6 +763,7 @@ namespace Argensimia.UI
             busy = true;
             var cv = placing;
             placing = null;
+            Snd.Ui("card_flip", 0.7f);
             Vector3 from = hand.InverseTransformPoint(placeBanner.position);
             HidePlacement();
             cv.gameObject.SetActive(true);
@@ -803,6 +834,8 @@ namespace Argensimia.UI
         {
             busy = true;
             Headlines.Say("renew", 20f);
+            Snd.Ui("card_shuffle");
+            Snd.Ui("spend", 0.6f);
             StartCoroutine(UiKit.Tween(0.7f, t => renewIcon.localRotation = Quaternion.Euler(0, 0, -Ease.InOutCubic(t) * 360f)));
             Vector3 target = hand.InverseTransformPoint(renewRt.TransformPoint(renewRt.rect.center));
             for (int i = cards.Length - 1; i >= 0; i--)
@@ -841,6 +874,7 @@ namespace Argensimia.UI
         {
             paused = !paused;
             Time.timeScale = paused ? 0 : 1;
+            AudioListener.pause = paused; // el mapa calla; la UI y la música siguen
             pauseOverlay.SetActive(paused);
             if (paused) StartCoroutine(UiKit.Tween(0.25f, t => { if (pauseOverlay) pauseOverlay.transform.Find("Group").localScale = Vector3.one * Mathf.Lerp(0.85f, 1f, Ease.OutBack(t)); }));
         }
@@ -891,6 +925,7 @@ namespace Argensimia.UI
 
         IEnumerator Shake(RectTransform rt)
         {
+            Snd.Ui("ui_error");
             var basePos = rt.anchoredPosition;
             yield return UiKit.Tween(0.32f, t => rt.anchoredPosition = basePos + new Vector2(Mathf.Sin(t * 40f) * 12f * (1 - t), 0));
             rt.anchoredPosition = basePos;

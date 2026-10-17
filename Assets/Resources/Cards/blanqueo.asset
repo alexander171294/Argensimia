@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1000
   description: "Moratoria para que entre plata al sistema. Sube el ingreso por segundo,
     con algo de costo pol\xEDtico."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 780c810b5bfa846f4975ec98dfc81ce0, type: 3}
   color: {r: 0.18431373, g: 0.6039216, b: 0.2901961, a: 1}
   copies: 1
   headline: "Lanzan un blanqueo: \xABesta vez s\xED\xBB, prometen|Blanqueo de capitales:

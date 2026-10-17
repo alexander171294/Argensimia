@@ -45,6 +45,7 @@ namespace Argensimia.UI
         {
             if (!CanDrag(cv)) return;
             dragging = cv;
+            Snd.Ui("card_zoom", 0.6f, 1.15f);
             cv.transform.SetParent(zoomLayer, true);
             cv.transform.SetAsLastSibling();
             cv.group.blocksRaycasts = false;
@@ -82,7 +83,7 @@ namespace Argensimia.UI
             cv.group.alpha = 1;
             bool ok = !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada) && !OverHand(e.position)
                       && GroundPoint(e.position, out var p) && TryUsePlaceCard(cv, p);
-            if (!ok) StartCoroutine(DragReturn(cv));
+            if (!ok) { Snd.Ui("card_flip", 0.6f); StartCoroutine(DragReturn(cv)); }
         }
 
         void EndDragFx()

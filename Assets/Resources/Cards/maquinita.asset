@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 0
   description: "El Banco Central imprime: entra plata ya, pero la inflaci\xF3n se
     nota en la calle."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 3f15cdcd7d8584681aa01b3926c9250d, type: 3}
   color: {r: 0.30980393, g: 0.5411765, b: 0.22745098, a: 1}
   copies: 1
   headline: "Emisi\xF3n r\xE9cord: \xABes para cubrir el d\xE9ficit\xBB, explican|El

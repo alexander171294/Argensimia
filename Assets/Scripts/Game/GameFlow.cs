@@ -56,6 +56,7 @@ namespace Argensimia
         Vector3 gamePos, gameLook;
         Transform heli;
         Spin rotor;
+        public float RotorSpeed => rotor ? rotor.speed : 0; // el audio del helicóptero sigue al rotor
         Vector3 padPos;
         Quaternion padRot;
         Transform crowd;
@@ -89,13 +90,27 @@ namespace Argensimia
             blur = 1;
             BuildCrowd(false);
             SetupHidrante();
+            // balizas de los patrulleros de la barricada (desfasadas para que no titilen juntas)
+            SirenLights.Add(GameObject.Find("Helipuerto/MenuPatrullero1"), 0.13f);
+            SirenLights.Add(GameObject.Find("Helipuerto/MenuPatrullero2"), 0.61f);
         }
 
         void Start()
         {
             if (state == State.Playing) return;
             menu = MenuScreen.Create(NewGame);
-            if (autoStart) { autoStart = false; menu.Show(false, 0); StartCoroutine(ToGame()); }
+            menu.Show(false, 0);
+            StartCoroutine(Boot());
+        }
+
+        // Pantalla de carga hasta que el juego deja de trabarse (shaders, texturas, audio); recién ahí entra el menú
+        // con la cinta sellada, o arranca el paneo si venimos de NUEVA PARTIDA tras recargar la escena.
+        IEnumerator Boot()
+        {
+            var load = LoadingScreen.Create();
+            yield return LoadingScreen.WaitStable();
+            yield return load.FadeOut(0.45f);
+            if (autoStart) { autoStart = false; StartCoroutine(ToGame()); }
             else menu.Show(true, 0.6f, "¡Defendé la Casa Rosada!");
         }
 
@@ -134,6 +149,7 @@ namespace Argensimia
             played = true;
             Time.timeScale = 1;
             var gs = GameState.I;
+            TakeScore();
             string sub = win
                 ? "<color=#f2c14e>¡COMPLETASTE EL PERÍODO!</color>\nPopularidad final: " + Mathf.RoundToInt(gs ? gs.popularity : 0) + "%"
                 : "<color=#ff7a70>PERDISTE LA GOBERNABILIDAD</color>\nLa Plaza quedó en manos de la calle en el mandato " + (gs ? gs.mandate : 0);
@@ -146,12 +162,22 @@ namespace Argensimia
             played = true;
             Time.timeScale = 1;
             var gs = GameState.I;
+            TakeScore();
             StartCoroutine(ToMenuRoutine("<color=#ff7a70>EL PRESIDENTE RENUNCIÓ</color>\nSe fue en helicóptero en el mandato " + (gs ? gs.mandate : 0)));
             if (WaveDirector.I) WaveDirector.I.Lose(); // corta la oleada; el HUD no muestra nada porque ya no está en partida
         }
 
+        int lastScore, lastMandates;
+        void TakeScore()
+        {
+            var gs = GameState.I;
+            lastScore = gs ? gs.Score : 0;
+            lastMandates = gs ? gs.MandatesSurvived : 0;
+        }
+
         IEnumerator ToMenuRoutine(string sub)
         {
+            sub += "  ·  Puntaje <color=#f2c14e>" + GameState.Money(lastScore) + "</color>";
             state = State.ToMenu;
             var hud = FindAnyObjectByType<GameHud>();
             if (hud) hud.SetHudVisible(false, 0.5f);
@@ -164,6 +190,7 @@ namespace Argensimia
             while (!hovering) yield return null;
             state = State.Menu;
             menu.Show(true, 0.6f, sub);
+            menu.OfferScore(lastScore, lastMandates);
         }
 
         IEnumerator ToGame()
@@ -312,6 +339,7 @@ namespace Argensimia
         IEnumerator TakeOff()
         {
             hovering = false;
+            Snd.Ui("heli_start", 1, 1, 1f);
             float t = 0;
             while (t < spinUp)
             {

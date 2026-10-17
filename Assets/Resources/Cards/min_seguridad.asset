@@ -16,10 +16,10 @@ MonoBehaviour:
   title: Min. Seguridad
   kind: 2
   cost: 2230
-  description: "Ministro pasivo: la polic\xEDa tiene +20% de gobernabilidad y al
-    cerrar cada mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta:
-    -1% de popularidad por mandato."
-  art: {fileID: 0}
+  description: "Ministro pasivo: la polic\xEDa tiene +20% de vida y al cerrar cada
+    mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta: -1% de popularidad
+    por mandato."
+  art: {fileID: 21300000, guid: 23421e1a0900f4cd0b112781f25e6d4f, type: 3}
   color: {r: 0.16862746, g: 0.2901961, b: 0.5411765, a: 1}
   copies: 0
   headline: "Asume la nueva ministra de Seguridad: \xABel que las hace, las paga\xBB|Nueva

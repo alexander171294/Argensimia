@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1850
   description: "Reparto de fondos. Sube la popularidad: menos gente en la calle y
     columnas m\xE1s tranquilas."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: b357cfb39e9b14aae995b79dea581970, type: 3}
   color: {r: 0.5411765, g: 0.24705882, b: 0.76862746, a: 1}
   copies: 1
   headline: "Lluvia de bonos: \xABes para reactivar el consumo\xBB|El Gobierno reparte

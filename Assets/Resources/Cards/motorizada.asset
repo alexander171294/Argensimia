@@ -16,11 +16,10 @@ MonoBehaviour:
   title: Motorizada
   kind: 0
   cost: 2230
-  description: 'Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av.
-    de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot
-    ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.
-    Soltala sobre una igual: NV 2 y 3.'
-  art: {fileID: 0}
+  description: "Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea,
+    empuja 3 m y aturde 1 s. En el slot ya aparece otra recargando, que tambi\xE9n
+    frena y recibe golpes."
+  art: {fileID: 21300000, guid: c43857332e370424fae289e2eddc8fbe, type: 3}
   color: {r: 0.14117648, g: 0.2509804, b: 0.56078434, a: 1}
   copies: 0
   headline: "Irrumpe la polic\xEDa motorizada en la Plaza|Las motos de la Federal

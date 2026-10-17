@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1200
   description: 'Medio aguinaldo extra para todos: sube mucho la popularidad y baja
     el ingreso por segundo.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: bd212b654b25a4759a92c7bd5357c047, type: 3}
   color: {r: 0.76862746, g: 0.53333336, b: 0.24705882, a: 1}
   copies: 0
   headline: 'Anuncian un aguinaldo extra: festejos en los barrios|Medio aguinaldo

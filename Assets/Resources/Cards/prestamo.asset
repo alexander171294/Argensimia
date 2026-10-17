@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 0
   description: "Entran d\xF3lares ya, a cambio de ajuste: baja el ingreso por segundo
     durante las oleadas."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 4ce7f56a6a7e14f6d81905fea9333c11, type: 3}
   color: {r: 0.8509804, g: 0.5882353, b: 0.10980392, a: 1}
   copies: 0
   headline: "Lleg\xF3 el desembolso del Fondo: \xABes el \xFAltimo\xBB, aseguran|Acuerdo

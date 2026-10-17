@@ -19,7 +19,7 @@ MonoBehaviour:
   description: "Ministro pasivo: concentra Econom\xEDa, Producci\xF3n y Hacienda.
     +$50/s en las oleadas y +$500 de sueldo por mandato, pero el ajuste resta 3%
     de popularidad por mandato."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 6555b920d10274e888967027956d6229, type: 3}
   color: {r: 0.7882353, g: 0.63529414, b: 0.15294118, a: 1}
   copies: 0
   headline: "Asume el Super Ministro: \xABvamos a ordenar la macro\xBB|Super Ministro:

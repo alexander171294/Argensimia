@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 // Slots policiales sobre los 4 carriles horizontales (BlenderSrc/plaza_layout.json → lanes).
-// Visual: "losa hundida" semitransparente sobre el pavimento: piso oscurecido, pared este en sombra,
+// Visual: "losa hundida" circular semitransparente sobre el pavimento: piso oscurecido, pared este en sombra,
 // pared oeste iluminada (sol desde el este) y cordón claro. Más un brillo dorado para el modo colocar.
 public static class SlotBuilder
 {
@@ -213,8 +213,10 @@ public static class SlotBuilder
         const float ppm = 64f;
         float w = glow ? SlotLen + 0.7f : SlotLen + 0.12f, d = glow ? SlotWid + 0.7f : SlotWid + 0.12f;
         int tw = Mathf.RoundToInt(w * ppm), th = Mathf.RoundToInt(d * ppm);
-        var half = new Vector2(SlotLen, SlotWid) * 0.5f;
-        const float rim = 0.16f, rOut = 0.42f;
+        // círculo de diámetro = ancho del slot (rectángulo redondeado con radio = medio lado); el quad sigue siendo SlotLen × SlotWid
+        float rOut = SlotWid * 0.5f;
+        var half = new Vector2(rOut, rOut);
+        const float rim = 0.16f;
         var inHalf = half - Vector2.one * rim;
         var dark = new Color(0.22f, 0.12f, 0.07f);
         var light = new Color(1f, 0.95f, 0.86f);

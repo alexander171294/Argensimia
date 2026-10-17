@@ -55,6 +55,9 @@ namespace Argensimia
         Transform model;
 
         float Mul => CardDef.LevelMul(level);
+        float Rate => CardDef.LevelRate(level);
+        float Range => def.stats.range + def.LevelRange(level);
+        static readonly List<Enemy> hits = new List<Enemy>();
 
         public static Defense Place(CardDef def, int level, PoliceSlots.Slot s, PoliceSlots.Slot s2)
         {
@@ -69,8 +72,7 @@ namespace Argensimia
             d.def = def; d.level = level; d.lane = s.lane; d.x = c.x;
             d.HalfLen = s2 != null ? Mathf.Abs(s2.position.x - s.position.x) * 0.5f + 2.7f : 2.7f;
             d.faceOff = d.HalfLen;
-            bool hpMain = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Infanteria;
-            d.baseHp = def.stats.hp * CardDef.LevelHp(level) * (hpMain ? d.Mul : 1);
+            d.baseHp = def.stats.hp * CardDef.LevelHp(level);
             d.maxHp = d.hp = d.baseHp * (GameState.I ? GameState.I.DefenseHpMul : 1);
             d.cycleT = def.cycleOn;
             d.tank = def.cycleOn;
@@ -108,6 +110,13 @@ namespace Argensimia
             }
             BuildBadge();
             StartCoroutine(PopIn());
+            PlaceSound();
+        }
+
+        void PlaceSound()
+        {
+            var p = transform.position;
+            Snd.At("place", p, 1, 0.05f, 0.04f); // "toc" de pieza apoyada
         }
 
         // Modelo según el nivel: cada nivel es más robusto (más agentes, doble vallado, blindaje).
@@ -303,8 +312,7 @@ namespace Argensimia
             if (!CanUpgrade) return;
             float oldMax = maxHp;
             level++;
-            bool hpMain = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Infanteria;
-            baseHp = def.stats.hp * CardDef.LevelHp(level) * (hpMain ? Mul : 1);
+            baseHp = def.stats.hp * CardDef.LevelHp(level);
             maxHp = baseHp * (GameState.I ? GameState.I.DefenseHpMul : 1);
             hp = Mathf.Min(maxHp, hp + Mathf.Max(0, maxHp - oldMax));
             vallas.Clear(); vallaPos.Clear(); vallaRot.Clear(); shooters.Clear();
@@ -316,6 +324,7 @@ namespace Argensimia
             bar.Set(hp / maxHp);
             StartCoroutine(PopIn());
             Burst(new Color(1f, 0.8f, 0.3f, 0.95f), 46, 7f);
+            Snd.Ui("upgrade");
         }
 
         // Curación del cierre de mandato (o de cartas): suma frac de la vida máxima, sin pasarse. Devuelve cuántas curó.
@@ -330,6 +339,7 @@ namespace Argensimia
                 d.Burst(new Color(0.45f, 1f, 0.45f, 0.85f), 22, 3.5f);
                 n++;
             }
+            if (n > 0) Snd.Ui("heal", 1, 1, 0.5f);
             return n;
         }
 
@@ -346,7 +356,9 @@ namespace Argensimia
 
         GameObject hint;
         Transform hintDisc, hintArrow;
+        readonly List<Material> hintMats = new List<Material>();
         bool hintHover;
+        public static bool AnyHint { get { foreach (var d in All) if (d.hint) return true; return false; } }
 
         public static void ShowHints(CardDef def, bool on)
         {
@@ -361,7 +373,13 @@ namespace Argensimia
         void SetHint(bool on)
         {
             if (on == (hint != null)) return;
-            if (!on) { Destroy(hint); hint = null; hintHover = false; return; }
+            if (!on)
+            {
+                Destroy(hint); hint = null; hintHover = false;
+                foreach (var m in hintMats) if (m) Destroy(m);
+                hintMats.Clear();
+                return;
+            }
             hint = new GameObject("UpgradeHint");
             hint.transform.SetParent(transform, false);
             var gold = new Color(1f, 0.8f, 0.25f);
@@ -370,6 +388,13 @@ namespace Argensimia
             hintArrow.SetParent(hint.transform, false);
             FxKit.Prim(PrimitiveType.Cube, hintArrow, new Vector3(0, 0.75f, 0), new Vector3(0.34f, 1.0f, 0.1f), gold);
             FxKit.Prim(PrimitiveType.Cube, hintArrow, new Vector3(0, 0.2f, 0), new Vector3(0.62f, 0.62f, 0.1f), gold, Quaternion.Euler(0, 0, 45));
+            // material propio con emisión para que titile
+            foreach (var r in hint.GetComponentsInChildren<Renderer>())
+            {
+                var m = r.material;
+                m.EnableKeyword("_EMISSION");
+                hintMats.Add(m);
+            }
         }
 
         void LateUpdate()
@@ -388,6 +413,10 @@ namespace Argensimia
                 hintArrow.localPosition = Vector3.up * (BarHeight + 1.9f + w * 0.5f);
                 if (cam) hintArrow.rotation = Quaternion.Euler(0, cam.transform.eulerAngles.y, 0);
                 hintArrow.localScale = Vector3.one * (hintHover ? 1.35f : 1f);
+                // titila: destello dorado fuerte ↔ apagado, ~2,5 veces por segundo
+                float blink = Mathf.Pow(0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 16f), 2f);
+                var em = new Color(1f, 0.75f, 0.2f) * Mathf.Lerp(0.05f, hintHover ? 3.2f : 2.4f, blink);
+                foreach (var m in hintMats) if (m) m.SetColor("_EmissionColor", em);
             }
         }
 
@@ -559,8 +588,10 @@ namespace Argensimia
         void Melee()
         {
             if (cd > 0) return;
-            Enemy t = null;
-            foreach (var e in blocking) if (e && !e.Dead) { t = e; break; }
+            // pega a 1 / 2 / 3 manifestantes por golpe según el nivel
+            hits.Clear();
+            foreach (var e in blocking) if (e && !e.Dead && hits.Count < level) hits.Add(e);
+            Enemy t = hits.Count > 0 ? hits[0] : null;
             if (!t)
             {
                 float best = def.stats.range + 0.6f;
@@ -572,8 +603,10 @@ namespace Argensimia
                 }
             }
             if (!t) return;
-            cd = 1f / Mathf.Max(0.05f, def.stats.rate);
-            t.TakeDamage(def.stats.damage);
+            if (hits.Count == 0) hits.Add(t);
+            cd = 1f / Mathf.Max(0.05f, def.stats.rate * Rate);
+            Snd.At("baton", t.transform.position, 1, 0.07f, 0.12f);
+            foreach (var e in hits.ToArray()) e.TakeDamage(def.stats.damage * Mul);
             punch = 1;
         }
 
@@ -581,7 +614,7 @@ namespace Argensimia
         void Shoot()
         {
             if (cd > 0 || shooters.Count == 0) return;
-            Candidates(def.stats.range, false, tmp);
+            Candidates(Range, false, tmp);
             Enemy t = null;
             float best = float.MaxValue;
             foreach (var e in tmp)
@@ -592,10 +625,11 @@ namespace Argensimia
                 if (score < best) { best = score; t = e; }
             }
             if (!t) return;
-            cd = 1f / Mathf.Max(0.05f, def.stats.rate);
+            cd = 1f / Mathf.Max(0.05f, def.stats.rate * Rate);
             var s = shooters[Random.Range(0, shooters.Count)];
             if (!s) return;
             RubberShot.Fire(s.transform.TransformPoint(GunMuzzle), t, def.stats.damage * Mul);
+            Snd.At("shotgun", s.transform.position, 1, 0.04f, 0.1f);
             s.Kick();
         }
 
@@ -603,7 +637,7 @@ namespace Argensimia
         void Gas()
         {
             if (cd > 0) return;
-            Candidates(def.stats.range, true, tmp);
+            Candidates(Range, true, tmp);
             if (tmp.Count == 0) return;
             var lanesWith = new List<int>();
             foreach (var e in tmp) if (!lanesWith.Contains(e.lane)) lanesWith.Add(e.lane);
@@ -619,11 +653,12 @@ namespace Argensimia
                 if (n > bestN) { bestN = n; t = e; }
             }
             if (!t) return;
-            cd = 1f / Mathf.Max(0.05f, def.stats.rate);
+            cd = 1f / Mathf.Max(0.05f, def.stats.rate * Rate);
             var s = shooters.Count > 0 ? shooters[Random.Range(0, shooters.Count)] : null;
             Vector3 from = s ? s.transform.TransformPoint(new Vector3(0.16f, 1.55f, 0.55f)) : transform.position + Vector3.up * 2.5f;
-            GasCloud.Throw(from, t.transform.position, def.stats.area, def.stats.damage * Mul,
+            GasCloud.Throw(from, t.transform.position, def.stats.area * (1 + 0.2f * (level - 1)), def.stats.damage * Mul,
                 def.slow, Mathf.Max(def.slowTime, level >= 3 ? 5 : 3));
+            Snd.At("gas_launch", from, 1, 0.1f);
             if (s) s.Kick();
             punch = 1;
         }
@@ -640,6 +675,8 @@ namespace Argensimia
             }
             if (!t) return;
             cd = 1f / Mathf.Max(0.05f, def.stats.rate * Mul);
+            Snd.At("cuffs", t.transform.position, 1, 0.1f);
+            Snd.At("whistle_short", transform.position, 0.6f, 0.6f);
             t.Capture();
             punch = 1;
         }
@@ -650,8 +687,8 @@ namespace Argensimia
         // lo empuja y lo frena. El tanque (cycleOn s) se gasta solo mientras moja; vacío, recarga cycleOff s.
         void Water(float dt)
         {
-            if (reloading) { reload -= dt; if (reload <= 0) { reloading = false; tank = def.cycleOn; } }
-            Candidates(def.stats.range, true, tmp);
+            if (reloading) { reload -= dt; if (reload <= 0) { reloading = false; tank = def.cycleOn * Rate; } }
+            Candidates(Range, true, tmp);
             Enemy t = null;
             float bd = float.MaxValue;
             foreach (var e in tmp)
@@ -677,6 +714,7 @@ namespace Argensimia
             bool on = !reloading && aimed;
             var em = jet.emission;
             if (em.enabled != on) em.enabled = on;
+            Snd.Loop(this, "loop_water", on);
             if (!on) return;
             tank -= dt;
             if (tank <= 0) { reloading = true; reload = def.cycleOff; }
@@ -685,7 +723,7 @@ namespace Argensimia
             t.TakeDamage(def.stats.damage * Mul * dt);
             t.Wet(1.5f);
             t.Slow(def.slow, 0.5f);
-            t.Push(def.push * dt);
+            t.Push(def.push * (1 + 0.25f * (level - 1)) * dt);
         }
 
         // La motorizada nunca deja el slot vacío: cuando una sale a los porrazos, en el slot ya aparece otra recargando
@@ -702,6 +740,7 @@ namespace Argensimia
             runner.SetParent(null, true);
             runner.localScale = Vector3.one;
             MotoRunner.Go(runner.gameObject, def, level, lane, x);
+            Snd.At("moto_pass", runner.position, 1, 0.2f);
             BuildMotos();
             moto.localScale = Vector3.zero;
             motoAppear = 0;
@@ -714,6 +753,7 @@ namespace Argensimia
             hp -= a;
             punch = Mathf.Max(punch, 0.5f);
             if (def.defense == DefenseKind.Vallado) shake = Mathf.Min(1, shake + 0.65f);
+            if (a >= 1) Snd.At(def.defense == DefenseKind.Vallado ? "fence_clang" : "defense_hit", transform.position, 1, 0.12f, 0.12f);
             bar.Set(hp / maxHp);
             if (hp <= 0) Break();
         }
@@ -724,6 +764,9 @@ namespace Argensimia
             All.Remove(this);
             blocking.Clear();
             if (def.defense == DefenseKind.Vallado) Headlines.Say("fence_break", 10f); else Headlines.Say("defense_break", 4f, def.title.ToLowerInvariant());
+            // vallado y camión se desarman; los agentes caen
+            bool thing = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Hidrante;
+            Snd.At(thing ? "break_crash" : "unit_down", transform.position, 1, 0.1f, 0.08f);
             StartCoroutine(Fall());
         }
 
@@ -766,6 +809,7 @@ namespace Argensimia
             transform.position = Vector3.MoveTowards(transform.position, aim, 55f * Time.deltaTime);
             if ((transform.position - aim).sqrMagnitude > 0.05f) return;
             if (target && !target.Dead) target.TakeDamage(dmg);
+            Snd.At("rubber_hit", aim, 1, 0.04f, 0.15f);
             var fx = new GameObject("GomaHit");
             fx.transform.position = aim;
             var ps = FxKit.Particles(fx.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.smoke, new Color(0.9f, 0.85f, 0.75f, 0.7f), 2, 0.35f, 0.25f, 0.5f, 0, 70, 0, 0.1f, 1.6f);
@@ -810,6 +854,7 @@ namespace Argensimia
                 if (travel < 1) return;
                 landed = true;
                 transform.position = to;
+                Snd.At("gas_hiss", to, 1, 0.1f);
                 if (can) Destroy(can.gameObject);
                 if (trail)
                 {
@@ -992,6 +1037,7 @@ namespace Argensimia
                 e.TakeDamage(def.stats.damage * CardDef.LevelMul(level));
                 e.Push(def.push);
                 e.Stun(def.stun);
+                Snd.At("baton", e.transform.position, 1, 0.06f, 0.1f, 0.85f);
             }
             if (x >= endX) Destroy(gameObject);
         }

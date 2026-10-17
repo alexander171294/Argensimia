@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 0
   description: 'DNU por la caja: entra plata, pero se pierde gobernabilidad (nunca
     te deja en 0).'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: bc5a0b474fa1240e9b3d214f0b0aa5d9, type: 3}
   color: {r: 0.5411765, g: 0.3529412, b: 0.16862746, a: 1}
   copies: 0
   headline: "Decretazo: el Congreso denuncia \xABavasallamiento institucional\xBB|El

@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 0
   description: "La AFIP sale a recaudar. Entra plata, pero la calle se calienta y
     las columnas llegan m\xE1s enojadas."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: 45bd27f34e3894990a2493ed580a987b, type: 3}
   color: {r: 0.84705883, g: 0.27058825, b: 0.18431373, a: 1}
   copies: 1
   headline: "AFIP anuncia un nuevo impuesto \xABtransitorio\xBB|Nuevo tributo: \xABes

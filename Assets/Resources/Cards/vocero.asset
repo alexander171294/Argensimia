@@ -18,7 +18,7 @@ MonoBehaviour:
   cost: 1300
   description: "Ministro pasivo: el vocero presidencial da conferencias todos los
     d\xEDas. +2% de popularidad por mandato; la pauta oficial cuesta $8/s."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: e2f5e7da1f9ca46b9b310de61c56aa21, type: 3}
   color: {r: 0.72156864, g: 0.2784314, b: 0.47843137, a: 1}
   copies: 0
   headline: "El vocero presidencial: \xABest\xE1 todo bajo control\xBB|Conferencia

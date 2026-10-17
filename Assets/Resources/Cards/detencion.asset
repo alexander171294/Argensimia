@@ -17,9 +17,8 @@ MonoBehaviour:
   kind: 0
   cost: 1760
   description: "Brigada de detenci\xF3n: cada 4 s saca de juego a un manifestante
-    cercano. Prioriza a los especiales; no puede con columnas. Soltala sobre una
-    igual: NV 2 y 3."
-  art: {fileID: 0}
+    cercano. Prioriza a los especiales; no puede con columnas."
+  art: {fileID: 21300000, guid: 09ed0b58e4d7d4dbebb16fa3d9d611bb, type: 3}
   color: {r: 0.29411766, g: 0.30980393, b: 0.61960787, a: 1}
   copies: 1
   headline: "Detenciones en la Plaza: la oposici\xF3n pide explicaciones|Despliegan

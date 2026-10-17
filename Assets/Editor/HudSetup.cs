@@ -27,7 +27,10 @@ public static class HudSetup
         Directory.CreateDirectory(UnitsDir);
         Directory.CreateDirectory(FxDir);
         string r = MakeFont("Assets/UI/Fonts/Roboto-Black.ttf", ResUi + "Roboto-Black SDF.asset")
-                 + MakeFont("Assets/UI/Fonts/Roboto-Bold.ttf", ResUi + "Roboto-Bold SDF.asset");
+                 + MakeFont("Assets/UI/Fonts/Roboto-Bold.ttf", ResUi + "Roboto-Bold SDF.asset")
+                 + MakeFont("Assets/UI/Fonts/LuckiestGuy-Regular.ttf", ResUi + "LuckiestGuy SDF.asset")   // logo (Apache 2.0)
+                 + MakeFont("Assets/UI/Fonts/LilitaOne-Regular.ttf", ResUi + "LilitaOne SDF.asset")       // títulos y botones (OFL)
+                 + LogoMaterials();
         AssetDatabase.DeleteAsset(CardsDir + "refuerzo.asset"); // reemplazada por Infantería con escudos
         AssetDatabase.DeleteAsset(CardsDir + "caballeria.asset"); // reemplazada por Motorizada
         int n = Cards();
@@ -53,11 +56,11 @@ public static class HudSetup
             "Despliegan la Infantería frente a la Casa Rosada",
             c => { c.defense = DefenseKind.Infanteria; c.stats = S(600, 8, 1, 1.5f); });
         n += Card("balas_goma", "Escopeteros", CardKind.Colocar, 1380, "#c0612b", 2, Rarity.PocoComun,
-            "Infantería sin escudo con escopetas antitumulto. Disparan balas de goma hasta 2 casilleros adelante en su carril: desde atrás de un vallado le tiran primero a los que lo están golpeando. También frenan a todos los que llegan.",
+            "Infantería sin escudo con escopetas antitumulto. Disparan balas de goma en su carril; desde atrás de un vallado le tiran primero a los que lo golpean. También frenan a los que llegan.",
             "Balas de goma en la Plaza: hay heridos y la oposición pide un informe",
             c => { c.defense = DefenseKind.BalasGoma; c.stats = S(400, 9, 1.2f, 14); });
         n += Card("lanzagases", "Lanzagases", CardKind.Colocar, 1620, "#6d7d2e", 1, Rarity.PocoComun,
-            "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros adelante, al azar en su carril o en los de al lado, al grupo más denso: daño por segundo en un área y -40% de velocidad.",
+            "Un agente con lanzagranadas: tira gas al grupo más denso, en su carril o los de al lado. Daño por segundo en área y -40% de velocidad.",
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
             c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
         n += Card("detencion", "Detenciones", CardKind.Colocar, 1760, "#4b4f9e", 1, Rarity.PocoComun,
@@ -65,11 +68,11 @@ public static class HudSetup
             "Detenciones en la Plaza: la oposición pide explicaciones",
             c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 2.5f); });
         n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 0, Rarity.Rara,
-            "Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.",
+            "Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s. En el slot ya aparece otra recargando, que también frena y recibe golpes.",
             "Irrumpe la policía motorizada en la Plaza",
             c => { c.defense = DefenseKind.Motorizada; c.stats = S(300, 40, 0, 0); c.push = 3; c.stun = 1; c.cycleOff = 12; });
         n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 0, Rarity.Rara,
-            "Cañón de agua de hasta 4 casilleros adelante. Apunta solo al manifestante más cercano, en su carril o en los de al lado: lo moja, lo empuja 2 m/s y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
+            "Cañón de agua que apunta al más cercano, en su carril o los de al lado: lo moja, lo empuja y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
             "Hidrantes en la Plaza: denuncian represión",
             c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
@@ -101,7 +104,7 @@ public static class HudSetup
             "Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 2% de popularidad.",
             "Asume el nuevo ministro de Economía: «no hay plata», advierte", c => { c.incomeDelta = 25; c.popPerMandate = -2; });
         n += Card("min_seguridad", "Min. Seguridad", CardKind.Ministro, 2230, "#2b4a8a", 0, Rarity.Rara,
-            "Ministro pasivo: la policía tiene +20% de gobernabilidad y al cerrar cada mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta: -1% de popularidad por mandato.",
+            "Ministro pasivo: la policía tiene +20% de vida y al cerrar cada mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta: -1% de popularidad por mandato.",
             "Asume la nueva ministra de Seguridad: «el que las hace, las paga»", c => { c.defenseHpBonus = 0.2f; c.healBonus = 0.05f; c.popPerMandate = -1; });
         n += Card("min_desarrollo", "Min. Desarrollo", CardKind.Ministro, 2470, "#3f9a7a", 0, Rarity.Rara,
             "Ministro pasivo de Desarrollo Social: cada mandato suma 3% de popularidad.",
@@ -123,9 +126,9 @@ public static class HudSetup
         n += Card("decretazo", "Decretazo", CardKind.Efecto, 0, "#8a5a2b", 0, Rarity.PocoComun,
             "DNU por la caja: entra plata, pero se pierde gobernabilidad (nunca te deja en 0).",
             "Decretazo: el Congreso denuncia «avasallamiento institucional»", c => { c.moneyDelta = 3500; c.govDelta = -2; });
-        n += Card("refuerzo_federal", "Refuerzo federal", CardKind.Efecto, 2800, "#2c6a5a", 0, Rarity.Rara,
-            "Llegan fuerzas federales: +3 de gobernabilidad y +3 al máximo. Las provincias se quejan.",
-            "Desembarcan fuerzas federales en la Capital", c => { c.govDelta = 3; c.maxGovDelta = 3; c.popularityDelta = -5; });
+        n += Card("refuerzo_federal", "Refuerzo militar", CardKind.Efecto, 2800, "#2c6a5a", 0, Rarity.Rara,
+            "Llegan tropas militares a la Capital: +3 de gobernabilidad y +3 al máximo. A la gente no le gusta nada.",
+            "Tropas militares desembarcan en la Capital", c => { c.govDelta = 3; c.maxGovDelta = 3; c.popularityDelta = -5; });
         n += Card("privatizacion", "Privatización", CardKind.Efecto, 0, "#6a4a8a", 0, Rarity.Rara,
             "Se vende una empresa del Estado: mucha plata de golpe, pero se pierde una fuente de ingresos y la calle se enoja.",
             "Venden la empresa estatal: «es para sanear las cuentas»", c => { c.moneyDelta = 7000; c.popularityDelta = -10; c.incomeDelta = -10; });
@@ -180,7 +183,7 @@ public static class HudSetup
         ["aguinaldo"] = "Medio aguinaldo extra: largas filas en los cajeros|Festejo en los barrios por el aguinaldo extra",
         ["operativo"] = "Llegan efectivos de refresco a la Plaza|Cambio de guardia sorpresa: la policía se reorganiza",
         ["decretazo"] = "El Presidente firma un DNU de madrugada|Por decreto: el Gobierno saltea al Congreso",
-        ["refuerzo_federal"] = "Gendarmería y Prefectura llegan a la Capital|Fuerzas federales toman posiciones en la Plaza",
+        ["refuerzo_federal"] = "Camiones militares entran a la Capital|Las tropas toman posiciones alrededor de la Plaza",
         ["privatizacion"] = "Venden la joya de la abuela: privatizan otra empresa|Protestas de trabajadores por la privatización",
         ["acuerdo_cgt"] = "Pacto social: la CGT levanta la medida de fuerza|Foto en Casa Rosada con la cúpula de la CGT",
         ["min_economia"] = "Nuevo ministro de Economía: el dólar reacciona|Juró el ministro de Economía: «hay que ordenar las cuentas»",
@@ -216,7 +219,7 @@ public static class HudSetup
         c.stats = default; c.maxBlock = 0; c.slow = 0; c.slowTime = 0; c.stun = 0; c.push = 0; c.cycleOn = 0; c.cycleOff = 0; c.slotSize = 1;
         ColorUtility.TryParseHtmlString(hex, out c.color);
         setup(c);
-        if (kind == CardKind.Colocar) c.description += " Soltala sobre una igual: NV 2 y 3.";
+        
         c.art = art;
         if (isNew) AssetDatabase.CreateAsset(c, path);
         EditorUtility.SetDirty(c);
@@ -240,7 +243,7 @@ public static class HudSetup
         n += Unit("mortero", "Mortero", UnitKind.Mortero, 4, S(35, 25, 0.25f, 14, 2, 1.0f), 3, 3, 0.8f, true,
             u => { u.shirt = 0; u.hair = 2; u.prop = "mortar"; u.scale = 1.12f; });
         n += Unit("columna", "Columna organizada", UnitKind.Columna, 6, S(600, 10, 1, 1, 0, 0.7f), 5, 4, 0.5f, true,
-            u => { u.auraSpeed = 0.2f; u.auraRadius = 4; u.pushResist = 0.5f; u.members = 6; u.prop = "banner"; });
+            u => { u.auraSpeed = 0.2f; u.auraRadius = 4; u.pushResist = 0.5f; u.members = 5; u.prop = "banner"; }); // dos filas: 3 + 2
         return n;
     }
 
@@ -348,6 +351,57 @@ public static class HudSetup
             imp.SaveAndReimport();
         }
         return AssetDatabase.LoadAssetAtPath<Texture2D>(p);
+    }
+
+    // Materiales del logo como assets (así el shader "TextMeshPro/Distance Field", que soporta textura de cara,
+    // entra al build): LogoMat (banana) y LogoFlagMat (bandera en la cara de cada letra, textura FlagFace).
+    static string LogoMaterials()
+    {
+        AssetDatabase.Refresh();
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ResUi + "LuckiestGuy SDF.asset");
+        var shader = Shader.Find("TextMeshPro/Distance Field");
+        if (!font || !shader) return "FALTA logo ";
+        // textura de la bandera: celeste / blanco / celeste
+        string texPath = ResUi + "FlagFace.png";
+        var tex = new Texture2D(4, 96, TextureFormat.RGBA32, false);
+        var celeste = new Color(0x74 / 255f, 0xac / 255f, 0xdf / 255f);
+        for (int y = 0; y < 96; y++) { float v = (y + 0.5f) / 96; var c = v > 0.34f && v < 0.66f ? Color.white : celeste; for (int x = 0; x < 4; x++) tex.SetPixel(x, y, c); }
+        tex.Apply();
+        File.WriteAllBytes(texPath, tex.EncodeToPNG());
+        Object.DestroyImmediate(tex);
+        AssetDatabase.ImportAsset(texPath);
+        var ti = (TextureImporter)AssetImporter.GetAtPath(texPath);
+        ti.mipmapEnabled = false; ti.wrapMode = TextureWrapMode.Clamp; ti.textureCompression = TextureImporterCompression.Uncompressed; ti.npotScale = TextureImporterNPOTScale.None;
+        ti.SaveAndReimport();
+        var flag = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
+
+        Material Make(string name, Color outline, Texture2D face)
+        {
+            string path = ResUi + name + ".mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (!m) { m = new Material(font.material); AssetDatabase.CreateAsset(m, path); }
+            m.shader = shader;
+            m.SetTexture(ShaderUtilities.ID_MainTex, font.atlasTexture);
+            m.SetFloat(ShaderUtilities.ID_GradientScale, font.atlasPadding + 1);
+            m.SetFloat(ShaderUtilities.ID_TextureWidth, font.atlasWidth);
+            m.SetFloat(ShaderUtilities.ID_TextureHeight, font.atlasHeight);
+            m.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            m.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.22f);
+            m.SetColor(ShaderUtilities.ID_OutlineColor, outline);
+            m.SetFloat(ShaderUtilities.ID_FaceDilate, 0.1f);
+            m.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+            m.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0.05f, 0.02f, 0.08f, 0.85f));
+            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.35f);
+            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.9f);
+            m.SetFloat(ShaderUtilities.ID_UnderlayDilate, 0.25f);
+            m.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.05f);
+            m.SetTexture(ShaderUtilities.ID_FaceTex, face);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+        Make("LogoMat", new Color(0.22f, 0.08f, 0.04f, 1), null);
+        Make("LogoFlagMat", new Color(0.05f, 0.11f, 0.28f, 1), flag);
+        return "logo ";
     }
 
     static string MakeFont(string ttf, string path)

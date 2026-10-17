@@ -17,7 +17,7 @@ MonoBehaviour:
   kind: 2
   cost: 2470
   description: 'Ministro pasivo de Desarrollo Social: cada mandato suma 3% de popularidad.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: b4a6b80e1a3c140a5941a0515bf65bda, type: 3}
   color: {r: 0.24705882, g: 0.6039216, b: 0.47843137, a: 1}
   copies: 0
   headline: "Desarrollo Social anuncia refuerzo de planes|Asume Desarrollo Social:

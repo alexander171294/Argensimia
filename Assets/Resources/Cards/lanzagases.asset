@@ -16,11 +16,9 @@ MonoBehaviour:
   title: Lanzagases
   kind: 0
   cost: 1620
-  description: "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros
-    adelante, al azar en su carril o en los de al lado, al grupo m\xE1s denso: da\xF1o
-    por segundo en un \xE1rea y -40% de velocidad. Soltala sobre una igual: NV 2
-    y 3."
-  art: {fileID: 0}
+  description: "Un agente con lanzagranadas: tira gas al grupo m\xE1s denso, en su
+    carril o los de al lado. Da\xF1o por segundo en \xE1rea y -40% de velocidad."
+  art: {fileID: 21300000, guid: b7e1f2492e8374c6b8361946650e2cab, type: 3}
   color: {r: 0.42745098, g: 0.49019608, b: 0.18039216, a: 1}
   copies: 1
   headline: "Gases en la Plaza: vecinos denuncian ardor en los ojos|Nube de gas sobre

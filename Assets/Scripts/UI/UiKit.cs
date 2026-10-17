@@ -24,6 +24,7 @@ namespace Argensimia.UI
         public Transform visual;
         public float pressScale = 0.93f;
         public bool interactable = true;
+        public string sound = "ui_tap"; // null = sin sonido
         float cur = 1f, goal = 1f;
 
         public void OnPointerDown(PointerEventData e) { if (interactable) goal = pressScale; }
@@ -32,6 +33,7 @@ namespace Argensimia.UI
         public void OnPointerClick(PointerEventData e)
         {
             if (!interactable) return;
+            if (!string.IsNullOrEmpty(sound)) Snd.Ui(sound);
             onTap?.Invoke();
             onTapAt?.Invoke(e.position);
         }
@@ -41,6 +43,38 @@ namespace Argensimia.UI
             if (!visual || Mathf.Abs(goal - cur) < 0.0005f) return;
             cur = Mathf.Lerp(cur, goal, 1f - Mathf.Exp(-30f * Time.unscaledDeltaTime));
             visual.localScale = Vector3.one * cur;
+        }
+    }
+
+    // Ondita del logo: cada letra sube y baja con un leve desfase y un pequeño giro (TMP vertex animation).
+    public class LogoWave : MonoBehaviour
+    {
+        public float amp = 7f, speed = 2.2f, tilt = 3f;
+        public int offset; // índice de la primera letra dentro del logo completo (la onda sigue de un texto al otro)
+        TMP_Text t;
+        void Awake() { t = GetComponent<TMP_Text>(); }
+        void LateUpdate()
+        {
+            if (!t) return;
+            t.ForceMeshUpdate();
+            var info = t.textInfo;
+            for (int i = 0; i < info.characterCount; i++)
+            {
+                var ch = info.characterInfo[i];
+                if (!ch.isVisible) continue;
+                var verts = info.meshInfo[ch.materialReferenceIndex].vertices;
+                int v0 = ch.vertexIndex;
+                float ph = Time.unscaledTime * speed + (i + offset) * 0.55f;
+                var mid = (verts[v0] + verts[v0 + 2]) * 0.5f;
+                var rot = Quaternion.Euler(0, 0, Mathf.Sin(ph * 0.8f) * tilt);
+                var off = Vector3.up * Mathf.Sin(ph) * amp;
+                for (int k = 0; k < 4; k++) verts[v0 + k] = mid + rot * (verts[v0 + k] - mid) + off;
+            }
+            for (int m = 0; m < info.meshInfo.Length; m++)
+            {
+                info.meshInfo[m].mesh.vertices = info.meshInfo[m].vertices;
+                t.UpdateGeometry(info.meshInfo[m].mesh, m);
+            }
         }
     }
 
@@ -60,8 +94,147 @@ namespace Argensimia.UI
         public static Color Tint(Color c, float k) => Color.Lerp(c, Color.white, k);
 
         // ---------- Fuentes ----------
-        static TMP_FontAsset font, fontBody;
-        static Material outlineMat;
+        static TMP_FontAsset font, fontBody, fontDisplay, fontLogo;
+        static Material outlineMat, logoMat;
+        static readonly Dictionary<TMP_FontAsset, Material> outlineByFont = new Dictionary<TMP_FontAsset, Material>();
+
+        // Títulos, botones y textos grandes con contorno: Lilita One (redondeada, de juego mobile).
+        public static TMP_FontAsset FontDisplay
+        {
+            get
+            {
+                if (fontDisplay == null) fontDisplay = Resources.Load<TMP_FontAsset>("UI/LilitaOne SDF");
+                return fontDisplay ? fontDisplay : Font;
+            }
+        }
+
+        // Logo ARGENSIMIA: Luckiest Guy (caricaturesca, gruesa).
+        public static TMP_FontAsset FontLogo
+        {
+            get
+            {
+                if (fontLogo == null) fontLogo = Resources.Load<TMP_FontAsset>("UI/LuckiestGuy SDF");
+                return fontLogo ? fontLogo : FontDisplay;
+            }
+        }
+
+        // Contorno de juego para cualquier fuente (el de Roboto es OutlineMat).
+        public static Material OutlineFor(TMP_FontAsset f)
+        {
+            if (!f || f == Font) return OutlineMat;
+            if (outlineByFont.TryGetValue(f, out var m) && m) return m;
+            m = new Material(f.material) { name = "TMP Outline " + f.name };
+            m.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            m.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.16f);
+            m.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.04f, 0.07f, 0.16f, 1));
+            m.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+            m.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0, 0, 0, 0.55f));
+            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.7f);
+            m.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.25f);
+            outlineByFont[f] = m;
+            return m;
+        }
+
+        // Logo: contorno grueso marrón oscuro y sombra dura abajo.
+        public static Material LogoMat
+        {
+            get
+            {
+                if (logoMat == null) logoMat = Resources.Load<Material>("UI/LogoMat"); // creado por HudSetup (menú 4)
+                if (logoMat == null)
+                {
+                    logoMat = new Material(FontLogo.material) { name = "TMP Logo (runtime)" };
+                    var full = Shader.Find("TextMeshPro/Distance Field"); // el Mobile no tiene textura de cara
+                    if (full) logoMat.shader = full;
+                    logoMat.EnableKeyword(ShaderUtilities.Keyword_Outline);
+                    logoMat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.22f);
+                    logoMat.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.22f, 0.08f, 0.04f, 1));
+                    logoMat.SetFloat(ShaderUtilities.ID_FaceDilate, 0.1f);
+                    logoMat.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+                    logoMat.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0.05f, 0.02f, 0.08f, 0.85f));
+                    logoMat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.35f);
+                    logoMat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.9f);
+                    logoMat.SetFloat(ShaderUtilities.ID_UnderlayDilate, 0.25f);
+                    logoMat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.05f);
+                }
+                return logoMat;
+            }
+        }
+
+        public static readonly Color Celeste = Hex("#74acdf");
+
+        // Textura de la bandera para la cara de las letras (celeste / blanco / celeste), mapeada por letra.
+        static Texture2D flagTex;
+        public static Texture2D FlagTex
+        {
+            get
+            {
+                if (flagTex) return flagTex;
+                flagTex = Resources.Load<Texture2D>("UI/FlagFace");
+                if (flagTex) return flagTex;
+                const int h = 96;
+                flagTex = new Texture2D(4, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, name = "FlagFace" };
+                for (int y = 0; y < h; y++)
+                {
+                    float v = (y + 0.5f) / h;
+                    // un poco más de blanco en el medio: lee mejor en letras gruesas
+                    var c = v > 0.34f && v < 0.66f ? Color.white : Celeste;
+                    for (int x = 0; x < 4; x++) flagTex.SetPixel(x, y, c);
+                }
+                flagTex.Apply();
+                return flagTex;
+            }
+        }
+
+        static Material logoFlagMat;
+        public static Material LogoFlagMat
+        {
+            get
+            {
+                if (logoFlagMat == null) logoFlagMat = Resources.Load<Material>("UI/LogoFlagMat");
+                if (logoFlagMat == null)
+                {
+                    logoFlagMat = new Material(LogoMat) { name = "TMP Logo Flag (runtime)" };
+                    logoFlagMat.SetTexture(ShaderUtilities.ID_FaceTex, FlagTex);
+                    logoFlagMat.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.05f, 0.11f, 0.28f, 1));
+                }
+                return logoFlagMat;
+            }
+        }
+
+        // Logo: "ARG" con la bandera argentina en la cara de cada letra + "ENSIMIA" en degradé banana→naranja,
+        // ambos con contorno, sombra dura y ondita por letra. Devuelve el contenedor (centrado).
+        public static RectTransform Logo(Transform parent, string name, float size)
+        {
+            var box = Rect(name, parent);
+            var a = LogoPart(box, "ARG", size, true, 0);
+            var b = LogoPart(box, "ENSIMIA", size, false, 3);
+            float wa = a.GetPreferredValues("ARG").x, wb = b.GetPreferredValues("ENSIMIA").x, gap = size * 0.05f;
+            float total = wa + gap + wb, split = -total * 0.5f + wa;
+            a.RT().At(new Vector2(0.5f, 0.5f), new Vector2(split, 0), new Vector2(wa + 40, size * 1.25f), new Vector2(1, 0.5f));
+            b.RT().At(new Vector2(0.5f, 0.5f), new Vector2(split + gap, 0), new Vector2(wb + 40, size * 1.25f), new Vector2(0, 0.5f));
+            return box;
+        }
+
+        public static TextMeshProUGUI LogoPart(Transform box, string text, float size, bool flag, int waveOffset)
+        {
+            var t = Txt(box, flag ? "Flag" : "Banana", text, size, Color.white, flag ? TextAlignmentOptions.Right : TextAlignmentOptions.Left, false, FontLogo);
+            t.characterSpacing = 4;
+            if (flag)
+            {
+                t.fontSharedMaterial = LogoFlagMat;
+                t.horizontalMapping = TextureMappingOptions.Character;
+                t.verticalMapping = TextureMappingOptions.Character;
+            }
+            else
+            {
+                t.fontSharedMaterial = LogoMat;
+                t.enableVertexGradient = true;
+                t.colorGradient = new VertexGradient(Hex("#fff1a8"), Hex("#ffe27a"), Hex("#f5a524"), Hex("#e8771a"));
+            }
+            if (Application.isPlaying) t.gameObject.AddComponent<LogoWave>().offset = waveOffset;
+            return t;
+        }
 
         public static TMP_FontAsset Font
         {
@@ -239,8 +412,9 @@ namespace Argensimia.UI
             TextAlignmentOptions align = TextAlignmentOptions.Center, bool outline = false, TMP_FontAsset f = null)
         {
             var t = Rect(name, parent).gameObject.AddComponent<TextMeshProUGUI>();
-            t.font = f ? f : Font;
-            if (outline) t.fontSharedMaterial = OutlineMat;
+            // textos grandes con contorno (títulos, botones, cifras grandes) van en la fuente display
+            t.font = f ? f : outline && size >= 36 ? FontDisplay : Font;
+            if (outline) t.fontSharedMaterial = OutlineFor(t.font);
             t.text = text; t.fontSize = size; t.color = color; t.alignment = align;
             t.raycastTarget = false; t.richText = true;
             t.textWrappingMode = TextWrappingModes.NoWrap;

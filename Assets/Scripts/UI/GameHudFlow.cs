@@ -18,6 +18,14 @@ namespace Argensimia.UI
         int lastGov = -1, lastCabinet = -1;
         string lastPreview;
         bool flowBusy;
+        // reloj de la previa: 30 s para decidir; al agotarse arranca solo (no corre en el cierre con las 3 cartas)
+        const float StartTime = 30f;
+        RectTransform clockRt;
+        Image clockFill;
+        TextMeshProUGUI clockTxt;
+        float startLeft = -1;
+        int lastTick = -1;
+        bool autoStarting;
 
         void BuildFlow()
         {
@@ -36,7 +44,7 @@ namespace Argensimia.UI
             previewTxt.lineSpacing = -6;
 
             // Gabinete (debajo de la popularidad)
-            cabinetRow = UiKit.Rect("Cabinet", safe).At(Vector2.one, new Vector2(-16 - 76 - 12, -100), new Vector2(390, 40));
+            cabinetRow = UiKit.Rect("Cabinet", safe).At(Vector2.one, new Vector2(-16 - 76 - 12, -140), new Vector2(390, 40)); // debajo de la cinta del estado
 
             // ARRANCAR MANDATO
             startBtn = UiKit.Rect("Start", safe).At(new Vector2(1, 0), new Vector2(-24, tickerHeight + 14 + 172 + 16), new Vector2(330, 108), new Vector2(1, 0));
@@ -50,6 +58,21 @@ namespace Argensimia.UI
             var st = startBtn.gameObject.AddComponent<Tap>();
             st.visual = startBtn; st.onTap = OnStart;
 
+            // reloj a la izquierda de ¡ARRANCAR!
+            clockRt = UiKit.Rect("StartClock", safe).At(new Vector2(1, 0), new Vector2(-24 - 330 - 14, tickerHeight + 14 + 172 + 16), new Vector2(108, 108), new Vector2(1, 0));
+            var ring = UiKit.Img(clockRt, "Ring", UiKit.Circle, UiKit.Gold);
+            ring.RT().Fill();
+            UiKit.Img(ring.transform, "Bg", UiKit.Circle, UiKit.NavyDark).RT().Fill(5, 5, 5, 5);
+            clockFill = UiKit.Img(ring.transform, "Fill", UiKit.Circle, UiKit.Green);
+            clockFill.RT().Fill(9, 9, 9, 9);
+            clockFill.type = Image.Type.Filled;
+            clockFill.fillMethod = Image.FillMethod.Radial360;
+            clockFill.fillOrigin = (int)Image.Origin360.Top;
+            clockFill.fillClockwise = false;
+            UiKit.Img(ring.transform, "In", UiKit.Circle, UiKit.NavyDark).RT().Fill(24, 24, 24, 24);
+            clockTxt = UiKit.Txt(ring.transform, "T", "30", 40, Color.white, TextAlignmentOptions.Center, true);
+            clockTxt.RT().Fill();
+
             // EVITAR (crisis) en el zoom
             evadeBtn = UiKit.Panel(zoomUi, "Evade", 24, true).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(380, 96));
             evadeBtn.Find("Inner").GetComponent<Image>().color = UiKit.Hex("#1e56b8");
@@ -58,6 +81,64 @@ namespace Argensimia.UI
             var et = evadeBtn.gameObject.AddComponent<Tap>();
             et.visual = evadeBtn; et.onTap = OnEvade;
             evadeBtn.gameObject.SetActive(false);
+
+            // VENDER (tacho) en el zoom: descarta la carta a cambio de SellPrice
+            sellBtn = UiKit.Rect("Sell", zoomUi).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96, 120));
+            var circ = UiKit.Img(sellBtn, "Btn", UiKit.Circle, UiKit.Hex("#7a231d"), 0, true);
+            circ.RT().At(new Vector2(0.5f, 1), Vector2.zero, new Vector2(84, 84), new Vector2(0.5f, 1));
+            UiKit.Img(circ.transform, "Face", UiKit.Circle, UiKit.Hex("#d9534a")).RT().Fill(4, 4, 4, 8);
+            var ic = UiKit.Rect("Trash", circ.transform).At(new Vector2(0.5f, 0.5f), new Vector2(0, 2), new Vector2(44, 50));
+            UiKit.Img(ic, "Lid", UiKit.RR, Color.white, 3).RT().At(new Vector2(0.5f, 1), Vector2.zero, new Vector2(44, 8), new Vector2(0.5f, 1));
+            UiKit.Img(ic, "Handle", UiKit.RR, Color.white, 3).RT().At(new Vector2(0.5f, 1), new Vector2(0, 5), new Vector2(16, 8), new Vector2(0.5f, 1));
+            var body = UiKit.Img(ic, "Body", UiKit.RR, Color.white, 5).RT();
+            body.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(34, 38), new Vector2(0.5f, 0));
+            for (int i = -1; i <= 1; i++) UiKit.Img(body, "L", UiKit.RR, UiKit.Hex("#d9534a"), 2).RT().At(new Vector2(0.5f, 0.5f), new Vector2(i * 10, 0), new Vector2(4, 26));
+            var pill = UiKit.Img(sellBtn, "Price", UiKit.RR, new Color(0, 0, 0, 0.6f), 12).RT();
+            pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(96, 30), new Vector2(0.5f, 0));
+            UiKit.Txt(pill, "T", "+$" + SellPrice, 22, UiKit.Green, TextAlignmentOptions.Center, true).RT().Fill();
+            var stp = sellBtn.gameObject.AddComponent<Tap>();
+            stp.visual = sellBtn; stp.onTap = OnSell;
+            sellBtn.gameObject.SetActive(false);
+        }
+
+        const int SellPrice = 100;
+        RectTransform sellBtn;
+
+        void OnSell()
+        {
+            if (busy || !zoomed || zoomed.def.kind == CardKind.Crisis) return;
+            StartCoroutine(SellRoutine(zoomed));
+        }
+
+        // La carta se achica, gira y cae en el tacho; entra la plata y se roba otra.
+        IEnumerator SellRoutine(CardView cv)
+        {
+            busy = true;
+            HideZoomButtons();
+            Snd.Ui("card_flip");
+            Vector3 from = cv.transform.localPosition, to = sellBtn.anchoredPosition;
+            yield return UiKit.Tween(0.38f, t =>
+            {
+                float e = Ease.InCubic(t);
+                dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
+                cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 60f;
+                cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.05f, e);
+                cv.transform.localRotation = Quaternion.Euler(0, 0, e * 160f);
+                cv.group.alpha = 1 - Mathf.Clamp01((t - 0.6f) / 0.4f);
+            });
+            gs.money += SellPrice;
+            Snd.Ui("coin");
+            FloatText(moneyPanel, "+$" + SellPrice, UiKit.Green, 0);
+            StartCoroutine(Pulse(moneyPanel));
+            int slot = cv.slot; // vendida: sale del juego (no vuelve al mazo)
+            cards[slot] = null;
+            Destroy(cv.gameObject);
+            dim.gameObject.SetActive(false);
+            zoomed = null;
+            Defense.ShowHints(null, false);
+            yield return new WaitForSecondsRealtime(0.1f);
+            yield return DrawInto(slot);
+            busy = false;
         }
 
         void UpdateFlow()
@@ -74,6 +155,7 @@ namespace Argensimia.UI
 
             bool previa = gs.phase == Phase.Previa;
             startBtn.gameObject.SetActive(previa);
+            UpdateClock(previa);
             previewPanel.gameObject.SetActive(previa);
             if (previa)
             {
@@ -107,6 +189,9 @@ namespace Argensimia.UI
                 else if (Mathf.Abs(a.x) > 1) activateBtn.anchoredPosition = new Vector2(0, a.y);
             }
             else if (!zoomed && evadeBtn.gameObject.activeSelf) evadeBtn.gameObject.SetActive(false);
+            bool sell = zoomed && !busy && zoomed.def.kind != CardKind.Crisis && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada);
+            if (sellBtn.gameObject.activeSelf != sell) sellBtn.gameObject.SetActive(sell);
+            if (sell) sellBtn.anchoredPosition = new Vector2(-closeBtn.anchoredPosition.x, closeBtn.anchoredPosition.y - 30); // arriba a la izquierda de la carta
 
             if (gs.phase != lastPhase)
             {
@@ -116,6 +201,42 @@ namespace Argensimia.UI
                 else if (gs.phase == Phase.Victoria) StartCoroutine(ShowEnd(true));
                 else if (gs.phase == Phase.Derrota) { if (GameFlow.I) { if (GameFlow.I.state == GameFlow.State.Playing) GameFlow.I.ToMenu(false); } else StartCoroutine(ShowEnd(false)); }
             }
+        }
+
+        void UpdateClock(bool previa)
+        {
+            clockRt.gameObject.SetActive(previa);
+            if (!previa) { startLeft = -1; lastTick = -1; return; }
+            if (startLeft < 0) startLeft = StartTime;
+            bool live = !GameFlow.I || GameFlow.I.state == GameFlow.State.Playing;
+            if (live && !autoStarting) startLeft = Mathf.Max(0, startLeft - Time.deltaTime); // en pausa deltaTime = 0
+            float k = startLeft / StartTime;
+            clockFill.fillAmount = k;
+            clockFill.color = k > 0.5f ? Color.Lerp(UiKit.Hex("#e8c22a"), UiKit.Green, (k - 0.5f) * 2) : Color.Lerp(UiKit.Red, UiKit.Hex("#e8c22a"), k * 2);
+            int secs = Mathf.CeilToInt(startLeft);
+            clockTxt.text = secs.ToString();
+            clockTxt.color = secs <= 5 ? UiKit.RedSoft : Color.white;
+            float pulse = secs <= 5 && secs > 0 ? 1 + Mathf.Max(0, Mathf.Sin((startLeft % 1f) * Mathf.PI)) * 0.08f : 1;
+            clockRt.localScale = Vector3.one * pulse;
+            if (live && secs != lastTick)
+            {
+                if (secs <= 5 && secs > 0) Snd.Ui("clock_tick", 1, secs <= 3 ? 1.25f : 1f, 0);
+                lastTick = secs;
+            }
+            if (live && startLeft <= 0 && !autoStarting) StartCoroutine(AutoStart());
+        }
+
+        // Se acabó el tiempo: cierra lo que haya abierto y arranca (las crisis de la mano se aplican igual).
+        IEnumerator AutoStart()
+        {
+            autoStarting = true;
+            if (overlay) CloseOverlay();
+            if (zoomed) CancelZoom();
+            if (placing) CancelPlacement();
+            CancelDrag();
+            while (busy || flowBusy) yield return null;
+            if (gs.phase == Phase.Previa) yield return StartRoutine();
+            autoStarting = false;
         }
 
         void RebuildCabinet()
@@ -151,6 +272,7 @@ namespace Argensimia.UI
                 var cv = cards[i];
                 if (!cv || cv.def.kind != CardKind.Crisis) continue;
                 gs.ApplyEffect(cv.def);
+                Snd.Ui("mood_down", 0.8f, 1, 0.4f);
                 FloatDeltas(cv.def);
                 cards[i] = null;
                 StartCoroutine(FlyAway(cv, hand.InverseTransformPoint(popPanel.position)));
@@ -167,6 +289,7 @@ namespace Argensimia.UI
             if (busy || !zoomed || zoomed.def.kind != CardKind.Crisis) return;
             if (!gs.Spend(zoomed.def.cost)) { StartCoroutine(Shake(evadeBtn)); return; }
             FloatText(moneyPanel, "-$" + GameState.Money(zoomed.def.cost), UiKit.RedSoft, 0);
+            Snd.Ui("spend");
             StartCoroutine(EvadeRoutine(zoomed));
         }
 
@@ -175,11 +298,12 @@ namespace Argensimia.UI
             busy = true;
             HideZoomButtons();
             evadeBtn.gameObject.SetActive(false);
+            Snd.Ui("evade");
             Vector3 from = cv.transform.localPosition, to = zoomLayer.InverseTransformPoint(renewRt.position);
             yield return UiKit.Tween(0.4f, t =>
             {
                 float e = Ease.InCubic(t);
-                dim.color = new Color(0, 0, 0, 0.68f * (1 - Ease.OutCubic(t)));
+                dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
                 cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.08f, e);
                 cv.transform.localRotation = Quaternion.Euler(0, 0, -e * 200f);
@@ -205,6 +329,7 @@ namespace Argensimia.UI
             if (empty.Count > 0)
             {
                 if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
+                Snd.Ui("crisis", 1, 1, 0.8f);
                 yield return DrawInto(empty[Random.Range(0, empty.Count)], new CardInst(crisis));
                 busy = false;
                 yield break;
@@ -219,6 +344,7 @@ namespace Argensimia.UI
             StartCoroutine(FlyAway(old, hand.InverseTransformPoint(deckTop.position)));
             yield return new WaitForSecondsRealtime(0.3f);
             if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
+                Snd.Ui("crisis", 1, 1, 0.8f);
             yield return DrawInto(slot, new CardInst(crisis));
             busy = false;
         }
@@ -256,7 +382,9 @@ namespace Argensimia.UI
             CancelDrag();
             while (busy || flowBusy) yield return null;
             yield return new WaitForSecondsRealtime(0.6f);
+            Snd.Ui("fanfare");
             int salary = gs.CloseMandate();
+            StartCoroutine(SndLater("coin", 0.9f));
             var o = MakeOverlay();
             UiKit.Txt(o, "Title", "FIN DEL MANDATO " + gs.mandate, 64, Color.white, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(1200, 80), new Vector2(0.5f, 1));
             int arr = WaveDirector.I ? WaveDirector.I.ArrivedThisWave : 0;
@@ -278,6 +406,7 @@ namespace Argensimia.UI
                 target.transform.localScale = Vector3.zero;
                 StartCoroutine(Delayed(0.15f + i * 0.12f, UiKit.Tween(0.4f, t => { if (target) target.transform.localScale = Vector3.one * RewardScale * Mathf.Max(0, Ease.OutBack(t)); })));
                 RerollButton(o, r);
+                StartCoroutine(SndLater("card_flip", 1.0f + i * 0.12f, 0.8f));
             }
             Button(o, "CONTINUAR", "#43c157", "#1d6b2a", new Vector2(0, -372), () => { if (!rewardBusy) StartCoroutine(ConfirmRewards()); });
         }
@@ -324,6 +453,8 @@ namespace Argensimia.UI
             r.bas.color = UiKit.Hex("#4a5160");
             r.btn.GetComponent<Tap>().interactable = false;
             Headlines.Say("reroll", 10f);
+            Snd.Ui("spend", 0.7f);
+            Snd.Ui("card_flip");
             StartCoroutine(RerollRoutine(r));
         }
 
@@ -359,6 +490,7 @@ namespace Argensimia.UI
                 var cv = rewards[i].cv;
                 if (!cv) continue;
                 deck.AddToDeck(cv.def);
+                Snd.Ui("card_draw", 0.9f, 1.1f, 0);
                 names.Add(cv.def.title);
                 Vector3 from = cv.transform.localPosition;
                 float s0 = cv.transform.localScale.x;

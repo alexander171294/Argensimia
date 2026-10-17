@@ -16,11 +16,10 @@ MonoBehaviour:
   title: "Cami\xF3n hidrante"
   kind: 0
   cost: 3470
-  description: "Ca\xF1\xF3n de agua de hasta 4 casilleros adelante. Apunta solo al
-    manifestante m\xE1s cercano, en su carril o en los de al lado: lo moja, lo empuja
-    2 m/s y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots. Soltala sobre
-    una igual: NV 2 y 3."
-  art: {fileID: 0}
+  description: "Ca\xF1\xF3n de agua que apunta al m\xE1s cercano, en su carril o
+    los de al lado: lo moja, lo empuja y lo frena 60%. Tanque de 8 s, recarga 6 s.
+    Ocupa 2 slots."
+  art: {fileID: 21300000, guid: d7f4ba45eba0d4b7c85090ce6e26fbf6, type: 3}
   color: {r: 0.16470589, g: 0.49803922, b: 0.81960785, a: 1}
   copies: 0
   headline: "Hidrantes en la Plaza: denuncian represi\xF3n|Llegan los \xABNeptunos\xBB:

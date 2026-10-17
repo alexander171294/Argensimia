@@ -19,8 +19,10 @@ namespace Argensimia.UI
             var stack = deckRt.Find("Stack");
             if (stack) deckStackGroup = stack.gameObject.AddComponent<CanvasGroup>();
 
-            float y = tickerHeight + 14 + CardView.H * deckScale + 16;
-            shopRt = UiKit.Panel(safe, "Shop", 18).At(Vector2.zero, new Vector2(14, y), new Vector2(268, 214));
+            // encima del mazo (que vacío no se usa): no ocupa lugar extra y queda por delante
+            float dw = CardView.W * deckScale, dh = CardView.H * deckScale;
+            float cx = 26 + dw * 0.5f, cy = tickerHeight + 14 + dh * 0.5f;
+            shopRt = UiKit.Panel(safe, "Shop", 18).At(Vector2.zero, new Vector2(Mathf.Max(8, cx - 134), Mathf.Max(tickerHeight + 6, cy - 107)), new Vector2(268, 214));
             shopGroup = shopRt.gameObject.AddComponent<CanvasGroup>();
             UiKit.Txt(shopRt, "Title", "MAZO VACÍO", 24, UiKit.Gold, TextAlignmentOptions.Center, true)
                 .RT().At(new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(250, 32), new Vector2(0.5f, 1));
@@ -63,6 +65,7 @@ namespace Argensimia.UI
                 if (show)
                 {
                     shopRt.gameObject.SetActive(true);
+                    shopRt.SetAsLastSibling();
                     StartCoroutine(UiKit.Tween(0.3f, t => { if (shopRt) shopRt.localScale = Vector3.one * Mathf.Max(0, Ease.OutBack(t)); }));
                 }
                 else shopRt.gameObject.SetActive(false);
@@ -85,6 +88,8 @@ namespace Argensimia.UI
             FloatText(moneyPanel, "-$" + GameState.Money(cost), UiKit.RedSoft, 0);
             for (int i = 0; i < n; i++) deck.AddToDeck(deck.RollOne(gs.mandate, null));
             Headlines.Say(n > 1 ? "buy10" : "buy", 8f);
+            Snd.Ui("spend");
+            Snd.Ui("card_shuffle");
             StartCoroutine(BuyRoutine());
         }
 

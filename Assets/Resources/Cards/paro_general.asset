@@ -17,7 +17,7 @@ MonoBehaviour:
   kind: 3
   cost: 2470
   description: "La CGT para el pa\xEDs: +1 columna organizada en la pr\xF3xima oleada."
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: d22e2c15096d84207a1833224fb9c237, type: 3}
   color: {r: 0.5411765, g: 0.12156863, b: 0.12156863, a: 1}
   copies: 0
   headline: "La CGT confirma paro general y movilizaci\xF3n a Plaza de Mayo|Paro

@@ -51,30 +51,43 @@ namespace Argensimia
         [Tooltip("Slots que ocupa en el camino")] [Min(1)] public int slotSize = 1;
 
         // Nivel 2 = +40% al stat principal; nivel 3 = x2 y +30% de vida. Se sube soltando la carta sobre una igual del mapa.
-        public static float LevelMul(int level) => level >= 3 ? 2f : level == 2 ? 1.4f : 1f;
-        public static float LevelHp(int level) => level >= 3 ? 1.3f : 1f;
+        // Niveles de las colocables (mejora soltando una carta igual sobre la defensa del mapa).
+        // Vida ×2 / ×3,5; daño ×1,75 / ×3; ritmo ×1,25 / ×1,6. NV3 además suma 1 casillero de alcance a los de distancia
+        // y la infantería pega a 2 / 3 manifestantes por golpe.
+        public static float LevelHp(int level) => level >= 3 ? 3.5f : level == 2 ? 2f : 1f;
+        public static float LevelMul(int level) => level >= 3 ? 3f : level == 2 ? 1.75f : 1f; // daño / potencia
+        public static float LevelRate(int level) => level >= 3 ? 1.6f : level == 2 ? 1.25f : 1f;
+        public float LevelRange(int level) => level >= 3 && (defense == DefenseKind.BalasGoma || defense == DefenseKind.Lanzagases || defense == DefenseKind.Hidrante) ? 6.8f : 0f;
 
         public bool IsPolice => kind == CardKind.Colocar;
         public bool UsesSlot => kind == CardKind.Colocar;
+
+        // Stats de las colocables para los badges de la carta. Vida = lo que aguanta la defensa antes de romperse
+        // (los golpes de los manifestantes la bajan; en 0 se rompe y libera el slot).
+        public List<(string label, string value)> StatList(int level = 1)
+        {
+            var l = new List<(string, string)>();
+            if (kind != CardKind.Colocar) return l;
+            float m = LevelMul(level);
+            if (stats.hp > 0) l.Add(("VIDA", Names.Num(Mathf.Round(stats.hp * LevelHp(level)))));
+            if (stats.damage > 0) l.Add(("DAÑO", Names.Num(Mathf.Round(stats.damage * m * 10) / 10)));
+            float rate = stats.rate * (defense == DefenseKind.Detencion ? m : LevelRate(level));
+            if (stats.rate > 0) l.Add(("RITMO", Names.Num(Mathf.Round(rate * 100) / 100) + "/s"));
+            float range = stats.range + LevelRange(level);
+            if (stats.range > 0) l.Add(("ALCANCE", range >= 6 ? Mathf.RoundToInt(range / 6.8f) + " cas." : Names.Num(range) + " m"));
+            return l;
+        }
 
         // Resumen con rich text TMP, se muestra arriba de la descripción.
         public string EffectSummary(int level = 1)
         {
             var parts = new List<string>();
-            if (kind == CardKind.Colocar)
-            {
-                float m = LevelMul(level);
-                if (stats.hp > 0) parts.Add(Stat("Gobernabilidad", Names.Num(stats.hp * LevelHp(level) * (defense == DefenseKind.Vallado || defense == DefenseKind.Infanteria ? m : 1))));
-                if (stats.damage > 0) parts.Add(Stat("Daño", Names.Num(stats.damage * (defense == DefenseKind.Vallado || defense == DefenseKind.Infanteria ? 1 : m))));
-                if (stats.rate > 0) parts.Add(Stat("Ritmo", Names.Num(stats.rate) + "/s"));
-                if (stats.range > 0) parts.Add(Stat("Alcance", stats.range >= 6 ? Mathf.RoundToInt(stats.range / 6.8f) + " casilleros" : Names.Num(stats.range) + " m"));
-                return string.Join("  ", parts);
-            }
+            if (kind == CardKind.Colocar) return ""; // los stats van como badges sobre el arte (StatList)
             if (moneyDelta != 0) parts.Add(Tag(moneyDelta > 0, (moneyDelta > 0 ? "+$" : "-$") + GameState.Money(moneyDelta)));
             if (incomeDelta != 0) parts.Add(Tag(incomeDelta > 0, (incomeDelta > 0 ? "+$" : "-$") + GameState.Money(incomeDelta) + "/s"));
             if (popularityDelta != 0) parts.Add(Tag(popularityDelta > 0, (popularityDelta > 0 ? "+" : "-") + Mathf.Abs(popularityDelta).ToString("0") + "% popularidad"));
             if (popPerMandate != 0) parts.Add(Tag(popPerMandate > 0, (popPerMandate > 0 ? "+" : "-") + Mathf.Abs(popPerMandate).ToString("0") + "%/mandato"));
-            if (defenseHpBonus != 0) parts.Add(Tag(true, "+" + Mathf.RoundToInt(defenseHpBonus * 100) + "% gobernabilidad policía"));
+            if (defenseHpBonus != 0) parts.Add(Tag(true, "+" + Mathf.RoundToInt(defenseHpBonus * 100) + "% vida policía"));
             if (moneyMultiplier < 1) parts.Add(Tag(false, "-" + Mathf.RoundToInt((1 - moneyMultiplier) * 100) + "% del dinero"));
             if (extraColumns > 0) parts.Add(Tag(false, "+" + extraColumns + " columna"));
             if (nextWaveReduction > 0) parts.Add(Tag(true, "oleada -" + Mathf.RoundToInt(nextWaveReduction * 100) + "%"));

@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: refuerzo_federal
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: refuerzo_federal
-  title: Refuerzo federal
+  title: Refuerzo militar
   kind: 1
   cost: 2800
-  description: "Llegan fuerzas federales: +3 de gobernabilidad y +3 al m\xE1ximo.
-    Las provincias se quejan."
-  art: {fileID: 0}
+  description: "Llegan tropas militares a la Capital: +3 de gobernabilidad y +3 al
+    m\xE1ximo. A la gente no le gusta nada."
+  art: {fileID: 21300000, guid: 5bfeb168a594d4d2396481382d67478c, type: 3}
   color: {r: 0.17254902, g: 0.41568628, b: 0.3529412, a: 1}
   copies: 0
-  headline: "Desembarcan fuerzas federales en la Capital|Gendarmer\xEDa y Prefectura
-    llegan a la Capital|Fuerzas federales toman posiciones en la Plaza"
+  headline: Tropas militares desembarcan en la Capital|Camiones militares entran
+    a la Capital|Las tropas toman posiciones alrededor de la Plaza
   rarity: 2
   inPool: 1
   popularityDelta: -5

@@ -92,7 +92,7 @@ namespace Argensimia.UI
             {
                 UiKit.Txt(art.transform, "Placeholder", def.title.Substring(0, 1).ToUpperInvariant(), 170, new Color(1, 1, 1, 0.45f)).RT().Fill();
                 UiKit.Txt(art.transform, "Hint", "ARTE PENDIENTE", 16, new Color(1, 1, 1, 0.6f))
-                    .RT().At(new Vector2(0.5f, 0), new Vector2(0, 10), new Vector2(220, 22), new Vector2(0.5f, 0));
+                    .RT().At(new Vector2(0.5f, 0), new Vector2(0, def.kind == CardKind.Colocar ? 66 : 10), new Vector2(220, 22), new Vector2(0.5f, 0));
             }
             var chip = UiKit.Img(artFrame.transform, "Kind", UiKit.RR, new Color(0, 0, 0, 0.55f), 12);
             chip.RT().At(new Vector2(0, 1), new Vector2(12, -12), new Vector2(def.kind == CardKind.Colocar ? 122 : 136, 32), new Vector2(0, 1));
@@ -109,6 +109,8 @@ namespace Argensimia.UI
                 lv.RT().At(new Vector2(1, 1), new Vector2(-12, -50), new Vector2(90, 34), new Vector2(1, 1));
                 UiKit.Txt(lv.transform, "T", "NV " + level, 22, UiKit.Hex("#5a3a06")).RT().Fill();
             }
+
+            if (def.kind == CardKind.Colocar) StatBadges(artFrame.transform);
 
             // Descripción: ilegible en la mano a propósito, se lee al hacer zoom.
             var descBg = UiKit.Img(f, "DescBg", UiKit.RR, UiKit.Cream, 14).RT();
@@ -142,6 +144,27 @@ namespace Argensimia.UI
             cost = UiKit.Txt(bar, "Cost", def.kind == CardKind.Crisis ? "$" + GameState.Money(def.cost) : def.cost <= 0 ? "GRATIS" : "$" + GameState.Money(def.cost), 38, Color.white, TextAlignmentOptions.Left, true);
             cost.RT().At(new Vector2(0.5f, 0.5f), new Vector2(-38, 0), new Vector2(200, 56), new Vector2(0, 0.5f));
             return f.gameObject;
+        }
+
+        // Daño, ritmo, alcance y vida como badges en el borde inferior del arte.
+        void StatBadges(Transform parent)
+        {
+            var list = def.StatList(level);
+            if (list.Count == 0) return;
+            const float bw = 74, bh = 52, gap = 6;
+            float total = list.Count * bw + (list.Count - 1) * gap;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var b = UiKit.Img(parent, "Stat_" + list[i].label, UiKit.RR, new Color(0.04f, 0.05f, 0.1f, 0.72f), 10);
+                b.raycastTarget = false;
+                b.RT().At(new Vector2(0.5f, 0), new Vector2(-total / 2 + bw / 2 + i * (bw + gap), 10), new Vector2(bw, bh), new Vector2(0.5f, 0));
+                var v = UiKit.Txt(b.transform, "V", list[i].value, 24, Color.white, TextAlignmentOptions.Center, true);
+                v.RT().At(new Vector2(0.5f, 1), new Vector2(0, -3), new Vector2(bw - 6, 30), new Vector2(0.5f, 1));
+                v.enableAutoSizing = true; v.fontSizeMin = 13; v.fontSizeMax = 24;
+                var lb = UiKit.Txt(b.transform, "L", list[i].label, 12, UiKit.Gold, TextAlignmentOptions.Center, true);
+                lb.RT().At(new Vector2(0.5f, 0), new Vector2(0, 4), new Vector2(bw - 4, 16), new Vector2(0.5f, 0));
+                lb.enableAutoSizing = true; lb.fontSizeMin = 9; lb.fontSizeMax = 12;
+            }
         }
 
         GameObject BuildBack()

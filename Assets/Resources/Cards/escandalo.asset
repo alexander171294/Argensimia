@@ -17,7 +17,7 @@ MonoBehaviour:
   kind: 3
   cost: 1520
   description: 'Se filtra un audio comprometedor: -15% de popularidad.'
-  art: {fileID: 0}
+  art: {fileID: 21300000, guid: e4e04332121d2466d9e70f5eef9bd8f2, type: 3}
   color: {r: 0.41568628, g: 0.16470589, b: 0.3529412, a: 1}
   copies: 0
   headline: "Se filtr\xF3 un audio y el Gobierno habla de \xABoperaci\xF3n\xBB|Esc\xE1ndalo:
