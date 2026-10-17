@@ -13,15 +13,17 @@ MonoBehaviour:
   m_Name: detencion
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: detencion
-  title: "Brigada de detenci\xF3n"
+  title: Detenciones
   kind: 0
   cost: 1760
-  description: Cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales;
-    no puede con columnas.
+  description: "Brigada de detenci\xF3n: cada 4 s saca de juego a un manifestante
+    cercano. Prioriza a los especiales; no puede con columnas. Soltala sobre una
+    igual: NV 2 y 3."
   art: {fileID: 0}
   color: {r: 0.29411766, g: 0.30980393, b: 0.61960787, a: 1}
-  copies: 0
-  headline: "Detenciones en la Plaza: la oposici\xF3n pide explicaciones"
+  copies: 1
+  headline: "Detenciones en la Plaza: la oposici\xF3n pide explicaciones|Despliegan
+    la brigada de detenciones en la Plaza|Polic\xEDa de civil identifica a los \xABrevoltosos\xBB"
   rarity: 1
   inPool: 1
   popularityDelta: 0
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 3
   stats:
     hp: 200

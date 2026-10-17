@@ -49,7 +49,7 @@ namespace Argensimia
         {
             moto = new GameObject("Motos").transform;
             moto.SetParent(model, false);
-            for (int i = 0, k = level >= 2 ? 3 : 2; i < k; i++) MotoRun.Moto(moto, new Vector3(-(i % 2) * 2.6f + 0.6f, 0, (i - (k - 1) * 0.5f) * 1.6f));
+            for (int i = 0, k = level + 1; i < k; i++) MotoRun.Moto(moto, new Vector3(-(i % 2) * 2.6f + 0.6f, 0, (i - (k - 1) * 0.5f) * 1.6f));
         }
         HpBar bar;
         Transform model;
@@ -91,58 +91,105 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ visual (modelos de la policía de la escena)
 
+        float BarHeight => def.defense == DefenseKind.Hidrante ? 6.4f : 4.6f;
+        // Agentes un poco más grandes en cada nivel (se lee la mejora de un vistazo).
+        float LevelScale => 1f + 0.05f * (level - 1);
+
         void Build()
+        {
+            BuildModel();
+            if (def.defense == DefenseKind.Motorizada) motoWait = 1f;
+            bar = HpBar.Create(transform, BarHeight, 3.6f, 0.55f);
+            if (def.defense == DefenseKind.Motorizada)
+            {
+                cdBar = HpBar.Create(transform, 4.0f, 3.6f, 0.28f);
+                cdBar.fixedColor = new Color(0.45f, 0.75f, 1f);
+                cdBar.alwaysShow = true;
+            }
+            BuildBadge();
+            StartCoroutine(PopIn());
+        }
+
+        // Modelo según el nivel: cada nivel es más robusto (más agentes, doble vallado, blindaje).
+        void BuildModel()
         {
             var a = GameAssets.I;
             model = new GameObject("Model").transform;
             model.SetParent(transform, false);
-            if (def.placePrefab) { Instantiate(def.placePrefab, model); }
-            else switch (def.defense)
+            if (def.placePrefab) { Instantiate(def.placePrefab, model); return; }
+            switch (def.defense)
             {
                 case DefenseKind.Vallado:
                 {
-                    // una sola línea de vallas en L, lo más al fondo (oeste) del slot; el pie mira al este
+                    // NV1: una línea de vallas en L al fondo (oeste) del slot. NV2: doble línea. NV3: + bloques de hormigón adelante.
                     float fx = -(HalfLen - 1.35f);
-                    foreach (float z in new[] { -1.2f, 1.2f })
-                    {
-                        var v = Inst(a.valla, new Vector3(fx, 0, z), 90, 1f);
-                        if (!v) continue;
-                        vallas.Add(v.transform); vallaPos.Add(v.transform.localPosition); vallaRot.Add(v.transform.localRotation);
-                    }
+                    var rows = new List<float> { fx };
+                    if (level >= 2) rows.Add(fx - 1.0f);
+                    foreach (float rx in rows)
+                        foreach (float z in new[] { -1.2f, 1.2f })
+                        {
+                            var v = Inst(a.valla, new Vector3(rx, 0, z), 90, 1f);
+                            if (!v) continue;
+                            vallas.Add(v.transform); vallaPos.Add(v.transform.localPosition); vallaRot.Add(v.transform.localRotation);
+                        }
                     faceOff = fx + 1.0f;
+                    if (level >= 3)
+                    {
+                        var conc = new Color(0.66f, 0.64f, 0.6f);
+                        var cap = new Color(0.58f, 0.56f, 0.53f);
+                        var stripe = new Color(0.95f, 0.75f, 0.12f);
+                        float bx = fx + 1.45f;
+                        foreach (float z in new[] { -1.15f, 1.15f })
+                        {
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.42f, z), new Vector3(0.62f, 0.84f, 2.1f), conc);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx, 0.9f, z), new Vector3(0.36f, 0.14f, 2.04f), cap);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(bx + 0.32f, 0.55f, z), new Vector3(0.03f, 0.16f, 1.96f), stripe);
+                        }
+                        faceOff = bx + 0.31f;
+                    }
                     break;
                 }
                 case DefenseKind.Infanteria:
-                    // la fila de adelante se mantiene firme; las de atrás se reacomodan
-                    for (int r = 0; r < 2; r++)
-                        for (int i = 0; i < 3; i++) Officer(new Vector3(1.6f - r * 1.5f, 0, (i - 1) * 1.35f + r * 0.45f), r == 0 ? Fidget.Mode.Firm : Fidget.Mode.Shuffle);
-                    if (level >= 2) for (int i = 0; i < 2; i++) Officer(new Vector3(-1.5f, 0, (i - 0.5f) * 1.4f), Fidget.Mode.Shuffle);
-                    break;
                 case DefenseKind.BalasGoma:
-                    // misma formación que la infantería, sin escudos y con escopetas antitumulto
+                {
+                    // misma formación; balas de goma sin escudos y con escopetas. La fila de adelante se mantiene firme.
+                    bool gun = def.defense == DefenseKind.BalasGoma;
+                    System.Func<Vector3, Fidget.Mode, GameObject> mk = gun ? (System.Func<Vector3, Fidget.Mode, GameObject>)GunOfficer : (lp, m) => Officer(lp, m);
                     for (int r = 0; r < 2; r++)
-                        for (int i = 0; i < 3; i++) GunOfficer(new Vector3(1.6f - r * 1.5f, 0, (i - 1) * 1.35f + r * 0.45f), r == 0 ? Fidget.Mode.Firm : Fidget.Mode.Shuffle);
-                    if (level >= 2) for (int i = 0; i < 2; i++) GunOfficer(new Vector3(-1.5f, 0, (i - 0.5f) * 1.4f), Fidget.Mode.Shuffle);
+                        for (int i = 0; i < 3; i++) mk(new Vector3(1.6f - r * 1.5f, 0, (i - 1) * 1.35f + r * 0.45f), r == 0 ? Fidget.Mode.Firm : Fidget.Mode.Shuffle);
+                    if (level >= 2) for (int i = 0; i < 2; i++) mk(new Vector3(-1.5f, 0, (i - 0.5f) * 1.4f), Fidget.Mode.Shuffle);
+                    if (level >= 3) for (int i = 0; i < 2; i++) mk(new Vector3(-1.5f, 0, (i == 0 ? -1 : 1) * 2.05f), Fidget.Mode.Shuffle);
                     break;
+                }
                 case DefenseKind.Lanzagases:
                 {
-                    // un solo agente con lanzagranadas de gas
-                    var o = Officer(new Vector3(0.6f, 0, 0), Fidget.Mode.Shuffle, 0.22f);
-                    if (o)
+                    // NV1 un agente, NV2 dos, NV3 tres + cajones de granadas
+                    var olive = new Color(0.2f, 0.25f, 0.18f);
+                    for (int k = 0; k < level; k++)
                     {
-                        var olive = new Color(0.2f, 0.25f, 0.18f);
+                        float z = (k - (level - 1) * 0.5f) * 1.3f;
+                        var o = Officer(new Vector3(0.6f - (k % 2) * 0.5f, 0, z), Fidget.Mode.Shuffle, 0.22f);
+                        if (!o) continue;
                         FxKit.Prim(PrimitiveType.Cylinder, o.transform, new Vector3(0.16f, 1.25f, 0.3f), new Vector3(0.16f, 0.36f, 0.16f), olive, Quaternion.Euler(60, 0, 0));
                         FxKit.Prim(PrimitiveType.Cylinder, o.transform, new Vector3(0.16f, 1.1f, 0.12f), new Vector3(0.26f, 0.09f, 0.26f), new Color(0.12f, 0.13f, 0.12f), Quaternion.Euler(60, 0, 0)); // tambor
                         shooters.Add(o.GetComponent<Fidget>());
                     }
+                    if (level >= 3)
+                        foreach (float z in new[] { -0.55f, 0.55f })
+                        {
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(-1.3f, 0.28f, z), new Vector3(0.8f, 0.56f, 0.6f), olive);
+                            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(-1.3f, 0.57f, z), new Vector3(0.84f, 0.04f, 0.64f), new Color(0.75f, 0.6f, 0.15f));
+                        }
                     break;
                 }
                 case DefenseKind.Detencion:
-                    for (int i = 0; i < 3; i++) Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - 1) * 1.4f), Fidget.Mode.Shuffle, 0.25f);
+                {
+                    int n = 2 + level; // 3 / 4 / 5 agentes
+                    for (int i = 0; i < n; i++) Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - (n - 1) * 0.5f) * 1.1f), Fidget.Mode.Shuffle, 0.25f);
                     break;
+                }
                 case DefenseKind.Motorizada:
                     BuildMotos();
-                    motoWait = 1f;
                     break;
                 case DefenseKind.Hidrante:
                 {
@@ -153,22 +200,195 @@ namespace Argensimia
                     turret.SetParent(model, false);
                     turret.localPosition = new Vector3(0.9f, 4.9f, 0);
                     turret.localRotation = Quaternion.Euler(-6, 90, 0);
+                    if (level >= 3) turret.localScale = Vector3.one * 1.3f;
                     FxKit.Prim(PrimitiveType.Cylinder, turret, new Vector3(0, -0.1f, 0), new Vector3(0.6f, 0.12f, 0.6f), new Color(0.12f, 0.13f, 0.15f));
                     FxKit.Prim(PrimitiveType.Cylinder, turret, new Vector3(0, 0, 0.55f), new Vector3(0.2f, 0.55f, 0.2f), new Color(0.22f, 0.24f, 0.27f), Quaternion.Euler(90, 0, 0));
                     jet = FxKit.Particles(turret, new Vector3(0, 0, 1.1f), Quaternion.identity, a.water,
                         new Color(0.85f, 0.93f, 1f, 0.8f), WaterSpeed, 1.4f, 0.35f, 0.9f, 220, 3f, WaterGravity, 0.1f, 2.4f, 3000);
                     var em = jet.emission; em.enabled = false;
+                    if (level >= 2) Armor(truck);
                     break;
                 }
             }
-            bar = HpBar.Create(transform, def.defense == DefenseKind.Hidrante ? 6.4f : 4.6f, 3.6f, 0.55f);
-            if (def.defense == DefenseKind.Motorizada)
+        }
+
+        // Hidrante NV2: chapas laterales con franja y paragolpes reforzado. NV3: + jaula en el techo y cañón más grande.
+        void Armor(GameObject truck)
+        {
+            if (!truck) return;
+            var mf = truck.GetComponentInChildren<MeshFilter>();
+            if (!mf || !mf.sharedMesh) return;
+            var mb = mf.sharedMesh.bounds;
+            Vector3 min = Vector3.positiveInfinity, max = Vector3.negativeInfinity;
+            for (int i = 0; i < 8; i++)
             {
-                cdBar = HpBar.Create(transform, 4.0f, 3.6f, 0.28f);
-                cdBar.fixedColor = new Color(0.45f, 0.75f, 1f);
-                cdBar.alwaysShow = true;
+                var c = mb.center + Vector3.Scale(mb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                var q = model.InverseTransformPoint(mf.transform.TransformPoint(c));
+                min = Vector3.Min(min, q); max = Vector3.Max(max, q);
             }
+            var steel = new Color(0.22f, 0.24f, 0.27f);
+            var plate = new Color(0.46f, 0.49f, 0.54f);
+            var hazard = new Color(0.95f, 0.75f, 0.12f);
+            float len = max.x - min.x, zc = (min.z + max.z) * 0.5f, zw = max.z - min.z;
+            float cx = (min.x + max.x) * 0.5f - len * 0.08f;
+            foreach (float sz in new[] { -1f, 1f })
+            {
+                float z = sz > 0 ? max.z + 0.07f : min.z - 0.07f;
+                FxKit.Prim(PrimitiveType.Cube, model, new Vector3(cx, min.y + 1.75f, z), new Vector3(len * 0.62f, 1.3f, 0.12f), plate);
+                FxKit.Prim(PrimitiveType.Cube, model, new Vector3(cx, min.y + 2.42f, z + sz * 0.02f), new Vector3(len * 0.62f, 0.16f, 0.12f), hazard);
+                for (int k = 0; k < 5; k++) FxKit.Prim(PrimitiveType.Cube, model, new Vector3(cx - len * 0.28f + k * len * 0.14f, min.y + 1.75f, z + sz * 0.05f), new Vector3(0.08f, 1.2f, 0.06f), steel); // remaches/costillas
+            }
+            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(max.x + 0.16f, min.y + 0.75f, zc), new Vector3(0.24f, 0.7f, zw * 0.92f), steel);
+            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(max.x + 0.3f, min.y + 0.75f, zc), new Vector3(0.06f, 0.14f, zw * 0.9f), hazard);
+            if (level < 3) return;
+            float top = max.y, rx = (min.x + max.x) * 0.5f - len * 0.18f, rl = len * 0.45f;
+            foreach (float sz in new[] { -1f, 1f })
+            {
+                float z = zc + sz * zw * 0.42f;
+                FxKit.Prim(PrimitiveType.Cube, model, new Vector3(rx, top + 0.42f, z), new Vector3(rl, 0.09f, 0.09f), steel);
+                for (int k = 0; k < 4; k++)
+                    FxKit.Prim(PrimitiveType.Cube, model, new Vector3(rx - rl * 0.5f + k * rl / 3f, top + 0.21f, z), new Vector3(0.09f, 0.42f, 0.09f), steel);
+            }
+            FxKit.Prim(PrimitiveType.Cube, model, new Vector3(rx - rl * 0.5f, top + 0.42f, zc), new Vector3(0.09f, 0.09f, zw * 0.84f), steel);
+        }
+
+        // Rombos de nivel sobre la defensa (plateados en NV2, dorados en NV3), siempre mirando a cámara.
+        Transform badge;
+        void BuildBadge()
+        {
+            if (badge) Destroy(badge.gameObject);
+            badge = null;
+            if (level < 2) return;
+            badge = new GameObject("Nivel").transform;
+            badge.SetParent(transform, false);
+            badge.localPosition = Vector3.up * (BarHeight + 0.85f);
+            var col = level >= 3 ? new Color(1f, 0.78f, 0.18f) : new Color(0.82f, 0.86f, 0.95f);
+            var rim = level >= 3 ? new Color(0.45f, 0.28f, 0.04f) : new Color(0.2f, 0.24f, 0.32f);
+            for (int i = 0; i < level; i++)
+            {
+                var c = new Vector3((i - (level - 1) * 0.5f) * 0.78f, 0, 0);
+                FxKit.Prim(PrimitiveType.Cube, badge, c + Vector3.forward * 0.04f, new Vector3(0.56f, 0.56f, 0.06f), rim, Quaternion.Euler(0, 0, 45));
+                FxKit.Prim(PrimitiveType.Cube, badge, c, new Vector3(0.42f, 0.42f, 0.1f), col, Quaternion.Euler(0, 0, 45));
+            }
+        }
+
+        // ------------------------------------------------------------------ mejora (soltar una carta igual encima)
+
+        public bool CanUpgrade => !Dead && level < 3;
+
+        public static bool AnyUpgradable(CardDef def)
+        {
+            foreach (var d in All) if (d.def == def && d.CanUpgrade) return true;
+            return false;
+        }
+
+        // Defensa mejorable con esta carta bajo el punto p (x, z), con r metros de tolerancia.
+        public static Defense UpgradableAt(CardDef def, Vector3 p, float r)
+        {
+            Defense best = null;
+            float bd = float.MaxValue;
+            foreach (var d in All)
+            {
+                if (d.def != def || !d.CanUpgrade) continue;
+                var q = d.transform.position;
+                float dist = new Vector2(p.x - q.x, p.z - q.z).magnitude;
+                if (dist > d.HalfLen + r || dist >= bd) continue;
+                bd = dist; best = d;
+            }
+            return best;
+        }
+
+        public void Upgrade()
+        {
+            if (!CanUpgrade) return;
+            float oldMax = maxHp;
+            level++;
+            bool hpMain = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Infanteria;
+            baseHp = def.stats.hp * CardDef.LevelHp(level) * (hpMain ? Mul : 1);
+            maxHp = baseHp * (GameState.I ? GameState.I.DefenseHpMul : 1);
+            hp = Mathf.Min(maxHp, hp + Mathf.Max(0, maxHp - oldMax));
+            vallas.Clear(); vallaPos.Clear(); vallaRot.Clear(); shooters.Clear();
+            turret = null; jet = null; sirenRed = sirenBlue = null; moto = null;
+            if (model) Destroy(model.gameObject);
+            BuildModel();
+            BuildBadge();
+            SetHint(false);
+            bar.Set(hp / maxHp);
             StartCoroutine(PopIn());
+            Burst(new Color(1f, 0.8f, 0.3f, 0.95f), 46, 7f);
+        }
+
+        // Curación del cierre de mandato (o de cartas): suma frac de la vida máxima, sin pasarse. Devuelve cuántas curó.
+        public static int HealAll(float frac)
+        {
+            int n = 0;
+            foreach (var d in All.ToArray())
+            {
+                if (d.Dead || d.hp >= d.maxHp - 0.01f) continue;
+                d.hp = Mathf.Min(d.maxHp, d.hp + d.maxHp * frac);
+                d.bar.Set(d.hp / d.maxHp);
+                d.Burst(new Color(0.45f, 1f, 0.45f, 0.85f), 22, 3.5f);
+                n++;
+            }
+            return n;
+        }
+
+        void Burst(Color c, int count, float speed)
+        {
+            var fx = new GameObject("DefenseFx");
+            fx.transform.position = transform.position + Vector3.up * 0.4f;
+            var ps = FxKit.Particles(fx.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.fire, c, speed, 0.9f, 0.35f, 0.75f, 0, 40, 0.5f, HalfLen * 0.6f, 0.3f);
+            var em = ps.emission; em.SetBursts(new[] { new ParticleSystem.Burst(0, count) });
+            Destroy(fx, 2f);
+        }
+
+        // ------------------------------------------------------------------ marca de 'soltá acá' mientras se arrastra una carta igual
+
+        GameObject hint;
+        Transform hintDisc, hintArrow;
+        bool hintHover;
+
+        public static void ShowHints(CardDef def, bool on)
+        {
+            foreach (var d in All) d.SetHint(on && def && d.def == def && d.CanUpgrade);
+        }
+
+        public static void HoverHint(Defense h)
+        {
+            foreach (var d in All) d.hintHover = d == h;
+        }
+
+        void SetHint(bool on)
+        {
+            if (on == (hint != null)) return;
+            if (!on) { Destroy(hint); hint = null; hintHover = false; return; }
+            hint = new GameObject("UpgradeHint");
+            hint.transform.SetParent(transform, false);
+            var gold = new Color(1f, 0.8f, 0.25f);
+            hintDisc = FxKit.Prim(PrimitiveType.Cylinder, hint.transform, new Vector3(0, 0.03f, 0), new Vector3(HalfLen * 2.1f, 0.015f, 4.4f), gold).transform;
+            hintArrow = new GameObject("Arrow").transform;
+            hintArrow.SetParent(hint.transform, false);
+            FxKit.Prim(PrimitiveType.Cube, hintArrow, new Vector3(0, 0.75f, 0), new Vector3(0.34f, 1.0f, 0.1f), gold);
+            FxKit.Prim(PrimitiveType.Cube, hintArrow, new Vector3(0, 0.2f, 0), new Vector3(0.62f, 0.62f, 0.1f), gold, Quaternion.Euler(0, 0, 45));
+        }
+
+        void LateUpdate()
+        {
+            var cam = Camera.main;
+            if (badge)
+            {
+                if (cam) badge.rotation = cam.transform.rotation;
+                badge.localPosition = Vector3.up * (BarHeight + 0.85f + Mathf.Sin(Time.time * 2.2f + x) * 0.08f);
+            }
+            if (hint)
+            {
+                float w = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 6f);
+                float k = hintHover ? 1.12f + w * 0.06f : 0.95f + w * 0.05f;
+                hintDisc.localScale = new Vector3(HalfLen * 2.1f * k, 0.015f, 4.4f * k);
+                hintArrow.localPosition = Vector3.up * (BarHeight + 1.9f + w * 0.5f);
+                if (cam) hintArrow.rotation = Quaternion.Euler(0, cam.transform.eulerAngles.y, 0);
+                hintArrow.localScale = Vector3.one * (hintHover ? 1.35f : 1f);
+            }
         }
 
         GameObject Inst(GameObject src, Vector3 lp, float yaw, float s)
@@ -185,7 +405,7 @@ namespace Argensimia
 
         GameObject Officer(Vector3 lp, Fidget.Mode mode = Fidget.Mode.Shuffle, float radius = 0.32f)
         {
-            var g = Inst(GameAssets.I.officer, lp, 90 + Random.Range(-6f, 6f), PeopleScale);
+            var g = Inst(GameAssets.I.officer, lp, 90 + Random.Range(-6f, 6f), PeopleScale * LevelScale);
             if (g) Fidget.Add(g, mode, radius);
             return g;
         }
@@ -400,7 +620,7 @@ namespace Argensimia
             }
             if (!t) return;
             cd = 1f / Mathf.Max(0.05f, def.stats.rate);
-            var s = shooters.Count > 0 ? shooters[0] : null;
+            var s = shooters.Count > 0 ? shooters[Random.Range(0, shooters.Count)] : null;
             Vector3 from = s ? s.transform.TransformPoint(new Vector3(0.16f, 1.55f, 0.55f)) : transform.position + Vector3.up * 2.5f;
             GasCloud.Throw(from, t.transform.position, def.stats.area, def.stats.damage * Mul,
                 def.slow, Mathf.Max(def.slowTime, level >= 3 ? 5 : 3));
@@ -503,7 +723,7 @@ namespace Argensimia
             Dead = true;
             All.Remove(this);
             blocking.Clear();
-            if (GameState.I && def.defense != DefenseKind.Vallado) GameState.I.PushHeadline("Retroceden las fuerzas de seguridad: cae la línea de " + def.title.ToLowerInvariant());
+            if (def.defense == DefenseKind.Vallado) Headlines.Say("fence_break", 10f); else Headlines.Say("defense_break", 4f, def.title.ToLowerInvariant());
             StartCoroutine(Fall());
         }
 

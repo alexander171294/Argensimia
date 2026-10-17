@@ -20,7 +20,9 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.41568628, g: 0.16470589, b: 0.3529412, a: 1}
   copies: 0
-  headline: "Se filtr\xF3 un audio y el Gobierno habla de \xABoperaci\xF3n\xBB"
+  headline: "Se filtr\xF3 un audio y el Gobierno habla de \xABoperaci\xF3n\xBB|Esc\xE1ndalo:
+    aparecen bolsos con dinero en un convento|Filtran un video comprometedor de un
+    funcionario"
   rarity: 0
   inPool: 0
   popularityDelta: -15
@@ -32,6 +34,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

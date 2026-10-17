@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Argensimia
 {
-    // Una carta concreta del mazo: definición + nivel (fusión: 2 iguales del mismo nivel = 1 de nivel +1).
+    // Una carta concreta del mazo. El nivel de las colocables ya no se sube en la mano: se sube en el mapa
+    // soltando la carta sobre una defensa igual (ver Defense.Upgrade).
     public class CardInst
     {
         public CardDef def;
@@ -11,19 +12,23 @@ namespace Argensimia
         public CardInst(CardDef d, int l = 1) { def = d; level = l; }
     }
 
-    // Mazo: pila de robo + descarte. Cuando se vacía el robo, se rebaraja el descarte.
+    // Mazo finito: arranca con las copias iniciales (10) y no se rebaraja. Lo que se juega se consume;
+    // cuando se vacía se pueden comprar cartas al azar (GameHudShop). Cada cierre de mandato suma 3 (ver GameHud.ShowClose).
     public class CardDeck : MonoBehaviour
     {
         public int handSize = 5;
-        [Tooltip("Costo de descartar toda la mano y robar una nueva")] public int renewCost = 300;
+        [Tooltip("Costo de devolver la mano al fondo del mazo y robar una nueva")] public int renewCost = 300;
+        [Tooltip("Cartas que entran al mazo al cerrar cada mandato")] public int rewardCount = 3;
+        [Tooltip("Costo de cambiar una carta del cierre por otra al azar (1 vez por carta)")] public int rerollCost = 100;
+        [Tooltip("Mazo vacío: comprar 1 carta al azar")] public int buyCost = 500;
+        [Tooltip("Mazo vacío: comprar 10 cartas al azar (descuento por cantidad)")] public int buy10Cost = 4200;
         [Tooltip("Vacío = carga todo Resources/Cards")] public List<CardDef> catalog = new List<CardDef>();
         public int maxLevel = 3;
 
-        readonly List<CardInst> drawPile = new List<CardInst>();
-        readonly List<CardInst> discardPile = new List<CardInst>();
+        readonly List<CardInst> drawPile = new List<CardInst>(); // el tope es el final de la lista
 
         public int DrawCount => drawPile.Count;
-        public int DiscardCount => discardPile.Count;
+        public int StartCount { get; private set; }
 
         void Awake()
         {
@@ -33,50 +38,57 @@ namespace Argensimia
                 if (c.kind == CardKind.Crisis) continue;
                 for (int i = 0; i < c.copies; i++) drawPile.Add(new CardInst(c));
             }
+            StartCount = drawPile.Count;
             Shuffle(drawPile);
         }
 
         public CardInst Draw()
         {
-            if (drawPile.Count == 0)
-            {
-                drawPile.AddRange(discardPile);
-                discardPile.Clear();
-                Shuffle(drawPile);
-            }
             if (drawPile.Count == 0) return null;
             var c = drawPile[drawPile.Count - 1];
             drawPile.RemoveAt(drawPile.Count - 1);
             return c;
         }
 
-        // Crisis y ministros no vuelven al mazo.
-        public void Discard(CardInst c)
+        // Una carta que vuelve sin jugarse (CAMBIAR MANO, la que pisa una crisis) va al fondo del mazo.
+        // Crisis no vuelven nunca.
+        public void ReturnToDeck(CardInst c)
         {
-            if (c == null || c.def == null) return;
-            if (c.def.kind == CardKind.Crisis || c.def.kind == CardKind.Ministro) return;
-            discardPile.Add(c);
+            if (c == null || c.def == null || c.def.kind == CardKind.Crisis) return;
+            drawPile.Insert(0, c);
         }
 
-        public void AddToDeck(CardDef d) { if (d) discardPile.Add(new CardInst(d)); }
+        // Carta nueva: entra en un lugar al azar del mazo.
+        public void AddToDeck(CardDef d)
+        {
+            if (!d) return;
+            drawPile.Insert(Random.Range(0, drawPile.Count + 1), new CardInst(d));
+        }
 
-        // Cartas que pueden salir en el 1 de 3, ponderadas por rareza (más raras desde el mandato 4).
+        // Cartas del cierre, ponderadas por rareza (más raras desde el mandato 4). Sin repetir dentro de la tanda.
         public List<CardDef> RollPicks(int count, int mandate)
         {
-            var pool = catalog.FindAll(c => c.inPool && c.kind != CardKind.Crisis);
             var res = new List<CardDef>();
-            float rareBoost = mandate >= 4 ? 1.8f : 1f;
-            for (int k = 0; k < count && pool.Count > 0; k++)
+            for (int k = 0; k < count; k++)
             {
-                float total = 0;
-                foreach (var c in pool) total += Weight(c, rareBoost);
-                float r = Random.value * total;
-                CardDef pick = pool[pool.Count - 1];
-                foreach (var c in pool) { r -= Weight(c, rareBoost); if (r <= 0) { pick = c; break; } }
-                res.Add(pick);
-                pool.Remove(pick);
+                var c = RollOne(mandate, res);
+                if (!c) break;
+                res.Add(c);
             }
             return res;
+        }
+
+        // Una carta al azar que no esté en exclude (para el CAMBIAR de cada carta del cierre).
+        public CardDef RollOne(int mandate, ICollection<CardDef> exclude)
+        {
+            var pool = catalog.FindAll(c => c.inPool && c.kind != CardKind.Crisis && (exclude == null || !exclude.Contains(c)));
+            if (pool.Count == 0) return null;
+            float rareBoost = mandate >= 4 ? 1.8f : 1f;
+            float total = 0;
+            foreach (var c in pool) total += Weight(c, rareBoost);
+            float r = Random.value * total;
+            foreach (var c in pool) { r -= Weight(c, rareBoost); if (r <= 0) return c; }
+            return pool[pool.Count - 1];
         }
 
         static float Weight(CardDef c, float rareBoost) =>

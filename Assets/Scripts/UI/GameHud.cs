@@ -124,6 +124,7 @@ namespace Argensimia.UI
             hand = UiKit.Rect("Hand", safe).At(new Vector2(0.5f, 0), new Vector2(0, tickerHeight + 14 + CardView.H * handScale * 0.5f), new Vector2(10, 10), new Vector2(0.5f, 0.5f));
             BuildDeck();
             BuildRenew();
+            BuildShop();
             BuildPlaceBanner();
             fxLayer = UiKit.Rect("FX", root).Fill();
             BuildZoomLayer();
@@ -185,8 +186,7 @@ namespace Argensimia.UI
 
             // Pausa
             var pause = UiKit.Panel(safe, "Pause", 16, true).At(Vector2.one, new Vector2(-16, -12), new Vector2(76, 76));
-            UiKit.Img(pause, "L", null, Color.white).RT().At(new Vector2(0.5f, 0.5f), new Vector2(-10, 0), new Vector2(12, 34));
-            UiKit.Img(pause, "R", null, Color.white).RT().At(new Vector2(0.5f, 0.5f), new Vector2(10, 0), new Vector2(12, 34));
+            for (int i = -1; i <= 1; i++) UiKit.Img(pause, "Bar" + (i + 1), UiKit.RR, Color.white, 4).RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, i * 13), new Vector2(40, 8));
             var pt = pause.gameObject.AddComponent<Tap>();
             pt.visual = pause; pt.onTap = TogglePause;
 
@@ -317,14 +317,12 @@ namespace Argensimia.UI
             // contenedor con el título PAUSA afuera, arriba; los dos se animan juntos (hijos de un grupo)
             var group = UiKit.Rect("Group", bg.transform).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(10, 10));
             UiKit.Txt(group, "T", "PAUSA", 104, Color.white, TextAlignmentOptions.Center, true).RT()
-                .At(new Vector2(0.5f, 0.5f), new Vector2(0, 262), new Vector2(700, 130));
-            var panel = UiKit.Panel(group, "Panel", 28, true).At(new Vector2(0.5f, 0.5f), new Vector2(0, -50), new Vector2(700, 470));
+                .At(new Vector2(0.5f, 0.5f), new Vector2(0, 262), new Vector2(700, 130)); // título PAUSA
+            var panel = UiKit.Panel(group, "Panel", 28, true).At(new Vector2(0.5f, 0.5f), new Vector2(0, -30), new Vector2(700, 430));
             VolumeSlider.Create(panel, "MÚSICA", new Vector2(0.5f, 1), new Vector2(0, -52), 600, () => GameAudio.Music, GameAudio.SetMusic);
             VolumeSlider.Create(panel, "EFECTOS", new Vector2(0.5f, 1), new Vector2(0, -118), 600, () => GameAudio.Sfx, GameAudio.SetSfx);
             PauseButton(panel, "CONTINUAR", "#43c157", "#1d6b2a", new Vector2(0, -228), TogglePause);
             PauseButton(panel, "RENUNCIAR", "#d8452f", "#7a1f14", new Vector2(0, -344), Resign);
-            UiKit.Txt(panel, "RS", "Presentar la renuncia indeclinable y abandonar la Casa Rosada", 20, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody).RT()
-                .At(new Vector2(0.5f, 1), new Vector2(0, -408), new Vector2(660, 30), new Vector2(0.5f, 1));
             pauseOverlay = bg.gameObject;
             pauseOverlay.SetActive(false);
         }
@@ -363,7 +361,7 @@ namespace Argensimia.UI
             }
 
             int dc = deck.DrawCount;
-            if (dc != lastDeck) { lastDeck = dc; deckCount.text = dc.ToString(); }
+            if (dc != lastDeck) { lastDeck = dc; deckCount.text = dc.ToString(); deckCount.color = dc == 0 ? UiKit.RedSoft : Color.white; }
             renewCostTxt.color = gs.CanAfford(deck.renewCost) ? Color.white : UiKit.RedSoft;
 
             foreach (var cv in cards)
@@ -371,6 +369,7 @@ namespace Argensimia.UI
                     cv.SetDisabled(Blocked(cv.def));
 
             if (zoomed && !busy) RefreshActivate();
+            UpdateShop();
             UpdateFlow();
             UpdateTicker();
         }
@@ -397,7 +396,8 @@ namespace Argensimia.UI
         }
 
         static bool NoFreeSlot() => PoliceSlots.I && !PoliceSlots.I.HasFree();
-        static bool Blocked(CardDef d) => d.UsesSlot && PoliceSlots.I && !PoliceSlots.I.HasFree(d.slotSize);
+        // Sin slot libre y sin una defensa igual para mejorar.
+        static bool Blocked(CardDef d) => d.UsesSlot && PoliceSlots.I && !PoliceSlots.I.HasFree(d.slotSize) && !Defense.AnyUpgradable(d);
 
         // ------------------------------------------------------------------ marquesina
 
@@ -414,7 +414,7 @@ namespace Argensimia.UI
             if (tickerX < -w || tickerX > 1e5f)
             {
                 tickerIsFiller = urgent.Count == 0;
-                string h = urgent.Count > 0 ? urgent.Dequeue() : headlines[headlineIdx++ % headlines.Length];
+                string h = urgent.Count > 0 ? urgent.Dequeue() : Headlines.NextFiller();
                 tickerTxt.text = h;
                 tickerTxt.RT().sizeDelta = new Vector2(tickerTxt.GetPreferredValues(h).x + 60, 0);
                 tickerX = tickerViewport.rect.width;
@@ -451,13 +451,14 @@ namespace Argensimia.UI
         IEnumerator DrawInto(int i, CardInst forced = null)
         {
             var inst = forced ?? deck.Draw();
-            if (inst == null) yield break;
+            if (inst == null) { Headlines.Say("deck_empty", 90f); yield break; } // se pueden comprar (GameHudShop)
             var def = inst.def;
             var cv = CardView.Create(hand, def, inst.level);
             cv.slot = i;
             cards[i] = cv;
             cv.tap.onTap = () => OnCardTap(cv);
             cv.tap.interactable = false;
+            if (def.kind == CardKind.Colocar) AddDrag(cv);
             Vector3 from = hand.InverseTransformPoint(deckTop.position), to = SlotPos(i);
             float zEnd = SlotZ(i);
             yield return UiKit.Tween(0.55f, t =>
@@ -468,7 +469,6 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(-arc * 20f, Mathf.Lerp(180, 0, Ease.InOutCubic(t)), Mathf.Lerp(-14, zEnd, e));
             });
             if (cv) cv.tap.interactable = true;
-            if (cv) yield return TryFuse(cv);
         }
 
         void OnCardTap(CardView cv)
@@ -601,13 +601,12 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.65f) / 0.35f);
             });
-            if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) gs.PushHeadline("Renuncia " + gone.title + ": asume " + def.title); }
+            if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", gone.title, def.title); }
             else gs.ApplyEffect(def);
             StartCoroutine(Pulse(target));
             FloatDeltas(def);
 
-            int slot = cv.slot;
-            deck.Discard(new CardInst(def, cv.level));
+            int slot = cv.slot; // la carta se consume: el mazo no se rebaraja
             cards[slot] = null;
             Destroy(cv.gameObject);
             dim.gameObject.SetActive(false);
@@ -643,8 +642,9 @@ namespace Argensimia.UI
             });
             cv.gameObject.SetActive(false);
             dim.gameObject.SetActive(false);
-            placeTxt.text = "Elegí un lugar en el camino para " + "<color=#f2c14e>" + cv.def.title.ToUpperInvariant() + "</color>";
+            placeTxt.text = (Defense.AnyUpgradable(cv.def) ? "Elegí un lugar o tocá una igual para mejorarla: " : "Elegí un lugar en el camino para ") + "<color=#f2c14e>" + cv.def.title.ToUpperInvariant() + "</color>";
             if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
+            Defense.ShowHints(cv.def, true);
             placeBanner.gameObject.SetActive(true);
             mapCatcher.gameObject.SetActive(true);
             yield return UiKit.Tween(0.2f, t => bannerGroup.alpha = t);
@@ -654,38 +654,64 @@ namespace Argensimia.UI
         void OnMapTap(Vector2 screen)
         {
             if (!placing || busy || paused) return;
-            var cam = Camera.main;
-            if (!cam) return;
-            var ray = cam.ScreenPointToRay(screen);
-            if (!new Plane(Vector3.up, new Vector3(0, groundY, 0)).Raycast(ray, out float d)) return;
-            var p = ray.GetPoint(d);
-            var slots = PoliceSlots.I;
-            var cv = placing;
-            var d0 = cv.def;
-            PoliceSlots.Slot target = null, second = null;
-            int laneHit = -1;
-            if (d0.slotSize >= 2) target = slots.NearestPair(p, slotSnapDistance + 2f, out second);
-            else target = slots.Nearest(p, slotSnapDistance);
-            if (target == null && laneHit < 0)
-            {
-                StartCoroutine(Shake(placeBanner));
-                return;
-            }
-            if (!gs.Spend(cv.def.cost)) { CancelPlacement(); return; }
-            if (cv.def.cost > 0) FloatText(moneyPanel, "-$" + GameState.Money(cv.def.cost), UiKit.RedSoft, 0);
-            {
-                var placed = Defense.Place(d0, cv.level, target, second).gameObject;
-                slots.Occupy(target, placed);
-                if (second != null) slots.Occupy(second, placed);
-            }
-            if (!string.IsNullOrEmpty(cv.def.headline)) gs.PushHeadline(cv.def.headline);
+            if (!GroundPoint(screen, out var p)) return;
+            if (!TryUsePlaceCard(placing, p)) { StartCoroutine(Shake(placeBanner)); return; }
             placing = null;
             HidePlacement();
+        }
+
+        bool GroundPoint(Vector2 screen, out Vector3 p)
+        {
+            p = default;
+            var cam = Camera.main;
+            if (!cam) return false;
+            var ray = cam.ScreenPointToRay(screen);
+            if (!new Plane(Vector3.up, new Vector3(0, groundY, 0)).Raycast(ray, out float d)) return false;
+            p = ray.GetPoint(d);
+            return true;
+        }
+
+        // Lo que haría una carta colocable soltada en p: mejorar una defensa igual (prioridad) o ocupar el slot libre más cercano.
+        void PlaceTarget(CardDef d0, Vector3 p, out Defense up, out PoliceSlots.Slot target, out PoliceSlots.Slot second)
+        {
+            up = Defense.UpgradableAt(d0, p, 1.2f);
+            target = second = null;
+            if (up || !PoliceSlots.I) return;
+            if (d0.slotSize >= 2) target = PoliceSlots.I.NearestPair(p, slotSnapDistance + 2f, out second);
+            else target = PoliceSlots.I.Nearest(p, slotSnapDistance);
+        }
+
+        // Usa la carta en p (cobra, coloca o mejora, consume la carta y roba otra). false = no había dónde.
+        bool TryUsePlaceCard(CardView cv, Vector3 p)
+        {
+            var d0 = cv.def;
+            PlaceTarget(d0, p, out var up, out var target, out var second);
+            if (!up && target == null) return false;
+            if (!gs.Spend(d0.cost))
+            {
+                FloatText(moneyPanel, "FALTA $" + GameState.Money(d0.cost - gs.money + 0.999f), UiKit.RedSoft, 0);
+                StartCoroutine(Shake(moneyPanel));
+                return false;
+            }
+            if (d0.cost > 0) FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0);
+            if (up)
+            {
+                up.Upgrade();
+                WorldFloat(up.transform.position + Vector3.up * 5.5f, "¡NIVEL " + up.level + "!", UiKit.Gold);
+                Headlines.Say("upgrade", d0.title.ToLowerInvariant(), up.level);
+            }
+            else
+            {
+                var placed = Defense.Place(d0, cv.level, target, second).gameObject;
+                PoliceSlots.I.Occupy(target, placed);
+                if (second != null) PoliceSlots.I.Occupy(second, placed);
+                if (!string.IsNullOrEmpty(d0.headline)) gs.PushHeadline(Headlines.PickVariant(d0.headline));
+            }
             int slot = cv.slot;
-            deck.Discard(new CardInst(cv.def, cv.level));
             cards[slot] = null;
             Destroy(cv.gameObject);
             StartCoroutine(DrawInto(slot));
+            return true;
         }
 
         void HidePlacement()
@@ -693,6 +719,7 @@ namespace Argensimia.UI
             placeBanner.gameObject.SetActive(false);
             mapCatcher.gameObject.SetActive(false);
             if (PoliceSlots.I) PoliceSlots.I.SetHighlight(false);
+            Defense.ShowHints(null, false);
         }
 
         void CancelPlacement()
@@ -775,6 +802,7 @@ namespace Argensimia.UI
         IEnumerator RenewRoutine()
         {
             busy = true;
+            Headlines.Say("renew", 20f);
             StartCoroutine(UiKit.Tween(0.7f, t => renewIcon.localRotation = Quaternion.Euler(0, 0, -Ease.InOutCubic(t) * 360f)));
             Vector3 target = hand.InverseTransformPoint(renewRt.TransformPoint(renewRt.rect.center));
             for (int i = cards.Length - 1; i >= 0; i--)
@@ -782,7 +810,7 @@ namespace Argensimia.UI
                 var cv = cards[i];
                 if (!cv || cv.def.kind == CardKind.Crisis) continue; // la crisis no se va renovando
                 cards[i] = null;
-                deck.Discard(new CardInst(cv.def, cv.level));
+                deck.ReturnToDeck(new CardInst(cv.def, cv.level)); // vuelve al fondo del mazo
                 StartCoroutine(FlyAway(cv, target));
                 yield return new WaitForSecondsRealtime(0.06f);
             }

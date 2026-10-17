@@ -8,7 +8,7 @@ using UnityEngine.UI;
 namespace Argensimia.UI
 {
     // Flujo del mandato en el HUD: previa (ARRANCAR + próxima oleada), gobernabilidad, gabinete,
-    // cierre con sueldo y 1 de 3, crisis forzadas, fusión de cartas, victoria/derrota.
+    // cierre con sueldo, curación y 3 cartas al mazo (con CAMBIAR), crisis forzadas, victoria/derrota.
     public partial class GameHud
     {
         RectTransform govPanel, govFill, startBtn, previewPanel, cabinetRow, evadeBtn, overlay;
@@ -190,7 +190,7 @@ namespace Argensimia.UI
             Destroy(cv.gameObject);
             dim.gameObject.SetActive(false);
             zoomed = null;
-            gs.PushHeadline("El Gobierno logra desactivar la crisis: «la situación está bajo control»");
+            Headlines.Say("crisis_evaded");
             yield return DrawInto(slot);
             busy = false;
         }
@@ -200,54 +200,30 @@ namespace Argensimia.UI
         {
             while (busy) yield return null;
             busy = true;
+            var empty = new List<int>();
+            for (int i = 0; i < cards.Length; i++) if (!cards[i]) empty.Add(i);
+            if (empty.Count > 0)
+            {
+                if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
+                yield return DrawInto(empty[Random.Range(0, empty.Count)], new CardInst(crisis));
+                busy = false;
+                yield break;
+            }
             var options = new List<int>();
             for (int i = 0; i < cards.Length; i++) if (cards[i] && cards[i].def.kind != CardKind.Crisis) options.Add(i);
             int slot = options.Count > 0 ? options[Random.Range(0, options.Count)] : -1;
             if (slot < 0) { busy = false; yield break; }
             var old = cards[slot];
             cards[slot] = null;
-            deck.Discard(new CardInst(old.def, old.level));
+            deck.ReturnToDeck(new CardInst(old.def, old.level)); // la carta pisada vuelve al fondo del mazo
             StartCoroutine(FlyAway(old, hand.InverseTransformPoint(deckTop.position)));
             yield return new WaitForSecondsRealtime(0.3f);
-            if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(crisis.headline);
+            if (!string.IsNullOrEmpty(crisis.headline)) gs.PushHeadline(Headlines.PickVariant(crisis.headline));
             yield return DrawInto(slot, new CardInst(crisis));
             busy = false;
         }
 
-        // ------------------------------------------------------------------ fusión
-
-        IEnumerator TryFuse(CardView cv)
-        {
-            if (!cv || cv.def.kind == CardKind.Crisis || cv.def.kind == CardKind.Ministro || cv.level >= deck.maxLevel) yield break;
-            CardView other = null;
-            foreach (var o in cards)
-                if (o && o != cv && o.def == cv.def && o.level == cv.level && o.transform.parent == hand && o.tap.interactable) { other = o; break; }
-            if (!other) yield break;
-            cv.tap.interactable = false;
-            other.tap.interactable = false;
-            yield return new WaitForSecondsRealtime(0.15f);
-            Vector3 from = cv.transform.localPosition, to = other.transform.localPosition;
-            yield return UiKit.Tween(0.4f, t =>
-            {
-                float e = Ease.InCubic(t);
-                if (cv) { cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 80; cv.transform.localScale = Vector3.one * handScale * (1 - e * 0.4f); }
-            });
-            int slot = cv.slot, os = other.slot;
-            cards[slot] = null;
-            Destroy(cv.gameObject);
-            var nv = CardView.Create(hand, other.def, other.level + 1);
-            nv.slot = os;
-            cards[os] = nv;
-            nv.tap.onTap = () => OnCardTap(nv);
-            Destroy(other.gameObject);
-            ReturnToHand(nv);
-            FloatText(nv.Rt, "¡FUSIÓN! NV " + nv.level, UiKit.Gold, 0);
-            yield return UiKit.Tween(0.4f, t => { if (nv) nv.transform.localScale = Vector3.one * handScale * (1 + Mathf.Sin(t * Mathf.PI) * 0.25f); });
-            if (nv) nv.transform.localScale = Vector3.one * handScale;
-            yield return DrawInto(slot);
-        }
-
-        // ------------------------------------------------------------------ cierre: sueldo + 1 de 3
+        // ------------------------------------------------------------------ cierre: sueldo + curación + 3 cartas al mazo
 
         RectTransform MakeOverlay()
         {
@@ -259,68 +235,158 @@ namespace Argensimia.UI
             return overlay;
         }
 
+        class Reward
+        {
+            public CardView cv;
+            public bool rerolled;
+            public Image face, bas;
+            public TextMeshProUGUI label;
+            public RectTransform btn;
+            public float x;
+        }
+
+        readonly List<Reward> rewards = new List<Reward>();
+        bool rewardBusy;
+        const float RewardScale = 0.78f, RewardY = -20, RewardGap = 380;
+
         IEnumerator ShowClose()
         {
             if (zoomed) CancelZoom();
             if (placing) CancelPlacement();
+            CancelDrag();
             while (busy || flowBusy) yield return null;
             yield return new WaitForSecondsRealtime(0.6f);
             int salary = gs.CloseMandate();
             var o = MakeOverlay();
             UiKit.Txt(o, "Title", "FIN DEL MANDATO " + gs.mandate, 64, Color.white, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(1200, 80), new Vector2(0.5f, 1));
             int arr = WaveDirector.I ? WaveDirector.I.ArrivedThisWave : 0;
-            UiKit.Txt(o, "Sub", "Sueldo <color=#7be36a>+$" + GameState.Money(salary) + "</color>    ·    Llegaron al vallado: <color=#ff7a70>" + arr + "</color>    ·    Gobernabilidad " + gs.governability + "/" + gs.maxGovernability,
-                28, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody).RT().At(new Vector2(0.5f, 1), new Vector2(0, -132), new Vector2(1400, 40), new Vector2(0.5f, 1));
-            UiKit.Txt(o, "Pick", "ELEGÍ UNA CARTA PARA TU MAZO", 34, UiKit.Gold, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -186), new Vector2(1200, 48), new Vector2(0.5f, 1));
+            string heal = gs.LastHealed > 0 ? "    ·    Policía <color=#7be36a>+" + Mathf.RoundToInt(gs.CloseHeal * 100) + "% vida</color>" : "";
+            UiKit.Txt(o, "Sub", "Sueldo <color=#7be36a>+$" + GameState.Money(salary) + "</color>    ·    Llegaron al vallado: <color=#ff7a70>" + arr + "</color>    ·    Gobernabilidad " + gs.governability + "/" + gs.maxGovernability + heal,
+                28, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody).RT().At(new Vector2(0.5f, 1), new Vector2(0, -132), new Vector2(1500, 40), new Vector2(0.5f, 1));
+            var picks = deck.RollPicks(deck.rewardCount, gs.mandate);
+            UiKit.Txt(o, "Pick", "OBTUVISTE " + picks.Count + " CARTAS PARA TU MAZO", 34, UiKit.Gold, TextAlignmentOptions.Center, true).RT().At(new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(1200, 48), new Vector2(0.5f, 1));
+            if (gs.LastHealed > 0) Headlines.Say("close");
             FloatText(moneyPanel, "+$" + GameState.Money(salary), UiKit.Green, 0.2f);
-            var picks = deck.RollPicks(3, gs.mandate);
-            bool chosen = false;
-            const float s = 0.92f;
+            rewards.Clear();
+            rewardBusy = false;
             for (int i = 0; i < picks.Count; i++)
             {
-                var cv = CardView.Create(o, picks[i]);
-                cv.dimWhenPoor = false;
-                cv.Rt.anchoredPosition = new Vector2((i - (picks.Count - 1) * 0.5f) * 400, -70);
-                cv.transform.localScale = Vector3.zero;
-                var target = cv;
-                cv.tap.onTap = () =>
-                {
-                    if (chosen) return;
-                    chosen = true;
-                    StartCoroutine(Choose(target));
-                };
-                int k = i;
-                StartCoroutine(Delayed(0.15f + k * 0.12f, UiKit.Tween(0.4f, t => { if (target) target.transform.localScale = Vector3.one * s * Mathf.Max(0, Ease.OutBack(t)); })));
+                var r = new Reward { x = (i - (picks.Count - 1) * 0.5f) * RewardGap };
+                rewards.Add(r);
+                r.cv = RewardCard(o, picks[i], r.x);
+                var target = r.cv;
+                target.transform.localScale = Vector3.zero;
+                StartCoroutine(Delayed(0.15f + i * 0.12f, UiKit.Tween(0.4f, t => { if (target) target.transform.localScale = Vector3.one * RewardScale * Mathf.Max(0, Ease.OutBack(t)); })));
+                RerollButton(o, r);
             }
+            Button(o, "CONTINUAR", "#43c157", "#1d6b2a", new Vector2(0, -372), () => { if (!rewardBusy) StartCoroutine(ConfirmRewards()); });
+        }
+
+        CardView RewardCard(RectTransform parent, CardDef def, float x)
+        {
+            var cv = CardView.Create(parent, def);
+            cv.dimWhenPoor = false;
+            cv.tap.interactable = false;
+            cv.Rt.anchoredPosition = new Vector2(x, RewardY);
+            cv.transform.localScale = Vector3.one * RewardScale;
+            return cv;
+        }
+
+        void RerollButton(RectTransform parent, Reward r)
+        {
+            var b = UiKit.Rect("Reroll", parent).At(new Vector2(0.5f, 0.5f), new Vector2(r.x, -262), new Vector2(250, 62));
+            r.bas = UiKit.Img(b, "Base", UiKit.RR, UiKit.Hex("#163a7a"), 18, true);
+            r.bas.RT().Fill();
+            r.face = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex("#2f6fd6"), 18);
+            r.face.RT().Fill(0, 0, 0, 6);
+            UiKit.Img(r.face.transform, "Icon", UiKit.Refresh, Color.white).RT().At(new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(34, 34), new Vector2(0, 0.5f));
+            r.label = UiKit.Txt(r.face.transform, "T", "CAMBIAR $" + GameState.Money(deck.rerollCost), 26, Color.white, TextAlignmentOptions.Center, true);
+            r.label.RT().Fill(44, 8, 0, 0);
+            r.btn = b;
+            var t = b.gameObject.AddComponent<Tap>();
+            t.visual = b;
+            t.onTap = () => OnReroll(r);
+        }
+
+        void OnReroll(Reward r)
+        {
+            if (rewardBusy || r.rerolled || !r.cv) return;
+            if (!gs.Spend(deck.rerollCost))
+            {
+                StartCoroutine(Shake(r.btn));
+                FloatText(r.btn, "FALTA $" + GameState.Money(deck.rerollCost - gs.money + 0.999f), UiKit.RedSoft, 0);
+                return;
+            }
+            FloatText(moneyPanel, "-$" + GameState.Money(deck.rerollCost), UiKit.RedSoft, 0);
+            r.rerolled = true;
+            r.label.text = "CAMBIADA";
+            r.face.color = UiKit.Hex("#7b8494");
+            r.bas.color = UiKit.Hex("#4a5160");
+            r.btn.GetComponent<Tap>().interactable = false;
+            Headlines.Say("reroll", 10f);
+            StartCoroutine(RerollRoutine(r));
+        }
+
+        // La carta gira, y del otro lado aparece una nueva (distinta de las que están en pantalla).
+        IEnumerator RerollRoutine(Reward r)
+        {
+            rewardBusy = true;
+            var shown = new List<CardDef>();
+            foreach (var o in rewards) if (o.cv) shown.Add(o.cv.def);
+            var nd = deck.RollOne(gs.mandate, shown) ?? deck.RollOne(gs.mandate, null);
+            var old = r.cv;
+            yield return UiKit.Tween(0.18f, t => { if (old) old.transform.localRotation = Quaternion.Euler(0, t * 90f, 0); });
+            var nv = RewardCard(overlay, nd, r.x);
+            nv.transform.localRotation = Quaternion.Euler(0, -90f, 0);
+            r.cv = nv;
+            Destroy(old.gameObject);
+            yield return UiKit.Tween(0.22f, t => { if (nv) nv.transform.localRotation = Quaternion.Euler(0, Mathf.Lerp(-90f, 0, Ease.OutCubic(t)), 0); });
+            yield return UiKit.Tween(0.25f, t => { if (nv) nv.transform.localScale = Vector3.one * RewardScale * (1 + Mathf.Sin(t * Mathf.PI) * 0.08f); });
+            rewardBusy = false;
         }
 
         IEnumerator Delayed(float d, IEnumerator r) { yield return new WaitForSecondsRealtime(d); yield return r; }
 
-        IEnumerator Choose(CardView cv)
+        IEnumerator ConfirmRewards()
         {
-            deck.AddToDeck(cv.def);
+            rewardBusy = true;
             foreach (Transform c in overlay)
+                if (c.name == "Reroll" || c.name == "CONTINUAR") c.gameObject.SetActive(false);
+            var names = new List<string>();
+            Vector3 to = overlay.InverseTransformPoint(deckTop.position);
+            for (int i = 0; i < rewards.Count; i++)
             {
-                var other = c.GetComponent<CardView>();
-                if (other && other != cv) StartCoroutine(UiKit.Tween(0.25f, t => { if (other) other.group.alpha = 1 - t; }));
+                var cv = rewards[i].cv;
+                if (!cv) continue;
+                deck.AddToDeck(cv.def);
+                names.Add(cv.def.title);
+                Vector3 from = cv.transform.localPosition;
+                float s0 = cv.transform.localScale.x;
+                StartCoroutine(UiKit.Tween(0.55f, t =>
+                {
+                    if (!cv) return;
+                    float e = Ease.InCubic(t);
+                    cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 120;
+                    cv.transform.localScale = Vector3.one * Mathf.Lerp(s0, deckScale, e);
+                    cv.transform.localRotation = Quaternion.Euler(0, e * 180f, 0);
+                }));
+                yield return new WaitForSecondsRealtime(0.12f);
             }
-            Vector3 from = cv.transform.localPosition, to = overlay.InverseTransformPoint(deckTop.position);
-            float s0 = cv.transform.localScale.x;
-            yield return UiKit.Tween(0.55f, t =>
-            {
-                float e = Ease.InCubic(t);
-                cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 120;
-                cv.transform.localScale = Vector3.one * Mathf.Lerp(s0, deckScale, e);
-                cv.transform.localRotation = Quaternion.Euler(0, e * 180f, 0);
-            });
-            gs.PushHeadline("Nueva medida en carpeta: " + cv.def.title);
+            yield return new WaitForSecondsRealtime(0.5f);
+            StartCoroutine(Pulse(deckRt));
+            if (names.Count > 0)
+                Headlines.Say("new_cards", (names.Count == 1 ? names[0] : string.Join(", ", names.GetRange(0, names.Count - 1)) + " y " + names[names.Count - 1]));
             var bg = overlay.GetComponent<Image>();
             var ov = overlay;
             yield return UiKit.Tween(0.25f, t => { if (bg) bg.color = new Color(0.02f, 0.04f, 0.1f, 0.78f * (1 - t)); });
             Destroy(ov.gameObject);
             overlay = null;
+            rewards.Clear();
+            rewardBusy = false;
             WaveDirector.I.NextMandate();
-            // crisis forzadas desde el mandato 2 (dos si la calle está muy caliente)
+            // primero se completa la mano con lo que haya en el mazo; después entran las crisis forzadas
+            yield return DealHand(0.1f);
+            while (busy) yield return null;
             var crises = deck.Crises();
             if (gs.mandate >= 2 && crises.Count > 0)
             {
@@ -335,6 +401,7 @@ namespace Argensimia.UI
         {
             if (zoomed) CancelZoom();
             if (placing) CancelPlacement();
+            CancelDrag();
             while (busy || flowBusy) yield return null;
             yield return new WaitForSecondsRealtime(win ? 1f : 0.6f);
             var o = MakeOverlay();

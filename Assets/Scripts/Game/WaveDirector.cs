@@ -198,8 +198,7 @@ namespace Argensimia
             extraColumns = 0;
             reduction = 0;
             gs.SetPhase(Phase.Oleada);
-            gs.PushHeadline(IsFinal ? "ESTALLIDO: todas las columnas marchan sobre la Casa Rosada" :
-                "Arranca el mandato " + gs.mandate + ": columnas avanzan por Av. de Mayo");
+            if (IsFinal) Headlines.Say("wave_final"); else Headlines.Say("wave_start", gs.mandate);
         }
 
         public void OnEnemyGone(Enemy e, bool arr)
@@ -211,7 +210,7 @@ namespace Argensimia
         void EndWave()
         {
             if (gs.phase != Phase.Oleada) return;
-            if (IsFinal) { gs.SetPhase(Phase.Victoria); gs.PushHeadline("Terminó el período: el Gobierno completa su mandato"); return; }
+            if (IsFinal) { gs.SetPhase(Phase.Victoria); Headlines.Say("victory"); return; }
             gs.SetPhase(Phase.Cierre);
         }
 

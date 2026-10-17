@@ -31,6 +31,12 @@ namespace Argensimia
         [Tooltip("Crisis: columnas organizadas extra en la próxima oleada")] public int extraColumns;
         [Tooltip("Efecto: la próxima oleada viene más chica (0,2 = -20%)")] public float nextWaveReduction;
         [Tooltip("Solo se puede jugar en la previa")] public bool previaOnly;
+        [Tooltip("Ministro: $ extra en el sueldo de cada cierre")] public int salaryDelta;
+        [Tooltip("Gobernabilidad que suma (o resta) al jugarla")] public int govDelta;
+        [Tooltip("Gobernabilidad máxima extra")] public int maxGovDelta;
+        [Tooltip("Ministro: gobernabilidad que recupera al cerrar cada mandato")] public int govPerMandate;
+        [Tooltip("Efecto: la policía recupera ya esta fracción de su vida (0,4 = 40%)")] public float healNow;
+        [Tooltip("Ministro: suma a la recuperación de la policía al cerrar el mandato (0,05 = +5%)")] public float healBonus;
 
         [Header("Policía (kind = Colocar)")]
         public DefenseKind defense;
@@ -44,7 +50,7 @@ namespace Argensimia
         [Tooltip("Prefab a instanciar en el mapa. Vacío = se arma con los modelos de policía")] public GameObject placePrefab;
         [Tooltip("Slots que ocupa en el camino")] [Min(1)] public int slotSize = 1;
 
-        // Nivel 2 = +40% al stat principal; nivel 3 = x2 y +30% de vida.
+        // Nivel 2 = +40% al stat principal; nivel 3 = x2 y +30% de vida. Se sube soltando la carta sobre una igual del mapa.
         public static float LevelMul(int level) => level >= 3 ? 2f : level == 2 ? 1.4f : 1f;
         public static float LevelHp(int level) => level >= 3 ? 1.3f : 1f;
 
@@ -72,6 +78,16 @@ namespace Argensimia
             if (moneyMultiplier < 1) parts.Add(Tag(false, "-" + Mathf.RoundToInt((1 - moneyMultiplier) * 100) + "% del dinero"));
             if (extraColumns > 0) parts.Add(Tag(false, "+" + extraColumns + " columna"));
             if (nextWaveReduction > 0) parts.Add(Tag(true, "oleada -" + Mathf.RoundToInt(nextWaveReduction * 100) + "%"));
+            if (salaryDelta != 0) parts.Add(Tag(salaryDelta > 0, (salaryDelta > 0 ? "+$" : "-$") + GameState.Money(salaryDelta) + " sueldo"));
+            if (maxGovDelta > 0 && govDelta == maxGovDelta) parts.Add(Tag(true, "+" + govDelta + " gobernabilidad (y máx.)"));
+            else
+            {
+                if (govDelta != 0) parts.Add(Tag(govDelta > 0, (govDelta > 0 ? "+" : "-") + Mathf.Abs(govDelta) + " gobernabilidad"));
+                if (maxGovDelta != 0) parts.Add(Tag(maxGovDelta > 0, (maxGovDelta > 0 ? "+" : "-") + Mathf.Abs(maxGovDelta) + " gob. máx."));
+            }
+            if (govPerMandate != 0) parts.Add(Tag(govPerMandate > 0, "+" + govPerMandate + " gob./mandato"));
+            if (healNow > 0) parts.Add(Tag(true, "policía +" + Mathf.RoundToInt(healNow * 100) + "% vida"));
+            if (healBonus > 0) parts.Add(Tag(true, "recupera " + Mathf.RoundToInt((GameState.BaseCloseHeal + healBonus) * 100) + "% al cierre"));
             return string.Join("   ", parts);
         }
 

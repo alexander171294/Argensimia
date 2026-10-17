@@ -35,7 +35,8 @@ namespace Argensimia
             Music = PlayerPrefs.GetFloat(KeyMusic, 0.7f);
             Sfx = PlayerPrefs.GetFloat(KeySfx, 0.8f);
             tracks.AddRange(Resources.LoadAll<AudioClip>("Music"));
-            tracks.Sort((a, b) => string.CompareOrdinal(b.name, a.name)); // arranca con La Marcha del Balcón
+            // orden del loop (alterna marchas y temas más movidos); los que no estén en la lista van al final
+            tracks.Sort((a, b) => Order(a.name).CompareTo(Order(b.name)));
             src = new AudioSource[2];
             for (int i = 0; i < 2; i++)
             {
@@ -47,6 +48,9 @@ namespace Argensimia
             }
             if (tracks.Count > 0) Play(0, false);
         }
+
+        static readonly string[] Playlist = { "La_Marcha_del_Balcon", "Fuerzas_de_la_Plaza", "Candombe_en_la_Plaza", "La_Gran_Marcha", "Corte_de_Calle" };
+        static int Order(string n) { int i = System.Array.IndexOf(Playlist, n); return i < 0 ? 100 : i; }
 
         void Play(int t, bool cross)
         {

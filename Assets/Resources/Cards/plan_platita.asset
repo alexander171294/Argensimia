@@ -20,8 +20,10 @@ MonoBehaviour:
     columnas m\xE1s tranquilas."
   art: {fileID: 0}
   color: {r: 0.5411765, g: 0.24705882, b: 0.76862746, a: 1}
-  copies: 2
-  headline: "Lluvia de bonos: \xABes para reactivar el consumo\xBB"
+  copies: 1
+  headline: "Lluvia de bonos: \xABes para reactivar el consumo\xBB|El Gobierno reparte
+    bonos antes de las elecciones|\xABEs para que la gente llegue a fin de mes\xBB,
+    justifican"
   rarity: 1
   inPool: 1
   popularityDelta: 10
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

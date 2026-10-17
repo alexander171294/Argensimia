@@ -20,8 +20,9 @@ MonoBehaviour:
     las columnas llegan m\xE1s enojadas."
   art: {fileID: 0}
   color: {r: 0.84705883, g: 0.27058825, b: 0.18431373, a: 1}
-  copies: 2
-  headline: "AFIP anuncia un nuevo impuesto \xABtransitorio\xBB"
+  copies: 1
+  headline: "AFIP anuncia un nuevo impuesto \xABtransitorio\xBB|Nuevo tributo: \xABes
+    solo por esta vez\xBB, dicen en Hacienda|Rechazo empresario al nuevo impuesto"
   rarity: 0
   inPool: 1
   popularityDelta: -16
@@ -33,6 +34,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

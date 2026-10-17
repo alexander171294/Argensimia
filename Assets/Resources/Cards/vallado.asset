@@ -18,11 +18,13 @@ MonoBehaviour:
   cost: 620
   description: "Una l\xEDnea de vallas al fondo del slot. Frena a todos hasta que
     la derriban; los encapuchados la rompen el triple de r\xE1pido. Las balas de
-    goma pueden disparar por detr\xE1s."
+    goma pueden disparar por detr\xE1s. Soltala sobre una igual: NV 2 y 3."
   art: {fileID: 0}
   color: {r: 0.12156863, g: 0.64705884, b: 0.6039216, a: 1}
   copies: 3
-  headline: "Vallan la Plaza: \xABes preventivo\xBB, explican desde Casa Rosada"
+  headline: "Vallan la Plaza: \xABes preventivo\xBB, explican desde Casa Rosada|M\xE1s
+    vallas en la Plaza: el Gobierno blinda la Casa Rosada|Cercan la Plaza de Mayo:
+    vecinos no pueden cruzar"
   rarity: 0
   inPool: 1
   popularityDelta: 0
@@ -34,6 +36,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 300

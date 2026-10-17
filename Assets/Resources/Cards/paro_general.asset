@@ -20,7 +20,9 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.5411765, g: 0.12156863, b: 0.12156863, a: 1}
   copies: 0
-  headline: "La CGT confirma paro general y movilizaci\xF3n a Plaza de Mayo"
+  headline: "La CGT confirma paro general y movilizaci\xF3n a Plaza de Mayo|Paro
+    total: no hay colectivos ni trenes|La CGT marcha con todas las columnas a la
+    Plaza"
   rarity: 0
   inPool: 0
   popularityDelta: 0
@@ -32,6 +34,12 @@ MonoBehaviour:
   extraColumns: 1
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

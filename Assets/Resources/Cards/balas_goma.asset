@@ -13,16 +13,19 @@ MonoBehaviour:
   m_Name: balas_goma
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: balas_goma
-  title: "Infanter\xEDa con balas de goma"
+  title: Escopeteros
   kind: 0
   cost: 1380
-  description: "Agentes sin escudo con escopetas antitumulto. Disparan balas de goma
-    hasta 2 casilleros adelante en su carril: desde atr\xE1s de un vallado le tiran
-    primero a los que lo est\xE1n golpeando. Tambi\xE9n frenan a todos los que llegan."
+  description: "Infanter\xEDa sin escudo con escopetas antitumulto. Disparan balas
+    de goma hasta 2 casilleros adelante en su carril: desde atr\xE1s de un vallado
+    le tiran primero a los que lo est\xE1n golpeando. Tambi\xE9n frenan a todos los
+    que llegan. Soltala sobre una igual: NV 2 y 3."
   art: {fileID: 0}
   color: {r: 0.7529412, g: 0.38039216, b: 0.16862746, a: 1}
-  copies: 1
-  headline: "Balas de goma en la Plaza: hay heridos y la oposici\xF3n pide un informe"
+  copies: 2
+  headline: "Balas de goma en la Plaza: hay heridos y la oposici\xF3n pide un informe|Disparos
+    de goma en la Plaza: denuncian represi\xF3n|Organismos de DDHH condenan el uso
+    de balas de goma"
   rarity: 1
   inPool: 1
   popularityDelta: 0
@@ -34,6 +37,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 6
   stats:
     hp: 400

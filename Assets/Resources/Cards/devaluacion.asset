@@ -21,7 +21,8 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.47843137, g: 0.1764706, b: 0.1764706, a: 1}
   copies: 0
-  headline: "Disparada del d\xF3lar: el Gobierno habla de \xABreacomodamiento\xBB"
+  headline: "Disparada del d\xF3lar: el Gobierno habla de \xABreacomodamiento\xBB|Salta
+    el d\xF3lar: corridas en las casas de cambio|El peso se derrumba frente al d\xF3lar"
   rarity: 0
   inPool: 0
   popularityDelta: 0
@@ -33,6 +34,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

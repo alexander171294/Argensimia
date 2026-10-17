@@ -21,7 +21,9 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.72156864, g: 0.5254902, b: 0.043137256, a: 1}
   copies: 0
-  headline: "Asume el nuevo ministro de Econom\xEDa: \xABno hay plata\xBB, advierte"
+  headline: "Asume el nuevo ministro de Econom\xEDa: \xABno hay plata\xBB, advierte|Nuevo
+    ministro de Econom\xEDa: el d\xF3lar reacciona|Jur\xF3 el ministro de Econom\xEDa:
+    \xABhay que ordenar las cuentas\xBB"
   rarity: 1
   inPool: 1
   popularityDelta: 0
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

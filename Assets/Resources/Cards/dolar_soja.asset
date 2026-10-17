@@ -21,7 +21,9 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.6039216, g: 0.65882355, b: 0.22745098, a: 1}
   copies: 0
-  headline: "Nuevo d\xF3lar soja: liquidan r\xE9cord en una semana"
+  headline: "Nuevo d\xF3lar soja: liquidan r\xE9cord en una semana|El campo liquida
+    d\xF3lares con el nuevo tipo de cambio|Entra una cosecha de d\xF3lares al Banco
+    Central"
   rarity: 1
   inPool: 1
   popularityDelta: -4
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 1
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

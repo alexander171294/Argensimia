@@ -61,8 +61,6 @@ namespace Argensimia.UI
         {
             var t = UiKit.Txt(fxLayer, "WFloat", s, 30, c, TextAlignmentOptions.Center, true);
             t.RT().sizeDelta = new Vector2(200, 40);
-            t.outlineWidth = 0.25f;
-            t.outlineColor = new Color32(30, 0, 0, 255);
             yield return UiKit.Tween(1.1f, k =>
             {
                 t.transform.localPosition = (Vector3)p0 + Vector3.up * Ease.OutCubic(k) * 46;

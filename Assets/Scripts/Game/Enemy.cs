@@ -257,7 +257,7 @@ namespace Argensimia
                 if (def.tireEvery > 0 && x < 34)
                 {
                     tireT -= dt;
-                    if (tireT <= 0) { tireT = def.tireEvery; TireFire.Drop(transform.position); }
+                    if (tireT <= 0) { tireT = def.tireEvery; TireFire.Drop(transform.position); Headlines.Say("tire", 15f); }
                 }
                 Place(true);
             }
@@ -271,7 +271,7 @@ namespace Argensimia
             jumpT = 0;
             jumpFrom = x;
             jumpTo = d.WestFace - 1.2f;
-            if (GameState.I) GameState.I.PushHeadline("Un encapuchado salta el cerco policial");
+            Headlines.Say("jump", 6f);
         }
 
         // Salto en arco por encima del retén (con giro), sin poder ser frenado en el aire.
@@ -344,6 +344,7 @@ namespace Argensimia
             {
                 atkCd = 1f / rate;
                 MortarShell.Fire(transform.position + Vector3.up * 2f, best.transform.position, damage, def.stats.area);
+            Headlines.Say("mortar", 15f);
                 punch = 1;
             }
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(best.transform.position - transform.position), Time.deltaTime * 5);
@@ -382,6 +383,7 @@ namespace Argensimia
         {
             if (Dead) return;
             if (def.popOnHit > 0 && GameState.I) GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
+            if (def.kind == UnitKind.Jubilado) Headlines.Say("capture_jubilado", 12f); else Headlines.Say("capture", 20f);
             Die(true);
         }
 
@@ -391,6 +393,7 @@ namespace Argensimia
             {
                 GameState.I.LoseGovernability(def.govDamage, transform.position + Vector3.up * 4.5f);
                 if (def.popOnArrive > 0) GameState.I.LosePopularity(def.popOnArrive, transform.position + Vector3.up * 4.5f);
+                if (def.kind == UnitKind.Columna) Headlines.Say("arrive_column", 8f); else Headlines.Say("arrive", 10f);
             }
             Die(false, true);
         }

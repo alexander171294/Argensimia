@@ -16,22 +16,32 @@ MonoBehaviour:
   title: Min. Seguridad
   kind: 2
   cost: 2230
-  description: 'Ministro pasivo: todas las defensas policiales tienen +25% de gobernabilidad.'
+  description: "Ministro pasivo: la polic\xEDa tiene +20% de gobernabilidad y al
+    cerrar cada mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta:
+    -1% de popularidad por mandato."
   art: {fileID: 0}
   color: {r: 0.16862746, g: 0.2901961, b: 0.5411765, a: 1}
   copies: 0
-  headline: "Asume la nueva ministra de Seguridad: \xABel que las hace, las paga\xBB"
+  headline: "Asume la nueva ministra de Seguridad: \xABel que las hace, las paga\xBB|Nueva
+    ministra de Seguridad promete \xABorden en las calles\xBB|Mano dura: asume la
+    nueva conducci\xF3n de Seguridad"
   rarity: 2
   inPool: 1
   popularityDelta: 0
   moneyDelta: 0
   incomeDelta: 0
-  popPerMandate: 0
-  defenseHpBonus: 0.25
+  popPerMandate: -1
+  defenseHpBonus: 0.2
   moneyMultiplier: 1
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0.05
   defense: 0
   stats:
     hp: 0

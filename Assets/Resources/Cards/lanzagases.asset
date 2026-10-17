@@ -18,11 +18,14 @@ MonoBehaviour:
   cost: 1620
   description: "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros
     adelante, al azar en su carril o en los de al lado, al grupo m\xE1s denso: da\xF1o
-    por segundo en un \xE1rea y -40% de velocidad."
+    por segundo en un \xE1rea y -40% de velocidad. Soltala sobre una igual: NV 2
+    y 3."
   art: {fileID: 0}
   color: {r: 0.42745098, g: 0.49019608, b: 0.18039216, a: 1}
   copies: 1
-  headline: 'Gases en la Plaza: vecinos denuncian ardor en los ojos'
+  headline: "Gases en la Plaza: vecinos denuncian ardor en los ojos|Nube de gas sobre
+    la Plaza: corridas en Av. de Mayo|Lacrim\xF3genos en el microcentro: cierran
+    comercios"
   rarity: 1
   inPool: 1
   popularityDelta: 0
@@ -34,6 +37,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 2
   stats:
     hp: 120

@@ -20,7 +20,8 @@ MonoBehaviour:
   art: {fileID: 0}
   color: {r: 0.78039217, g: 0.2784314, b: 0.47843137, a: 1}
   copies: 2
-  headline: "Cadena nacional: el Presidente pide \xABcalma y paciencia\xBB"
+  headline: "Cadena nacional: el Presidente pide \xABcalma y paciencia\xBB|El Presidente
+    habla por cadena nacional|Interrumpen la novela para un mensaje presidencial"
   rarity: 0
   inPool: 1
   popularityDelta: 5
@@ -32,6 +33,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

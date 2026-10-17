@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: min_desarrollo
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: min_desarrollo
-  title: Min. Desarrollo Social
+  title: Min. Desarrollo
   kind: 2
   cost: 2470
-  description: 'Ministro pasivo: cada mandato suma 3% de popularidad.'
+  description: 'Ministro pasivo de Desarrollo Social: cada mandato suma 3% de popularidad.'
   art: {fileID: 0}
   color: {r: 0.24705882, g: 0.6039216, b: 0.47843137, a: 1}
   copies: 0
-  headline: Desarrollo Social anuncia refuerzo de planes
+  headline: "Desarrollo Social anuncia refuerzo de planes|Asume Desarrollo Social:
+    \xABnadie va a quedar afuera\xBB|M\xE1s planes sociales con la nueva gesti\xF3n"
   rarity: 2
   inPool: 1
   popularityDelta: 0
@@ -32,6 +33,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

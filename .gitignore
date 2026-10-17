@@ -126,3 +126,8 @@ BlenderSrc/*.blend1
 # Capturas de trabajo de la escena
 /[Aa]ssets/_Shots/
 /[Aa]ssets/_Shots.meta
+
+# Restos de git/herramientas que no se pueden borrar desde la sesión de Claude (no versionar)
+*.lock
+!packages-lock.json
+stale-*

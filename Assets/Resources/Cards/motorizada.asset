@@ -18,11 +18,13 @@ MonoBehaviour:
   cost: 2230
   description: 'Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av.
     de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot
-    ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.'
+    ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.
+    Soltala sobre una igual: NV 2 y 3.'
   art: {fileID: 0}
   color: {r: 0.14117648, g: 0.2509804, b: 0.56078434, a: 1}
-  copies: 1
-  headline: "Irrumpe la polic\xEDa motorizada en la Plaza"
+  copies: 0
+  headline: "Irrumpe la polic\xEDa motorizada en la Plaza|Las motos de la Federal
+    avanzan sobre los manifestantes|Ruido de motores en la Plaza: llega la motorizada"
   rarity: 2
   inPool: 1
   popularityDelta: 0
@@ -34,6 +36,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 4
   stats:
     hp: 300

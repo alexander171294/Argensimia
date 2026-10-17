@@ -48,42 +48,42 @@ public static class HudSetup
             "Una línea de vallas al fondo del slot. Frena a todos hasta que la derriban; los encapuchados la rompen el triple de rápido. Las balas de goma pueden disparar por detrás.",
             "Vallan la Plaza: «es preventivo», explican desde Casa Rosada",
             c => { c.defense = DefenseKind.Vallado; c.stats = S(300, 0, 0, 0); });
-        n += Card("infanteria", "Infantería con escudos", CardKind.Colocar, 1140, "#3557b8", 2, Rarity.Comun,
+        n += Card("infanteria", "Infantería", CardKind.Colocar, 1140, "#3557b8", 2, Rarity.Comun,
             "Tanque barato: una línea de agentes con escudos que frena a todos los que llegan y los golpea cuerpo a cuerpo. No llega detrás de un vallado.",
             "Despliegan la Infantería frente a la Casa Rosada",
             c => { c.defense = DefenseKind.Infanteria; c.stats = S(600, 8, 1, 1.5f); });
-        n += Card("balas_goma", "Infantería con balas de goma", CardKind.Colocar, 1380, "#c0612b", 1, Rarity.PocoComun,
-            "Agentes sin escudo con escopetas antitumulto. Disparan balas de goma hasta 2 casilleros adelante en su carril: desde atrás de un vallado le tiran primero a los que lo están golpeando. También frenan a todos los que llegan.",
+        n += Card("balas_goma", "Escopeteros", CardKind.Colocar, 1380, "#c0612b", 2, Rarity.PocoComun,
+            "Infantería sin escudo con escopetas antitumulto. Disparan balas de goma hasta 2 casilleros adelante en su carril: desde atrás de un vallado le tiran primero a los que lo están golpeando. También frenan a todos los que llegan.",
             "Balas de goma en la Plaza: hay heridos y la oposición pide un informe",
             c => { c.defense = DefenseKind.BalasGoma; c.stats = S(400, 9, 1.2f, 14); });
         n += Card("lanzagases", "Lanzagases", CardKind.Colocar, 1620, "#6d7d2e", 1, Rarity.PocoComun,
             "Un agente solo con lanzagranadas. Tira granadas de gas hasta 3 casilleros adelante, al azar en su carril o en los de al lado, al grupo más denso: daño por segundo en un área y -40% de velocidad.",
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
             c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
-        n += Card("detencion", "Brigada de detención", CardKind.Colocar, 1760, "#4b4f9e", 0, Rarity.PocoComun,
-            "Cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales; no puede con columnas.",
+        n += Card("detencion", "Detenciones", CardKind.Colocar, 1760, "#4b4f9e", 1, Rarity.PocoComun,
+            "Brigada de detención: cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales; no puede con columnas.",
             "Detenciones en la Plaza: la oposición pide explicaciones",
             c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 2.5f); });
-        n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 1, Rarity.Rara,
+        n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 0, Rarity.Rara,
             "Ocupa un slot. Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s a cada uno. Mientras sale, en el slot ya aparece otra recargando; si los manifestantes llegan, le bajan la gobernabilidad.",
             "Irrumpe la policía motorizada en la Plaza",
             c => { c.defense = DefenseKind.Motorizada; c.stats = S(300, 40, 0, 0); c.push = 3; c.stun = 1; c.cycleOff = 12; });
-        n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 1, Rarity.Rara,
+        n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 0, Rarity.Rara,
             "Cañón de agua de hasta 4 casilleros adelante. Apunta solo al manifestante más cercano, en su carril o en los de al lado: lo moja, lo empuja 2 m/s y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
             "Hidrantes en la Plaza: denuncian represión",
             c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
         // ---- Efecto
-        n += Card("impuestazo", "Impuestazo", CardKind.Efecto, 0, "#d8452f", 2, Rarity.Comun,
+        n += Card("impuestazo", "Impuestazo", CardKind.Efecto, 0, "#d8452f", 1, Rarity.Comun,
             "La AFIP sale a recaudar. Entra plata, pero la calle se calienta y las columnas llegan más enojadas.",
             "AFIP anuncia un nuevo impuesto «transitorio»", c => { c.moneyDelta = 3000; c.popularityDelta = -16; });
-        n += Card("plan_platita", "Plan platita", CardKind.Efecto, 1850, "#8a3fc4", 2, Rarity.PocoComun,
+        n += Card("plan_platita", "Plan platita", CardKind.Efecto, 1850, "#8a3fc4", 1, Rarity.PocoComun,
             "Reparto de fondos. Sube la popularidad: menos gente en la calle y columnas más tranquilas.",
             "Lluvia de bonos: «es para reactivar el consumo»", c => c.popularityDelta = 10);
-        n += Card("prestamo", "Préstamo FMI", CardKind.Efecto, 0, "#d9961c", 1, Rarity.Rara,
+        n += Card("prestamo", "Préstamo FMI", CardKind.Efecto, 0, "#d9961c", 0, Rarity.Rara,
             "Entran dólares ya, a cambio de ajuste: baja el ingreso por segundo durante las oleadas.",
             "Llegó el desembolso del Fondo: «es el último», aseguran", c => { c.moneyDelta = 5000; c.incomeDelta = -15; });
-        n += Card("blanqueo", "Blanqueo", CardKind.Efecto, 1000, "#2f9a4a", 2, Rarity.PocoComun,
+        n += Card("blanqueo", "Blanqueo", CardKind.Efecto, 1000, "#2f9a4a", 1, Rarity.PocoComun,
             "Moratoria para que entre plata al sistema. Sube el ingreso por segundo, con algo de costo político.",
             "Lanzan un blanqueo: «esta vez sí», prometen", c => { c.incomeDelta = 20; c.popularityDelta = -6; });
         n += Card("cadena_nacional", "Cadena nacional", CardKind.Efecto, 520, "#c7477a", 2, Rarity.Comun,
@@ -101,11 +101,46 @@ public static class HudSetup
             "Ministro pasivo: +$25/s en las oleadas, pero cada mandato resta 2% de popularidad.",
             "Asume el nuevo ministro de Economía: «no hay plata», advierte", c => { c.incomeDelta = 25; c.popPerMandate = -2; });
         n += Card("min_seguridad", "Min. Seguridad", CardKind.Ministro, 2230, "#2b4a8a", 0, Rarity.Rara,
-            "Ministro pasivo: todas las defensas policiales tienen +25% de gobernabilidad.",
-            "Asume la nueva ministra de Seguridad: «el que las hace, las paga»", c => c.defenseHpBonus = 0.25f);
-        n += Card("min_desarrollo", "Min. Desarrollo Social", CardKind.Ministro, 2470, "#3f9a7a", 0, Rarity.Rara,
-            "Ministro pasivo: cada mandato suma 3% de popularidad.",
+            "Ministro pasivo: la policía tiene +20% de gobernabilidad y al cerrar cada mandato recupera hasta 30% (en vez de 25%). La mano dura cuesta: -1% de popularidad por mandato.",
+            "Asume la nueva ministra de Seguridad: «el que las hace, las paga»", c => { c.defenseHpBonus = 0.2f; c.healBonus = 0.05f; c.popPerMandate = -1; });
+        n += Card("min_desarrollo", "Min. Desarrollo", CardKind.Ministro, 2470, "#3f9a7a", 0, Rarity.Rara,
+            "Ministro pasivo de Desarrollo Social: cada mandato suma 3% de popularidad.",
             "Desarrollo Social anuncia refuerzo de planes", c => c.popPerMandate = 3);
+
+        // ---- Tanda 2: solo entran por las cartas del cierre (copias 0). Siempre suman por un lado y restan por otro.
+        n += Card("maquinita", "La maquinita", CardKind.Efecto, 0, "#4f8a3a", 1, Rarity.Comun,
+            "El Banco Central imprime: entra plata ya, pero la inflación se nota en la calle.",
+            "Emisión récord: «es para cubrir el déficit», explican", c => { c.moneyDelta = 2000; c.popularityDelta = -8; });
+        n += Card("futbol", "Fútbol para todos", CardKind.Efecto, 700, "#2e8bc0", 0, Rarity.Comun,
+            "Partidos gratis por TV abierta. La gente se queda en casa, pero sale caro mantenerlo.",
+            "Vuelve el fútbol gratis: la oposición habla de «pan y circo»", c => { c.popularityDelta = 6; c.incomeDelta = -5; });
+        n += Card("aguinaldo", "Aguinaldo", CardKind.Efecto, 1200, "#c4883f", 0, Rarity.PocoComun,
+            "Medio aguinaldo extra para todos: sube mucho la popularidad y baja el ingreso por segundo.",
+            "Anuncian un aguinaldo extra: festejos en los barrios", c => { c.popularityDelta = 12; c.incomeDelta = -12; });
+        n += Card("operativo", "Relevo", CardKind.Efecto, 900, "#3a5f9e", 0, Rarity.PocoComun,
+            "Operativo sorpresa, relevo de tropas en plena Plaza: toda la policía recupera 40% de su vida al instante. A la gente no le gusta.",
+            "Relevo sorpresa de las fuerzas en la Plaza de Mayo", c => { c.healNow = 0.4f; c.popularityDelta = -3; });
+        n += Card("decretazo", "Decretazo", CardKind.Efecto, 0, "#8a5a2b", 0, Rarity.PocoComun,
+            "DNU por la caja: entra plata, pero se pierde gobernabilidad (nunca te deja en 0).",
+            "Decretazo: el Congreso denuncia «avasallamiento institucional»", c => { c.moneyDelta = 3500; c.govDelta = -2; });
+        n += Card("refuerzo_federal", "Refuerzo federal", CardKind.Efecto, 2800, "#2c6a5a", 0, Rarity.Rara,
+            "Llegan fuerzas federales: +3 de gobernabilidad y +3 al máximo. Las provincias se quejan.",
+            "Desembarcan fuerzas federales en la Capital", c => { c.govDelta = 3; c.maxGovDelta = 3; c.popularityDelta = -5; });
+        n += Card("privatizacion", "Privatización", CardKind.Efecto, 0, "#6a4a8a", 0, Rarity.Rara,
+            "Se vende una empresa del Estado: mucha plata de golpe, pero se pierde una fuente de ingresos y la calle se enoja.",
+            "Venden la empresa estatal: «es para sanear las cuentas»", c => { c.moneyDelta = 7000; c.popularityDelta = -10; c.incomeDelta = -10; });
+        n += Card("acuerdo_cgt", "Pacto social", CardKind.Efecto, 2600, "#8a2f2f", 0, Rarity.Rara,
+            "Acuerdo con la CGT: la próxima oleada viene 30% más chica, a cambio de concesiones que bajan el ingreso. Solo en la previa.",
+            "Gobierno y CGT firman un acuerdo: «paz social», celebran", c => { c.nextWaveReduction = 0.3f; c.incomeDelta = -10; c.previaOnly = true; });
+        n += Card("super_ministro", "Super Ministro", CardKind.Ministro, 2900, "#c9a227", 0, Rarity.Rara,
+            "Ministro pasivo: concentra Economía, Producción y Hacienda. +$50/s en las oleadas y +$500 de sueldo por mandato, pero el ajuste resta 3% de popularidad por mandato.",
+            "Asume el Super Ministro: «vamos a ordenar la macro»", c => { c.incomeDelta = 50; c.salaryDelta = 500; c.popPerMandate = -3; });
+        n += Card("min_interior", "Min. del Interior", CardKind.Ministro, 1900, "#5a6e3a", 0, Rarity.PocoComun,
+            "Ministro pasivo: negocia con gobernadores y recupera 1 de gobernabilidad al cerrar cada mandato. Las transferencias bajan el ingreso.",
+            "El ministro del Interior cierra acuerdos con los gobernadores", c => { c.govPerMandate = 1; c.incomeDelta = -10; });
+        n += Card("vocero", "Vocero", CardKind.Ministro, 1300, "#b8477a", 0, Rarity.PocoComun,
+            "Ministro pasivo: el vocero presidencial da conferencias todos los días. +2% de popularidad por mandato; la pauta oficial cuesta $8/s.",
+            "El vocero presidencial: «está todo bajo control»", c => { c.popPerMandate = 2; c.incomeDelta = -8; });
 
         // ---- Crisis (entran solas a la mano; el costo es lo que sale evitarlas)
         n += Card("devaluacion", "Devaluación", CardKind.Crisis, 1850, "#7a2d2d", 0, Rarity.Comun,
@@ -123,6 +158,43 @@ public static class HudSetup
         return n;
     }
 
+    // Variantes extra de titular por carta (la marquesina elige una al azar sin repetir la última).
+    static readonly System.Collections.Generic.Dictionary<string, string> MoreHeadlines = new System.Collections.Generic.Dictionary<string, string>
+    {
+        ["vallado"] = "Más vallas en la Plaza: el Gobierno blinda la Casa Rosada|Cercan la Plaza de Mayo: vecinos no pueden cruzar",
+        ["infanteria"] = "Escudos y cascos: la Infantería forma frente a Balcarce 50|Refuerzan el operativo con la Guardia de Infantería",
+        ["balas_goma"] = "Disparos de goma en la Plaza: denuncian represión|Organismos de DDHH condenan el uso de balas de goma",
+        ["lanzagases"] = "Nube de gas sobre la Plaza: corridas en Av. de Mayo|Lacrimógenos en el microcentro: cierran comercios",
+        ["detencion"] = "Despliegan la brigada de detenciones en la Plaza|Policía de civil identifica a los «revoltosos»",
+        ["motorizada"] = "Las motos de la Federal avanzan sobre los manifestantes|Ruido de motores en la Plaza: llega la motorizada",
+        ["hidrante"] = "Llegan los «Neptunos»: chorros de agua en la Plaza|El camión hidrante dispersa a los manifestantes",
+        ["impuestazo"] = "Nuevo tributo: «es solo por esta vez», dicen en Hacienda|Rechazo empresario al nuevo impuesto",
+        ["plan_platita"] = "El Gobierno reparte bonos antes de las elecciones|«Es para que la gente llegue a fin de mes», justifican",
+        ["prestamo"] = "Acuerdo con el FMI: llegan los dólares y el ajuste|El Fondo aprueba el desembolso con «metas exigentes»",
+        ["blanqueo"] = "Blanqueo de capitales: «traigan los dólares del colchón»|La oposición critica el «perdón fiscal»",
+        ["cadena_nacional"] = "El Presidente habla por cadena nacional|Interrumpen la novela para un mensaje presidencial",
+        ["feriado_puente"] = "Fin de semana largo: la Costa Atlántica, colapsada|Récord de turistas por el feriado puente",
+        ["dolar_soja"] = "El campo liquida dólares con el nuevo tipo de cambio|Entra una cosecha de dólares al Banco Central",
+        ["maquinita"] = "El Central imprime billetes a toda máquina|Récord de emisión: los economistas advierten por la inflación",
+        ["futbol"] = "Vuelven los partidos gratis por TV abierta|Fútbol para todos: los bares se llenan",
+        ["aguinaldo"] = "Medio aguinaldo extra: largas filas en los cajeros|Festejo en los barrios por el aguinaldo extra",
+        ["operativo"] = "Llegan efectivos de refresco a la Plaza|Cambio de guardia sorpresa: la policía se reorganiza",
+        ["decretazo"] = "El Presidente firma un DNU de madrugada|Por decreto: el Gobierno saltea al Congreso",
+        ["refuerzo_federal"] = "Gendarmería y Prefectura llegan a la Capital|Fuerzas federales toman posiciones en la Plaza",
+        ["privatizacion"] = "Venden la joya de la abuela: privatizan otra empresa|Protestas de trabajadores por la privatización",
+        ["acuerdo_cgt"] = "Pacto social: la CGT levanta la medida de fuerza|Foto en Casa Rosada con la cúpula de la CGT",
+        ["min_economia"] = "Nuevo ministro de Economía: el dólar reacciona|Juró el ministro de Economía: «hay que ordenar las cuentas»",
+        ["min_seguridad"] = "Nueva ministra de Seguridad promete «orden en las calles»|Mano dura: asume la nueva conducción de Seguridad",
+        ["min_desarrollo"] = "Asume Desarrollo Social: «nadie va a quedar afuera»|Más planes sociales con la nueva gestión",
+        ["super_ministro"] = "Super Ministro: concentra Economía, Producción y Agricultura|Llega el Super Ministro y los mercados festejan",
+        ["min_interior"] = "El ministro del Interior recorre las provincias|Acuerdo con los gobernadores: «hay gobernabilidad»",
+        ["vocero"] = "Conferencia del vocero: «no tenemos nada para informar»|El vocero presidencial desmiente todo",
+        ["devaluacion"] = "Salta el dólar: corridas en las casas de cambio|El peso se derrumba frente al dólar",
+        ["paro_general"] = "Paro total: no hay colectivos ni trenes|La CGT marcha con todas las columnas a la Plaza",
+        ["tarifazo"] = "Llegan las boletas: aumentos de tres cifras en luz y gas|Ruidazo en los barrios contra el tarifazo",
+        ["escandalo"] = "Escándalo: aparecen bolsos con dinero en un convento|Filtran un video comprometedor de un funcionario",
+    };
+
     static UnitStats S(float hp, float dmg, float rate, float range, float area = 0, float speed = 0) =>
         new UnitStats { hp = hp, damage = dmg, rate = rate, range = range, area = area, speed = speed };
 
@@ -135,13 +207,16 @@ public static class HudSetup
         bool isNew = c == null;
         if (isNew) c = ScriptableObject.CreateInstance<CardDef>();
         var art = c.art;
-        c.id = id; c.title = title; c.kind = kind; c.cost = cost; c.copies = copies; c.description = desc; c.headline = headline;
+        c.id = id; c.title = title; c.kind = kind; c.cost = cost; c.copies = copies; c.description = desc;
+        c.headline = MoreHeadlines.TryGetValue(id, out var more) ? headline + "|" + more : headline; // variantes separadas por |
         c.rarity = rarity; c.inPool = true;
         c.popularityDelta = 0; c.moneyDelta = 0; c.incomeDelta = 0; c.popPerMandate = 0; c.defenseHpBonus = 0;
         c.moneyMultiplier = 1; c.extraColumns = 0; c.nextWaveReduction = 0; c.previaOnly = false;
+        c.salaryDelta = 0; c.govDelta = 0; c.maxGovDelta = 0; c.govPerMandate = 0; c.healNow = 0; c.healBonus = 0;
         c.stats = default; c.maxBlock = 0; c.slow = 0; c.slowTime = 0; c.stun = 0; c.push = 0; c.cycleOn = 0; c.cycleOff = 0; c.slotSize = 1;
         ColorUtility.TryParseHtmlString(hex, out c.color);
         setup(c);
+        if (kind == CardKind.Colocar) c.description += " Soltala sobre una igual: NV 2 y 3.";
         c.art = art;
         if (isNew) AssetDatabase.CreateAsset(c, path);
         EditorUtility.SetDirty(c);

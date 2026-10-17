@@ -59,8 +59,8 @@ namespace Argensimia.UI
             foreach (var t in new[] { m.ribbonTxt, m.ribbonShadowTxt }) { t.enableAutoSizing = true; t.fontSizeMin = 26; t.fontSizeMax = 54; t.characterSpacing = 3; }
             m.subTxt = UiKit.Txt(root, "Sub", "", 32, UiKit.Cream, TextAlignmentOptions.Center, true);
             m.subTxt.RT().At(new Vector2(0.5f, 1), new Vector2(0, -272), new Vector2(1400, 60), new Vector2(0.5f, 1));
-            m.subTxt.outlineWidth = 0.22f;
-            m.subTxt.outlineColor = new Color32(10, 10, 25, 255);
+            // sin override de contorno: un outlineWidth > 0,16 desborda el SDF y la línea se ve como bloques negros
+            m.subTxt.textWrappingMode = TextWrappingModes.Normal;
             m.StartCoroutine(m.RibbonPulse());
 
             var b = UiKit.Rect("NewGame", root).At(new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(460, 112), new Vector2(0.5f, 0));

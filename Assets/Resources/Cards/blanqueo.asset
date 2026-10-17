@@ -20,8 +20,10 @@ MonoBehaviour:
     con algo de costo pol\xEDtico."
   art: {fileID: 0}
   color: {r: 0.18431373, g: 0.6039216, b: 0.2901961, a: 1}
-  copies: 2
-  headline: "Lanzan un blanqueo: \xABesta vez s\xED\xBB, prometen"
+  copies: 1
+  headline: "Lanzan un blanqueo: \xABesta vez s\xED\xBB, prometen|Blanqueo de capitales:
+    \xABtraigan los d\xF3lares del colch\xF3n\xBB|La oposici\xF3n critica el \xABperd\xF3n
+    fiscal\xBB"
   rarity: 1
   inPool: 1
   popularityDelta: -6
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0

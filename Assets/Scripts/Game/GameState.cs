@@ -48,7 +48,16 @@ namespace Argensimia
         public float Difficulty => Mathf.Lerp(0.6f, 2f, 1f - popularity / 100f);
         public int MoodIndex => popularity >= 70 ? 0 : popularity >= 50 ? 1 : popularity >= 30 ? 2 : 3;
         public string Mood => MoodNames[MoodIndex];
-        public int Salary => salaryBase + Mathf.RoundToInt(salaryPerPop * popularity);
+        public int Salary
+        {
+            get { int s = salaryBase + Mathf.RoundToInt(salaryPerPop * popularity); foreach (var c in cabinet) s += c.salaryDelta; return s; }
+        }
+        // Al cerrar cada mandato la policía recupera hasta este % de su vida máxima (Min. Seguridad lo sube).
+        public const float BaseCloseHeal = 0.25f;
+        public float CloseHeal
+        {
+            get { float h = BaseCloseHeal; foreach (var c in cabinet) h += c.healBonus; return h; }
+        }
         public float DefenseHpMul
         {
             get { float m = 1; foreach (var c in cabinet) m += c.defenseHpBonus; return m; }
@@ -89,12 +98,16 @@ namespace Argensimia
             money = Mathf.Max(0, money + c.moneyDelta);
             income = Mathf.Max(0, income + c.incomeDelta);
             AddPopularity(c.popularityDelta, false);
+            if (c.maxGovDelta != 0) { maxGovernability = Mathf.Max(1, maxGovernability + c.maxGovDelta); governability = Mathf.Min(governability, maxGovernability); }
+            if (c.govDelta > 0) governability = Mathf.Min(maxGovernability, governability + c.govDelta);
+            else if (c.govDelta < 0) { int lost = Mathf.Min(-c.govDelta, governability - 1); governability -= lost; if (lost > 0) Lost?.Invoke("gov", lost, null); } // una carta nunca te hace perder
+            if (c.healNow > 0) Defense.HealAll(c.healNow);
             if (WaveDirector.I)
             {
                 WaveDirector.I.extraColumns += c.extraColumns;
                 WaveDirector.I.reduction = Mathf.Max(WaveDirector.I.reduction, c.nextWaveReduction);
             }
-            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(c.headline);
+            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(c.headline));
             MoodHeadline(before);
         }
 
@@ -118,29 +131,35 @@ namespace Argensimia
         void MoodHeadline(int before)
         {
             if (MoodIndex != before)
-                Headline?.Invoke(MoodIndex > before ? "La calle se calienta: las columnas llegan más enojadas" : "Baja la tensión en la Plaza de Mayo");
+                Headline?.Invoke(Headlines.Pick(MoodIndex > before ? "mood_up" : "mood_down"));
         }
 
         // Ministro nuevo: si el gabinete está lleno, reemplaza al más viejo.
         public CardDef AddMinister(CardDef c)
         {
             CardDef removed = null;
-            if (cabinet.Count >= cabinetSize) { removed = cabinet[0]; cabinet.RemoveAt(0); income = Mathf.Max(0, income - removed.incomeDelta); }
+            if (cabinet.Count >= cabinetSize) { removed = cabinet[0]; cabinet.RemoveAt(0); income = Mathf.Max(0, income - removed.incomeDelta); if (removed.defenseHpBonus > 0) foreach (var d in Defense.All) d.RefreshHp(); }
             cabinet.Add(c);
             money = Mathf.Max(0, money + c.moneyDelta);
             income = Mathf.Max(0, income + c.incomeDelta);
             AddPopularity(c.popularityDelta);
-            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(c.headline);
+            if (!string.IsNullOrEmpty(c.headline)) Headline?.Invoke(Headlines.PickVariant(c.headline));
             if (c.defenseHpBonus > 0) foreach (var d in Defense.All) d.RefreshHp();
             return removed;
         }
 
-        // Cierre de mandato: sueldo + efecto de los ministros.
+        // Cierre de mandato: sueldo + efecto de los ministros + la policía recupera hasta CloseHeal de su vida.
+        public int LastHealed { get; private set; }
         public int CloseMandate()
         {
             int s = Salary;
             money += s;
-            foreach (var c in cabinet) { if (c.popPerMandate < 0) LosePopularity(-c.popPerMandate); else AddPopularity(c.popPerMandate); }
+            foreach (var c in cabinet)
+            {
+                if (c.popPerMandate < 0) LosePopularity(-c.popPerMandate); else AddPopularity(c.popPerMandate);
+                if (c.govPerMandate > 0) governability = Mathf.Min(maxGovernability, governability + c.govPerMandate);
+            }
+            LastHealed = Defense.HealAll(CloseHeal);
             return s;
         }
 
@@ -151,7 +170,7 @@ namespace Argensimia
             Lost?.Invoke("gov", n, at);
             if (governability <= 0)
             {
-                Headline?.Invoke("Crisis institucional: el Gobierno pierde el control de la Plaza");
+                Headline?.Invoke(Headlines.Pick("gov_lost"));
                 if (WaveDirector.I) WaveDirector.I.Lose();
             }
         }

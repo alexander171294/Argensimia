@@ -20,8 +20,10 @@ MonoBehaviour:
     durante las oleadas."
   art: {fileID: 0}
   color: {r: 0.8509804, g: 0.5882353, b: 0.10980392, a: 1}
-  copies: 1
-  headline: "Lleg\xF3 el desembolso del Fondo: \xABes el \xFAltimo\xBB, aseguran"
+  copies: 0
+  headline: "Lleg\xF3 el desembolso del Fondo: \xABes el \xFAltimo\xBB, aseguran|Acuerdo
+    con el FMI: llegan los d\xF3lares y el ajuste|El Fondo aprueba el desembolso
+    con \xABmetas exigentes\xBB"
   rarity: 2
   inPool: 1
   popularityDelta: 0
@@ -33,6 +35,12 @@ MonoBehaviour:
   extraColumns: 0
   nextWaveReduction: 0
   previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
   defense: 0
   stats:
     hp: 0
