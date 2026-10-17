@@ -383,7 +383,12 @@ Todo elemento policial de una carta ocupa un slot y solo se coloca sobre el cami
 - **Goma del piquetero:** ocupa 8 s el slot libre más cercano.
 - **Código:** `PoliceSlots.cs` (runtime, incluye `NeighborLanes` para gases e hidrante) y `SlotBuilder.cs` (menú `Argensimia/6. Rebuild Police Slots`).
 
-## Pendientes y problemas conocidos
+## Releases
+
+- **Builds:** desde Unity (MCP `build`) a `Builds/Windows/Argensimia.exe`, `Builds/macOS/Argensimia.app` (universal Intel + Apple Silicon) y `Builds/Linux/Argensimia.x86_64`. Solo entra `Plaza.unity`. Backend Mono (permite compilar Windows y Linux desde la Mac).
+- **Paquetes** (`BlenderSrc/release.py`, salida en `Release/`, no versionado): instalador de Windows con NSIS (`makensis`, necesita locale UTF-8), `.dmg` con hdiutil (app firmada ad hoc) y AppImage armado a mano (squashfs zstd + runtime type2 de AppImage). Ícono desde `Assets/Art/Icon/AppIcon.png` (.ico de 16 a 256 px).
+- **Publicación:** `gh release create vX.Y.Z` con los tres archivos; README con capturas en `docs/screenshots/`.
+
 
 - [ ] Balance fino de costos, sobre todo de la tanda nueva
 - [ ] Modelos de Blender para las motos (hoy primitivas) y prefabs dedicados de defensas (los niveles hoy suman primitivas)

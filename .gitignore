@@ -134,3 +134,10 @@ stale-*
 
 # arte de cartas en revisión (generado)
 CardArt/review/
+
+# builds y paquetes de release
+Builds/
+Release/
+
+# generados por el paquete de performance tests al compilar
+Assets/Resources/PerformanceTestRun*.json*
