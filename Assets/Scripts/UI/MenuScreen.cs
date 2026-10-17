@@ -85,7 +85,27 @@ namespace Argensimia.UI
         void BuildSideButtons()
         {
             // idioma (abajo) y GitHub (arriba), con el mismo margen que el ranking
-            var lang = SideButton("Lang", L.En ? "ESPAÑOL" : "ENGLISH", "#2f6fd6", "#163a7a", 50);
+            // escritorio: salir (abajo de todo) y ventana / pantalla completa (arriba)
+            bool desktop = !Application.isMobilePlatform && Application.platform != RuntimePlatform.WebGLPlayer;
+            float y0 = 50;
+            if (desktop)
+            {
+                var quit = SideButton("Quit", "SALIR", "#d9534a", "#7a231d", y0);
+                var qi = UiKit.Rect("Icon", quit).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 40), new Vector2(0, 0.5f));
+                UiKit.Img(qi, "Ring", UiKit.Circle, Color.white).RT().Fill();
+                UiKit.Txt(qi, "X", "X", 24, UiKit.Hex("#7a231d"), TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 2, 0);
+                quit.GetComponent<Tap>().onTap = () =>
+                {
+                    PlayerPrefs.Save();
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+#else
+                    Application.Quit();
+#endif
+                };
+                y0 += 98;
+            }
+            var lang = SideButton("Lang", L.En ? "ESPAÑOL" : "ENGLISH", "#2f6fd6", "#163a7a", y0);
             var flag = UiKit.Rect("Flag", lang).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(46, 32), new Vector2(0, 0.5f));
             if (L.En)
             {
@@ -106,7 +126,20 @@ namespace Argensimia.UI
                 L.En = !L.En;
                 UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             };
-            var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", 50 + 84 + 14);
+            var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", y0 + 98);
+            if (desktop)
+            {
+                var win = SideButton("Window", ScreenLabel(), "#6a4fb3", "#35246b", y0 + 196);
+                var wi = UiKit.Rect("Icon", win).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 32), new Vector2(0, 0.5f));
+                // cuatro esquinas: "expandir"
+                foreach (var c in new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) })
+                {
+                    UiKit.Img(wi, "H", null, Color.white).RT().At(c, Vector2.zero, new Vector2(14, 5), c);
+                    UiKit.Img(wi, "V", null, Color.white).RT().At(c, Vector2.zero, new Vector2(5, 14), c);
+                }
+                var lbl = win.Find("Face/T").GetComponent<TextMeshProUGUI>();
+                win.GetComponent<Tap>().onTap = () => { ToggleFullscreen(); StartCoroutine(RefreshScreenLabel(lbl)); };
+            }
             // versión, debajo del botón de idioma
             UiKit.Txt(root, "Version", "v" + Application.version, 20, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
                 .RT().At(new Vector2(1, 0), new Vector2(-28, 16), new Vector2(280, 26), new Vector2(1, 0));
@@ -116,12 +149,32 @@ namespace Argensimia.UI
             gh.GetComponent<Tap>().onTap = () => Application.OpenURL(RepoUrl);
         }
 
+        static bool IsFullscreen => Screen.fullScreenMode != FullScreenMode.Windowed;
+        static string ScreenLabel() => L.T(IsFullscreen ? "VENTANA" : "PANTALLA COMPLETA");
+
+        // Pantalla completa en el monitor donde está la ventana, o ventana al 75% de ese monitor.
+        static void ToggleFullscreen()
+        {
+            var d = Screen.mainWindowDisplayInfo;
+            int w = d.width > 0 ? d.width : Display.main.systemWidth, h = d.height > 0 ? d.height : Display.main.systemHeight;
+            if (IsFullscreen) Screen.SetResolution(Mathf.RoundToInt(w * 0.75f), Mathf.RoundToInt(h * 0.75f), FullScreenMode.Windowed);
+            else Screen.SetResolution(w, h, FullScreenMode.FullScreenWindow);
+        }
+
+        IEnumerator RefreshScreenLabel(TextMeshProUGUI lbl)
+        {
+            yield return null; yield return null; // el cambio de modo se aplica al cuadro siguiente
+            if (lbl) lbl.text = ScreenLabel();
+        }
+
         RectTransform SideButton(string name, string label, string faceHex, string baseHex, float y)
         {
             var b = UiKit.Rect(name, root).At(new Vector2(1, 0), new Vector2(-28, y), new Vector2(280, 84), new Vector2(1, 0));
             UiKit.Img(b, "Base", UiKit.RR, UiKit.Hex(baseHex), 22, true).RT().Fill();
             var face = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex(faceHex), 22).RT().Fill(0, 0, 0, 8);
-            UiKit.Txt(face, "T", label, 36, Color.white, TextAlignmentOptions.Center, true).RT().Fill(70, 14, 0, 0);
+            var t0 = UiKit.Txt(face, "T", label, 36, Color.white, TextAlignmentOptions.Center, true);
+            t0.RT().Fill(70, 14, 0, 0);
+            t0.enableAutoSizing = true; t0.fontSizeMin = 20; t0.fontSizeMax = 36;
             var t = b.gameObject.AddComponent<Tap>();
             t.visual = b;
             return b;

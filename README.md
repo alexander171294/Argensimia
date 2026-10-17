@@ -8,7 +8,7 @@
 
 ## Descargar
 
-Última versión: **[v0.1.1](https://github.com/alexander171294/Argensimia/releases/latest)**
+Última release: **[v0.1.1](https://github.com/alexander171294/Argensimia/releases/latest)** · En desarrollo: 0.1.2 (botones de salir y pantalla completa)
 
 | Plataforma | Archivo | Cómo se instala |
 | --- | --- | --- |

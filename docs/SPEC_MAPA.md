@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.1.1** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.1.2** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
 | 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
 | 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
 | 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
 | 2026-10-17 | Niveles bufeados (vida ×2/×3,5, daño ×1,75/×3, ritmo, alcance y golpe múltiple de infantería); slots circulares; pantalla de carga al arrancar. |
-| 2026-10-17 | Arte de las 32 cartas (Nano Banana 2 Lite, recortes completados con edit); Refuerzo federal pasa a Refuerzo militar. |
 
 ## Resumen
 
@@ -274,7 +274,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Helicóptero:** recién despegado, inclinado y saliendo hacia la derecha de la pantalla (offset (−3, 8,4, −5,5) desde el helipuerto, rotación (13, −120, 10)). Suspendido con una flotación muy sutil (~20 cm, 1–2° de balanceo) y el rotor en "cámara lenta" (230°/s). Si se mueve a mano en Play, flota alrededor de la nueva pose.
 - **Ambiente:** ~170 manifestantes en anillo alrededor del helipuerto y ~80 de relleno a los costados (quedan desenfocados), 5 gomas prendidas con humo, el hidrante tirando agua en arco a la multitud sur con la sirena encendida, y los patrulleros en barricada.
 - **Ranking:** panel RANKING abajo a la izquierda (28 px de margen) con el top 5 (medallas, nombre, puntaje, mandatos).
-- **Derecha (abajo):** botón GITHUB (abre el repo), botón de idioma ENGLISH/ESPAÑOL (recarga la escena) y debajo la versión en blanco.
+- **Derecha (abajo, de abajo hacia arriba):** SALIR, idioma ENGLISH/ESPAÑOL (recarga la escena), GITHUB (abre el repo) y PANTALLA COMPLETA/VENTANA (pantalla completa en el monitor donde está la ventana; ventana al 75% de ese monitor), con la versión en blanco debajo. SALIR y el modo de pantalla solo aparecen en escritorio.
 - **UI:** logo ARGENSIMIA (ARG con la bandera, ENSIMIA banana, ondita por letra); cinta roja inclinada con filetes dorados "¡DEFENDÉ LA CASA ROSADA!" (entra sellada con rebote y pulsa cada 2,4 s; tras una partida muestra el resultado y el detalle abajo, con el contorno TMP por defecto); MÚSICA y EFECTOS en contenedores individuales flotantes; NUEVA PARTIDA.
 
 ## Audio
