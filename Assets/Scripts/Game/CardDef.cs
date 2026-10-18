@@ -49,6 +49,15 @@ namespace Argensimia
         [Tooltip("Hidrante: segundos de chorro / de recarga")] public float cycleOn, cycleOff;
         [Tooltip("Prefab a instanciar en el mapa. Vacío = se arma con los modelos de policía")] public GameObject placePrefab;
         [Tooltip("Slots que ocupa en el camino")] [Min(1)] public int slotSize = 1;
+        [Tooltip("Puntero: $ por segundo que genera durante la oleada")] public float moneyRate;
+        [Tooltip("Comisario: daño extra de las defensas cercanas (0,3 = +30%)")] public float buff;
+        [Tooltip("Contenedores: el encapuchado no puede saltarlo")] public bool noJump;
+
+        // De un solo uso (no se suben de nivel): el infiltrado y el estruendo se consumen al actuar.
+        public bool Upgradable => kind == CardKind.Colocar && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio;
+        // Las que no frenan ni reciben golpes no muestran VIDA.
+        public bool HasHp => defense != DefenseKind.Concertina && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio;
+        public float LevelBuff(int level) => buff * (1 + 0.5f * (level - 1));
 
         // Nivel 2 = +40% al stat principal; nivel 3 = x2 y +30% de vida. Se sube soltando la carta sobre una igual del mapa.
         // Niveles de las colocables (mejora soltando una carta igual sobre la defensa del mapa).
@@ -69,12 +78,16 @@ namespace Argensimia
             var l = new List<(string, string)>();
             if (kind != CardKind.Colocar) return l;
             float m = LevelMul(level);
-            if (stats.hp > 0) l.Add(("VIDA", Names.Num(Mathf.Round(stats.hp * LevelHp(level)))));
+            if (stats.hp > 0 && HasHp) l.Add(("VIDA", Names.Num(Mathf.Round(stats.hp * LevelHp(level)))));
             if (stats.damage > 0) l.Add(("DAÑO", Names.Num(Mathf.Round(stats.damage * m * 10) / 10)));
             float rate = stats.rate * (defense == DefenseKind.Detencion ? m : LevelRate(level));
             if (stats.rate > 0) l.Add(("RITMO", Names.Num(Mathf.Round(rate * 100) / 100) + "/s"));
+            if (moneyRate > 0) l.Add(("PLATA", "+$" + Names.Num(Mathf.Round(moneyRate * LevelRate(level))) + "/s"));
+            if (buff > 0) l.Add(("REFUERZO", "+" + Mathf.RoundToInt(LevelBuff(level) * 100) + "%"));
+            if (stun > 0 && defense != DefenseKind.Motorizada) l.Add(("ATURDE", Names.Num(stun) + " s"));
             float range = stats.range + LevelRange(level);
-            if (stats.range > 0) l.Add(("ALCANCE", range >= 6 ? Mathf.RoundToInt(range / 6.8f) + L.T(" cas.") : Names.Num(range) + " m"));
+            if (stats.range >= 40) l.Add(("ALCANCE", L.T("PLAZA")));
+            else if (stats.range > 0) l.Add(("ALCANCE", range >= 6 ? Mathf.RoundToInt(range / 6.8f) + L.T(" cas.") : Names.Num(range) + " m"));
             return l;
         }
 

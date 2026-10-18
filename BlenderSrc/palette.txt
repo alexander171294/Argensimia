@@ -91,3 +91,11 @@ M_StoneDark #5e5650 0 T_stone 2
 M_Rust #6b4630 0 T_stone 1
 M_SteelDark #4a4643 0 T_stone 1
 M_NavGreen #2ee05a 2.0
+M_DumpGreen #2f7a45 0
+M_ConeOrange #f06a1e 0
+M_Chori #8a3b22 0
+M_Coal #ff6a20 1.5
+M_Apron #f2efe6 0
+M_PunteroShirt #2d6fc0 0
+M_Cash #6fae5a 0
+M_Vest #d8f23a 0

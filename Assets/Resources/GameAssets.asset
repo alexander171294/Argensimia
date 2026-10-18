@@ -23,6 +23,15 @@ MonoBehaviour:
   flagArg: {fileID: 919132149155446097, guid: e32eb650f5bdc4cc88a879d775a3c5cc, type: 3}
   flagRed: {fileID: 919132149155446097, guid: d9814f55b6b1549e69e06bc57cbf3385, type: 3}
   banner: {fileID: 919132149155446097, guid: 2ec9dc442991c49708c61c7254245568, type: 3}
+  puntero: {fileID: 919132149155446097, guid: d1c514f3ca4e34f7298aa43aae47908d, type: 3}
+  contenedor: {fileID: 919132149155446097, guid: 4c498f473ee514324b25af52af51da5f, type: 3}
+  comisario: {fileID: 919132149155446097, guid: 7cd1357893eff4a7685c79323f78aee7, type: 3}
+  concertina: {fileID: 919132149155446097, guid: 0c7a8aafafe0b4702b74d7fce5d1e8a8, type: 3}
+  requisa: {fileID: 919132149155446097, guid: 7c94dc93cabfa4619863318a0fc37c1e, type: 3}
+  desvio: {fileID: 919132149155446097, guid: 210ba00f142884ed7a551bb191375d36, type: 3}
+  drone: {fileID: 919132149155446097, guid: 676f61e237c7d4ac191d61eea8f85000, type: 3}
+  tanqueta: {fileID: 919132149155446097, guid: 92cf9b792cae849de9e204ef965e7737, type: 3}
+  tanquetaTurret: {fileID: 919132149155446097, guid: 405394391ae2c4612ac1aa54daef54d0, type: 3}
   shirts:
   - {fileID: 2100000, guid: 3714f00c3a24840308e5edb32eb8b8c5, type: 2}
   - {fileID: 2100000, guid: 13c73dce818734560bef2b4977aff589, type: 2}

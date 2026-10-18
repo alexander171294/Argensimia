@@ -119,9 +119,10 @@ namespace Argensimia
             {
                 menu.Show(true, 0.6f, pendingSub);
                 if (pendingScore >= 0) menu.OfferScore(pendingScore, pendingMandates);
+                menu.ShowRewards(Meta.TakePending()); // cartas y mejoras ganadas en la partida (después del ranking)
                 pendingSub = null; pendingScore = -1;
             }
-            else menu.Show(true, 0.6f, L.T("¡Defendé la Casa Rosada!"));
+            else { menu.Show(true, 0.6f, L.T("¡Defendé la Casa Rosada!")); menu.ShowRewards(Meta.TakePending()); }
         }
 
         void OnDestroy() { if (I == this) I = null; }
@@ -160,6 +161,8 @@ namespace Argensimia
             Time.timeScale = 1;
             var gs = GameState.I;
             TakeScore();
+            if (!win) Achievements.Unlock("helicoptero");
+            Meta.Save();
             string sub = win
                 ? L.F("<color=#f2c14e>¡COMPLETASTE EL PERÍODO!</color>\nPopularidad final: {0}%", Mathf.RoundToInt(gs ? gs.popularity : 0))
                 : L.F("<color=#ff7a70>PERDISTE LA GOBERNABILIDAD</color>\nLa Plaza quedó en manos de la calle en el mandato {0}", gs ? gs.mandate : 0);
@@ -173,6 +176,8 @@ namespace Argensimia
             Time.timeScale = 1;
             var gs = GameState.I;
             TakeScore();
+            if (gs && gs.mandate <= 1) Achievements.Unlock("que_se_vayan");
+            Meta.Save();
             StartCoroutine(ToMenuRoutine(L.F("<color=#ff7a70>EL PRESIDENTE RENUNCIÓ</color>\nSe fue en helicóptero en el mandato {0}", gs ? gs.mandate : 0)));
             if (WaveDirector.I) WaveDirector.I.Lose(); // corta la oleada; el HUD no muestra nada porque ya no está en partida
         }

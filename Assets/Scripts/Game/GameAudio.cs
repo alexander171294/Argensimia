@@ -126,7 +126,13 @@ namespace Argensimia
 
         void InitSfx()
         {
-            foreach (var c in Resources.LoadAll<AudioClip>("SFX")) clips[c.name] = c;
+            // Efectos en PCM en memoria (sin decodificar al cargar): con Vorbis + DecompressOnLoad el build de Linux quedaba mudo.
+            foreach (var c in Resources.LoadAll<AudioClip>("SFX"))
+            {
+                clips[c.name] = c;
+                if (c.loadState == AudioDataLoadState.Unloaded) c.LoadAudioData();
+            }
+            Debug.Log("[GameAudio] efectos cargados: " + clips.Count + " · música: " + tracks.Count + " · salida " + AudioSettings.outputSampleRate + " Hz");
             pool = new AudioSource[Voices];
             for (int i = 0; i < Voices; i++)
             {

@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: puntero
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: puntero
+  title: Puntero
+  kind: 0
+  cost: 700
+  description: "El puntero del barrio arma su parrillita en la Plaza: mientras est\xE1
+    en pie genera $12/s durante la oleada. Es fr\xE1gil: cuidalo."
+  art: {fileID: 21300000, guid: 9d4ebb574f1a942f7a55090e32e528f9, type: 3}
+  color: {r: 0.8784314, g: 0.627451, b: 0.1882353, a: 1}
+  copies: 0
+  headline: "Choripanes gratis en la Plaza: \xABes una jornada solidaria\xBB|El puntero
+    del barrio reparte choris en la Plaza|\xABAc\xE1 nadie se queda sin su chori\xBB,
+    promete un militante"
+  rarity: 0
+  inPool: 1
+  popularityDelta: 0
+  moneyDelta: 0
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 1
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
+  defense: 7
+  stats:
+    hp: 150
+    damage: 0
+    rate: 0
+    range: 0
+    area: 0
+    speed: 0
+  maxBlock: 0
+  slow: 0
+  slowTime: 0
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1
+  moneyRate: 12
+  buff: 0
+  noJump: 0

@@ -282,7 +282,7 @@ namespace Argensimia
                 {
                     var b = Defense.BlockerFor(this);
                     // encapuchado: la primera vez que un retén lo frena, tira la chance de saltarlo
-                    if (b && def.jumpChance > 0 && !rolled.Contains(b))
+                    if (b && def.jumpChance > 0 && !b.def.noJump && !rolled.Contains(b))
                     {
                         rolled.Add(b);
                         if (Random.value < def.jumpChance) { b.Release(this); StartJump(b); return; }
@@ -346,7 +346,8 @@ namespace Argensimia
         void Place(bool face)
         {
             if (!onLane) return;
-            float z = Slots.LaneZ(lane, x) + offset;
+            laneBlend = Mathf.MoveTowards(laneBlend, 0, Time.deltaTime * 4.5f);
+            float z = Slots.LaneZ(lane, x) + offset + laneBlend;
             transform.position = new Vector3(x, Ground(x, z), z);
             if (face) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, -90, 0), Time.deltaTime * 6);
         }
@@ -445,9 +446,49 @@ namespace Argensimia
             if (blocker) { blocker.Release(this); blocker = null; }
         }
 
+        // Desvío: pasa al carril vecino (se desliza de costado, no salta).
+        float laneBlend;
+        public void ShiftLane(int to)
+        {
+            if (!onLane || Dead || to == lane || to < 0) return;
+            float z0 = Slots.LaneZ(lane, x) + offset + laneBlend;
+            if (blocker) { blocker.Release(this); blocker = null; }
+            lane = to;
+            x = Mathf.Clamp(x, Slots.WestX(lane) + 1f, Slots.EastX(lane));
+            laneBlend = z0 - (Slots.LaneZ(lane, x) + offset);
+            rolled.Clear();
+        }
+
+        // Requisa: un especial queda desarmado y pasa a ser un manifestante común (conserva vida y bronca relativas).
+        public bool Disarm(UnitDef to)
+        {
+            if (Dead || !to || !def.special || def.members > 1 || jumping) return false;
+            float k = hp / Mathf.Max(1, maxHp);
+            float hpMul = maxHp / Mathf.Max(1, def.stats.hp);
+            float dmgMul = def.stats.damage > 0 ? damage / def.stats.damage : 1;
+            float spdMul = def.stats.speed > 0 ? speed / def.stats.speed : 1;
+            if (blocker) { blocker.Release(this); blocker = null; }
+            def = to;
+            maxHp = to.stats.hp * hpMul; hp = maxHp * k;
+            damage = to.stats.damage * dmgMul;
+            rate = Mathf.Max(0.01f, to.stats.rate);
+            speed = to.stats.speed * spdMul;
+            range = to.stats.range;
+            if (model) Destroy(model.gameObject);
+            if (bar) Destroy(bar.gameObject);
+            BuildModel();
+            var fx = new GameObject("Requisa");
+            fx.transform.position = transform.position + Vector3.up * 1.5f;
+            var ps = FxKit.Particles(fx.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.smoke, new Color(0.9f, 0.9f, 0.95f, 0.8f), 2, 0.6f, 0.5f, 1f, 0, 60, 0, 0.3f, 1.6f);
+            var em = ps.emission; em.SetBursts(new[] { new ParticleSystem.Burst(0, 12) });
+            Destroy(fx, 1.5f);
+            return true;
+        }
+
         public void Capture()
         {
             if (Dead) return;
+            Achievements.Count("detenidos");
             if (def.popOnHit > 0 && GameState.I) GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
             if (def.kind == UnitKind.Jubilado) Headlines.Say("capture_jubilado", 12f); else Headlines.Say("capture", 20f);
             Die(true);
@@ -515,7 +556,7 @@ namespace Argensimia
             transform.position = p;
             if (t < 1) return;
             foreach (var d in Defense.All.ToArray())
-                if (!d.Dead && (d.transform.position - b).sqrMagnitude < (area + d.HalfLen) * (area + d.HalfLen)) d.TakeDamage(dmg);
+                if (!d.Dead && d.Targetable && (d.transform.position - b).sqrMagnitude < (area + d.HalfLen) * (area + d.HalfLen)) d.TakeDamage(dmg);
             Snd.At("explosion", b, 1, 0.1f);
             var fx = new GameObject("MortarHit");
             fx.transform.position = b;

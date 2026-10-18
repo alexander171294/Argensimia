@@ -33,6 +33,8 @@ namespace Argensimia
         void Awake()
         {
             if (catalog.Count == 0) catalog.AddRange(Resources.LoadAll<CardDef>("Cards"));
+            // las desbloqueables entran recién en la partida siguiente a ganarlas (Meta se consulta al arrancar)
+            catalog.RemoveAll(c => !c || !Meta.IsUnlocked(c.id));
             foreach (var c in catalog)
             {
                 if (c.kind == CardKind.Crisis) continue;

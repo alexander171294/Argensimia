@@ -8,13 +8,13 @@
 
 ## Descargar
 
-Última release: **[v0.1.1](https://github.com/alexander171294/Argensimia/releases/latest)** · En desarrollo: 0.1.2 (botones de salir y pantalla completa)
+Última release: **[v0.2.0](https://github.com/alexander171294/Argensimia/releases/latest)**: progresión entre partidas con 10 defensas desbloqueables y logros.
 
 | Plataforma | Archivo | Cómo se instala |
 | --- | --- | --- |
-| Windows 10/11 (64 bits) | `Argensimia-0.1.1-Windows-Setup.exe` | Instalador con acceso directo en el escritorio y desinstalador. Como no está firmado, SmartScreen puede pedir *Más información → Ejecutar de todas formas*. |
-| macOS 11+ (Intel y Apple Silicon) | `Argensimia-0.1.1-macOS.dmg` | Arrastrá Argensimia a Aplicaciones. Está firmado ad hoc (sin notarizar): la primera vez abrilo con clic derecho → *Abrir*. |
-| Linux x86_64 | `Argensimia-0.1.1-Linux-x86_64.AppImage` | `chmod +x Argensimia-*.AppImage && ./Argensimia-*.AppImage` (requiere FUSE). |
+| Windows 10/11 (64 bits) | `Argensimia-0.2.0-Windows-Setup.exe` | Instalador con acceso directo en el escritorio y desinstalador. Como no está firmado, SmartScreen puede pedir *Más información → Ejecutar de todas formas*. |
+| macOS 11+ (Intel y Apple Silicon) | `Argensimia-0.2.0-macOS.dmg` | Arrastrá Argensimia a Aplicaciones. Está firmado ad hoc (sin notarizar): la primera vez abrilo con clic derecho → *Abrir*. |
+| Linux x86_64 | `Argensimia-0.2.0-Linux-x86_64.AppImage` | `chmod +x Argensimia-*.AppImage && ./Argensimia-*.AppImage` (requiere FUSE). |
 
 ## Capturas
 
@@ -30,12 +30,14 @@
 - **Gobernabilidad.** Cada manifestante que llega al vallado de la Casa Rosada la baja. Si llega a 0, el presidente se va en helicóptero.
 - **Popularidad = dificultad.** Con poca popularidad viene más gente y más enojada (TRANQUI → TENSO → CALLE CALIENTE → ESTALLIDO). Muchas cartas dan plata a cambio de popularidad.
 - **Mazo finito.** Lo que jugás se consume; al cerrar cada mandato elegís 3 cartas nuevas y podés comprar más o vender las que no te sirven.
+- **Progresión entre partidas.** Cada 3 mandatos sobrevividos (sumando todas tus partidas) desbloqueás una defensa nueva para las próximas: puntero, contenedores, infiltrado, comisario, concertina, requisa, desvío, estruendo, drone y tanqueta. Con todas, cada 3 mandatos ganás una mejora permanente.
+- **Logros.** 19 logros (llegar al mandato 10, detener a 500 manifestantes, usar 25 veces La maquinita…) con su panel en el menú.
 - **Defensas con niveles.** Soltá una carta igual sobre una defensa del mapa para subirla a nivel 2 y 3.
 - **Puntaje y ranking.** (Eliminados + dinero / 10) × mandatos jugados × popularidad. El top 5 queda en el menú.
 
 **Policía:** vallado, infantería, escopeteros, lanzagases, detenciones, motorizada y camión hidrante.
 **Manifestantes:** comunes, caceroleros, jubilados, encapuchados (saltan los retenes), piqueteros (prenden gomas), morteros y columnas organizadas.
-**Cartas:** 32 entre colocables, efectos (Impuestazo, La maquinita, Plan platita, Dólar soja…), ministros pasivos y crisis forzadas (Devaluación, Paro general…).
+**Cartas:** 42 entre colocables (10 se desbloquean jugando), efectos (Impuestazo, La maquinita, Plan platita, Dólar soja…), ministros pasivos y crisis forzadas (Devaluación, Paro general…).
 
 ## Tecnología
 

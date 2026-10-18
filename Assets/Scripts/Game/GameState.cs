@@ -74,7 +74,17 @@ namespace Argensimia
             get { float m = 1; foreach (var c in cabinet) m += c.defenseHpBonus; return m; }
         }
 
-        void Awake() { I = this; governability = maxGovernability; }
+        // Usó escopeteros o lanzagases en esta partida (logro "Sin represión").
+        public bool usedRepression;
+
+        void Awake()
+        {
+            I = this;
+            // mejoras permanentes ganadas con mandatos sobrevividos (ver Meta)
+            money += Meta.StartMoneyBonus;
+            maxGovernability += Meta.MaxGovBonus;
+            governability = maxGovernability;
+        }
 
         void Update()
         {
@@ -91,6 +101,7 @@ namespace Argensimia
         {
             mandate++;
             MandateChanged?.Invoke(mandate);
+            Achievements.OnMandate(mandate, popularity, usedRepression);
         }
 
         public bool CanAfford(int cost) => money + 0.001f >= cost;
@@ -154,6 +165,7 @@ namespace Argensimia
             CardDef removed = null;
             if (cabinet.Count >= cabinetSize) { removed = cabinet[0]; cabinet.RemoveAt(0); income = Mathf.Max(0, income - removed.incomeDelta); if (removed.defenseHpBonus > 0) foreach (var d in Defense.All) d.RefreshHp(); }
             cabinet.Add(c);
+            if (cabinet.Count >= 3) Achievements.Unlock("gabinete");
             money = Mathf.Max(0, money + c.moneyDelta);
             income = Mathf.Max(0, income + c.incomeDelta);
             AddPopularity(c.popularityDelta);
@@ -168,6 +180,11 @@ namespace Argensimia
         {
             int s = Salary;
             money += s;
+            // progresión entre partidas y logros del cierre
+            Meta.MandateSurvived();
+            if (mandate == 1) Achievements.Unlock("asumio");
+            if (WaveDirector.I && WaveDirector.I.ArrivedThisWave == 0) Achievements.Unlock("orden");
+            if (MoodIndex == 3) Achievements.Unlock("mal_bien");
             foreach (var c in cabinet)
             {
                 if (c.popPerMandate < 0) LosePopularity(-c.popPerMandate); else AddPopularity(c.popPerMandate);

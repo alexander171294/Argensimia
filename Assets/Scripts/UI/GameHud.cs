@@ -610,6 +610,7 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.65f) / 0.35f);
             });
+            if (!free) Achievements.Count("play_" + def.id);
             if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", L.CardTitle(gone), L.CardTitle(def)); }
             else gs.ApplyEffect(def);
             StartCoroutine(Pulse(target));
@@ -724,6 +725,8 @@ namespace Argensimia.UI
                 return false;
             }
             if (d0.cost > 0) { FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0); Snd.Ui("spend", 0.6f); }
+            Achievements.Count("place_" + d0.id);
+            if (d0.defense == DefenseKind.BalasGoma || d0.defense == DefenseKind.Lanzagases) gs.usedRepression = true;
             if (up)
             {
                 up.Upgrade();
@@ -735,6 +738,7 @@ namespace Argensimia.UI
                 var placed = Defense.Place(d0, cv.level, target, second).gameObject;
                 PoliceSlots.I.Occupy(target, placed);
                 if (second != null) PoliceSlots.I.Occupy(second, placed);
+                if (d0.defense == DefenseKind.Puntero && Defense.Count(DefenseKind.Puntero) >= 3) Achievements.Unlock("aparato");
                 if (!string.IsNullOrEmpty(d0.headline)) gs.PushHeadline(Headlines.PickVariant(L.CardHeadline(d0)));
             }
             int slot = cv.slot;

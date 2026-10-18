@@ -322,6 +322,7 @@ namespace Argensimia.UI
             dim.gameObject.SetActive(false);
             zoomed = null;
             Headlines.Say("crisis_evaded");
+            Achievements.Count("crisis_evitadas");
             yield return DrawInto(slot);
             busy = false;
         }

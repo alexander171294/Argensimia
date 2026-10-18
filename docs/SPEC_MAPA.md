@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.1.2** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.2.0** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.2.0**: progresión entre partidas (cada 3 mandatos sobrevividos se desbloquea 1 de 10 defensas nuevas inspiradas en Plants vs Zombies, con modelo y arte; después, mejoras permanentes), 19 logros con aviso y panel LOGROS en el menú; efectos en PCM (el build de Linux quedaba mudo). |
 | 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
 | 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
 | 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
 | 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
-| 2026-10-17 | Niveles bufeados (vida ×2/×3,5, daño ×1,75/×3, ritmo, alcance y golpe múltiple de infantería); slots circulares; pantalla de carga al arrancar. |
 
 ## Resumen
 
@@ -50,6 +50,7 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `BlenderSrc/porteno_kit.py` | Edificios porteños eclécticos (Otto Wulff, terraza con camarógrafo) y la valla policial en L (`valla_l`). |
 | `BlenderSrc/casa_v2.py` | Casa Rosada (alas de 2 vanos, pabellones, bloque central). |
 | `BlenderSrc/heli_kit.py` | Helipuerto (`helipad`), helicóptero presidencial caricaturesco y detallado (`helicopter`) y rotor aparte (`heli_rotor`). |
+| `BlenderSrc/defense_kit.py` | Defensas desbloqueables: `puntero` (con parrilla), `contenedor`, `comisario` (megáfono), `concertina`, `requisa` (mesa con lo secuestrado), `desvio` (barrera y conos), `drone` (las hélices las agrega Unity) y `tanqueta` + `tanqueta_torreta`. `build_all()`. |
 | `BlenderSrc/sfx_gen.py` | Efectos de sonido sintetizados con numpy (sin samples): `build_all()` escribe los WAV en `Assets/Resources/SFX`. |
 | `BlenderSrc/card_art.py` | Arte de cartas: genera (`start`), completa recortes y retoca (`edit_image`, `crop_rows`) y arma la galería de revisión. Key en `~/.argensimia_atlas_key`. |
 | `BlenderSrc/palette.txt` | Una línea por material: `nombre hex emisión [textura metros_por_repetición]`. |
@@ -62,14 +63,14 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `Assets/Editor/IconBuilder.cs` | Ícono de la app (menú 7): renderiza en Play la "A" con bandera sobre el Sol de Mayo a `Assets/Art/Icon/AppIcon.png` y lo asigna en Player Settings. |
 | `Assets/Editor/SlotBuilder.cs` | Genera los slots policiales desde lanes, sus texturas y materiales (menú 6). |
 | `Assets/Shaders/TiltShift.shader` | Desenfoque de bordes (Full Screen Pass) y blur circular del menú (globales `_MenuBlur`, `_MenuCenter`). |
-| `Assets/Scripts/Game/` | `Loc` (idioma `L`: español/inglés, interfaz, cartas, unidades y titulares), `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
-| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
+| `Assets/Scripts/Game/` | `Loc` (idioma `L`: español/inglés, interfaz, cartas, unidades y titulares), `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `Meta` (progresión entre partidas: mandatos totales, desbloqueos, mejoras, contadores), `Achievements` (logros), `DefenseUnlocks` (parcial de `Defense`: las 10 desbloqueables + `FoamShell`), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
+| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre; parcial `MenuScreenMeta`: carta desbloqueada y panel LOGROS), `AchievementToast` (aviso de logro, canvas persistente), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
 | `Assets/Resources/` | `Cards/`, `Units/`, `Music/` (5 temas MP3, streaming), `SFX/` (45 WAV), `UI/` (fuentes), `FX/`, `GameAssets.asset`. |
 
 **Orden para regenerar todo**
 
 1. Blender: `exec` de `plaza_design_v3.py`, después de `plaza_design_v2.py` (con `plaza_map` recargado).
-2. Blender: recargar `gen_assets`, `hq`, `props_hq`, `buildings_kit`, `porteno_kit`, `casa_v2` y `heli_kit`, y regenerar los modelos tocados. `props_hq.ground()` es obligatorio si cambió el layout.
+2. Blender: recargar `gen_assets`, `hq`, `props_hq`, `buildings_kit`, `porteno_kit`, `casa_v2`, `heli_kit` y `defense_kit`, y regenerar los modelos tocados. `props_hq.ground()` es obligatorio si cambió el layout.
 3. Unity: `Assets/Refresh`.
 4. Unity: `Argensimia/2. Remap Model Materials`, solo si hay materiales o modelos nuevos. Deja `police_officer.fbx` legible (lo necesita la Escopeteros para sacar el escudo).
 5. Unity: `PlazaBuilder.SetupRendering()` vía `eval`, solo si cambió el post o el renderer.
@@ -282,7 +283,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Música (`GameAudio`):** 5 temas en `Resources/Music/` (MP3, importados como Vorbis q 0,6 en streaming), en este orden de loop (`GameAudio.Playlist`): La Marcha del Balcón → Fuerzas de la Plaza → Candombe en la Plaza → La Gran Marcha → Corte de Calle. Temas nuevos que no estén en la lista van al final. Pasa de uno a otro con fundido cruzado de 2,5 s. Objeto persistente (`DontDestroyOnLoad`): la música no se corta entre menú y partida ni al recargar.
 - **Volúmenes:** música (70% por defecto) y efectos (80%) guardados en `PlayerPrefs`. Al mover EFECTOS suena un tap de muestra.
 - **Efectos (`Snd`):** `Snd.Ui(id)` para interfaz (sigue sonando en pausa) y `Snd.At(id, pos)` para eventos del mapa (se pausan con `AudioListener.pause`). Pool de 24 voces 2D, máx. 4 iguales a la vez, enfriamiento por clip, leve variación de tono y paneo según la posición en pantalla (fuera de cuadro, 45%). Volumen relativo por clip en `GameAudio.Gain`.
-- **Clips (`Resources/SFX`, generados por `BlenderSrc/sfx_gen.py`, mono, Vorbis; cortos descomprimidos al cargar, loops comprimidos en memoria):**
+- **Clips (`Resources/SFX`, generados por `BlenderSrc/sfx_gen.py`, mono, **PCM en memoria** (sin decodificar: con Vorbis + DecompressOnLoad el build de Linux no sonaba). `GameAudio` loguea al arrancar cuántos efectos cargó):**
   - Interfaz: `ui_tap` (todos los `Tap`), `ui_error` (sacudón), `card_draw/flip/zoom/play/shuffle`, `coin` (cha-ching), `spend` (moneda), `pop_up` (marimba), `pop_down` (wah-wah), `mood_down` (sube la bronca), `stamp` (ministro, cinta del menú), `upgrade`, `heal`, `crisis` (cortina de noticiero), `evade`, `wave_start` (pitazo + multitud + bombo), `fanfare` (fin de mandato), `gameover` (trombón triste).
   - Policía: `place` (pisotones) + extra por tipo (valla, sirena del hidrante, moto, silbato), `shotgun`, `rubber_hit`, `baton`, `fence_clang` y `defense_hit` (golpes recibidos), `gas_launch`, `gas_hiss`, `cuffs` + `whistle_short` (detención), `moto_pass`, `break_crash`, `siren_yelp`, `loop_water` (chorro del hidrante, con `SndLoop`).
   - Otros: `boo` (abucheo al perder popularidad), `clock_tick` (reloj de la previa), `unit_down` (cae un agente), `heli_start` (turbina al perder).
@@ -312,6 +313,30 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Títulos:** cortos, para que el título de la carta no baje de ~33 pt (autoajuste 22–40 en 324 de ancho); el detalle va en la descripción.
 - **Cartas:** `CardDef.headline` admite variantes separadas por `|` (las extra salen de `HudSetup.MoreHeadlines`); todas las cartas tienen 3.
 - **Relleno:** cuando no hay noticias, sale de una bolsa barajada (no repite hasta agotarla) con titulares de clima político y frases célebres de la política argentina ("la casa está en orden", "estamos mal pero vamos bien", "pasaron cosas", "no hay plata", "¡que se vayan todos!", etc.), puestas como citas de funcionarios del juego.
+
+## Progresión entre partidas y logros
+
+`Meta.cs` guarda todo en PlayerPrefs (`meta_v1`, JSON). Para pruebas: `Meta.DebugAddMandates(n)` y el menú `Argensimia/Debug/Borrar progresión y logros`.
+
+- **Mandatos sobrevividos:** cada cierre de mandato suma 1 al total (todas las partidas). Cada 3 se gana la siguiente carta de `Meta.UnlockOrder`; con las 10, cada 3 mandatos una **mejora permanente** (alterna +$250 iniciales y +1 de gobernabilidad máxima, se aplican en `GameState.Awake`).
+- **Cuándo se ve:** al volver al menú (perder o renunciar), después del cartel del top 5: pantalla ¡NUEVA CARTA DESBLOQUEADA! / ¡MEJORA PERMANENTE! con la carta, el total y cuánto falta para la próxima (`MenuScreen.ShowRewards`).
+- **Cuándo entra:** desde la partida siguiente; `CardDeck.Awake` saca del catálogo las bloqueadas, así que entran solo al sorteo del cierre y a la compra con mazo vacío (copias iniciales 0).
+- **Logros (`Achievements.cs`, 19):** de un paso (`Unlock`) o con contador (`Count(clave)`, ej. `play_<id>`, `place_<id>`, `detenidos`, `crisis_evitadas`). Aviso deslizante arriba a la derecha (`AchievementToast`, persiste entre escenas) y panel LOGROS en el menú (botón dorado con contador, grilla de 2 columnas con barra de progreso y la fila de las 10 cartas a desbloquear). Los `id` quedan listos para Steamworks.
+
+| Mandatos | Carta | Rareza | Costo | Qué hace | Modelo |
+| --- | --- | --- | --- | --- | --- |
+| 3 | Puntero | Común | $700 | +$12/s durante la oleada mientras esté en pie (×1,25/×1,6 por nivel). 150 de vida. | Gordito con delantal y parrilla con choris; NV2 sombrilla, NV3 bafle y bandera |
+| 6 | Contenedores | Común | $1.300 | 1.500 de vida; el encapuchado no lo puede saltar (`noJump`). | 2 contenedores verdes; NV2 doble fila, NV3 gomas y chapas |
+| 9 | Infiltrado | Poco común | $900 | Se arma en 10 s; no frena ni lo atacan. El primero que lo pisa queda detenido (a una columna le pega 150) y los de 4 m, aturdidos 2 s. Un solo uso. | Civil de buzo gris, gorra y mochila |
+| 12 | Comisario | Rara | $1.600 | +30% de daño (45/60% en NV2/NV3) a las defensas a 1 casillero; no se acumula. Frena. | Comisario panzón con megáfono; escolta en NV2/NV3 |
+| 15 | Concertina | Común | $500 | No frena ni recibe golpes: 6 dps y −30% de velocidad a los que la cruzan. NV2/NV3 suman rollos. | Rollos de alambre sobre caballetes |
+| 18 | Requisa | Poco común | $1.700 | Cada 8 s desarma al especial más caro a 2 casilleros (encapuchado, piquetero, mortero → manifestante común). | Mesa con palos, tubos y pasamontañas + 2-4 agentes |
+| 21 | Desvío | Poco común | $800 | Manda a los que llegan al carril vecino mejor defendido (no a las columnas). No frena ni lo atacan, salvo el mortero. Sin niveles. | Barrera a rayas, conos y agente de tránsito con chaleco |
+| 24 | Estruendo | Poco común | $1.100 | A los 0,8 s explota: 60 de daño y 3 s de aturdimiento en 6 m. Un solo uso. | Granada con luz que titila |
+| 27 | Drone | Rara | $2.100 | Vuela; 10 de daño, 1,2/s, a cualquier carril hasta 3 casilleros, primero los especiales. No frena; el mortero lo puede bajar. | Cuadricóptero con balizas y hélices que giran |
+| 30 | Tanqueta | Rara | $3.900 | 2 slots, 1.400 de vida, frena. Cada 16 s dispara espuma al grupo más denso de toda la Plaza: 45 en 7 m, moja y frena 70% por 4 s. | Blindado de 6 ruedas con torreta giratoria |
+
+`Defense.Blocks` (frena) y `Defense.Targetable` (el mortero le puede tirar) separan a las que no frenan. Arte en `Assets/Art/Cards/<id>.jpg` (prompts en `card_art.py`).
 
 ## Sistema de cartas
 
@@ -400,6 +425,8 @@ Todo elemento policial de una carta ocupa un slot y solo se coloca sobre el cami
 - [x] Sistema de oleadas real, unidades con habilidades y columnas organizadas
 - [x] Menú principal, loop menú ↔ partida, pausa y música
 - [x] Mazo finito, cartas del cierre con CAMBIAR, niveles en el mapa y curación del cierre
+- [x] Progresión entre partidas (10 defensas desbloqueables, mejoras permanentes) y logros
+- [ ] Balancear las desbloqueables y revisar el arte generado (v1)
 - [x] Arte de las 32 cartas
 - [x] Efectos de sonido y ambiente sonoro (sintetizados; reemplazables por samples con el mismo nombre en `Resources/SFX`)
 

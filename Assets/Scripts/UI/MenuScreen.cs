@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Argensimia.UI
 {
     // Pantalla del menú (sobre la vista del helicóptero): título, subtítulo (resultado de la partida) y NUEVA PARTIDA.
-    public class MenuScreen : MonoBehaviour
+    public partial class MenuScreen : MonoBehaviour
     {
         CanvasGroup group;
         TextMeshProUGUI subTxt, ribbonTxt, ribbonShadowTxt;
@@ -127,6 +127,7 @@ namespace Argensimia.UI
                 UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             };
             var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", y0 + 98);
+            BuildAchievementsButton(y0 + (desktop ? 294 : 196));
             if (desktop)
             {
                 var win = SideButton("Window", ScreenLabel(), "#6a4fb3", "#35246b", y0 + 196);

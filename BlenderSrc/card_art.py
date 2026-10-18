@@ -55,6 +55,37 @@ CARDS = {
  "hidrante": ("Camión hidrante", "Colocar", "#2A7FD1",
    "A big armored riot-police water cannon truck, chunky and cartoonish, its roof cannon blasting a powerful arc of water, "
    "red and blue siren lights glowing, spray and droplets sparkling in the sun."),
+ # --- desbloqueables (cada 3 mandatos sobrevividos, entre partidas)
+ "puntero": ("Puntero", "Colocar", "#E0A030",
+   "A chubby cheerful neighborhood political broker in an apron and a cap, grilling choripán sausages on a small street parrilla grill "
+   "with thick appetizing smoke, handing a sandwich forward with a wink, a little cash box with banknotes peeking out on a folding table, plaza behind."),
+ "contenedores": ("Contenedores", "Colocar", "#3E8E4E",
+   "Two big green municipal trash dumpsters on wheels tipped over and pushed together as a barricade across plaza paving, "
+   "dented and sturdy, a hooded protester comically bouncing off the top of them, no police, pink Casa Rosada blurred behind."),
+ "infiltrado": ("Infiltrado", "Colocar", "#5D6B7A",
+   "An undercover cop disguised as a protester blending into a cheerful crowd: grey hoodie, cap, backpack and a blank placard, "
+   "a secret police earpiece and a pair of handcuffs peeking from his pocket, sly sideways glance, the crowd unaware."),
+ "comisario": ("Comisario", "Colocar", "#2F4F9F",
+   "A big-bellied police commissioner with a thick mustache and a peaked cap with golden visor, shouting orders through a megaphone, "
+   "riot officers behind him standing taller with a glowing golden aura, heroic low angle."),
+ "concertina": ("Concertina", "Colocar", "#7B8794",
+   "Coils of shiny razor wire (concertina) laid on wooden sawhorse frames across the plaza paving, glinting in the sun, "
+   "a couple of cartoon protesters hopping and tiptoeing comically over it with torn trousers, no gore."),
+ "requisa": ("Requisa", "Colocar", "#6B4FA0",
+   "Two police officers at a folding table searching protesters' backpacks, a growing pile of confiscated items: wooden sticks, "
+   "homemade cardboard mortar tubes, balaclavas and slingshots, a surprised protester with empty hands, playful tone."),
+ "desvio": ("Desvío", "Colocar", "#E8742C",
+   "A traffic officer in a bright reflective vest with a whistle and white gloves pointing the way, orange traffic cones and a striped "
+   "detour barrier redirecting a line of confused cartoon protesters down a side street, a big curved arrow painted on the street."),
+ "estruendo": ("Estruendo", "Colocar", "#E04A2F",
+   "A flash-bang stun grenade bursting in the middle of the plaza with a bright white flash, comic shockwave rings and cartoon stars, "
+   "protesters knocked dizzy with spirals over their heads, nobody hurt, slapstick tone."),
+ "drone": ("Drone", "Colocar", "#3A9AD9",
+   "A chunky police quadcopter drone with blue and red beacon lights hovering above the plaza crowd, a camera lens looking down, "
+   "shooting a small paintball pellet at a hooded protester, sunny sky."),
+ "tanqueta": ("Tanqueta", "Colocar", "#4A5560",
+   "A chunky cartoonish armored riot-control vehicle with big wheels, navy and grey armor plates and a turret cannon "
+   "launching a huge arc of white foam over the crowd, foam bubbles everywhere, siren lights glowing."),
  # --- efectos
  "impuestazo": ("Impuestazo", "Efecto", "#D8452F",
    "A giant cartoon tax-collector magnet hovering over the city, pulling coins and banknotes out of the pockets of small surprised citizens, "

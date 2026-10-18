@@ -19,6 +19,11 @@ namespace Argensimia
                 "Primeras columnas del mandato {0} llegan desde el Congreso",
                 "Mandato {0}: cortes y bombos en el microcentro",
             },
+            ["infiltrado"] = new[] { "Un policía de civil detiene a un manifestante en plena marcha", "Denuncian infiltrados entre los manifestantes", "«Parecía uno más», cuenta un testigo de la detención" },
+            ["requisa"] = new[] { "Requisa en la Plaza: secuestran palos y morteros caseros", "Desarman a un grupo de encapuchados en los accesos" },
+            ["desvio"] = new[] { "Desvían a los manifestantes por una calle lateral", "Operativo de tránsito: la marcha cambia de recorrido" },
+            ["estruendo"] = new[] { "Estruendo en la Plaza: corridas y confusión", "Una granada de estruendo dispersa a los manifestantes" },
+            ["tanqueta"] = new[] { "La tanqueta dispara espuma sobre la Plaza", "Espuma antidisturbios: la Plaza parece un lavadero" },
             ["wave_final"] = new[]
             {
                 "ESTALLIDO: todas las columnas marchan sobre la Casa Rosada",

@@ -5,7 +5,7 @@ namespace Argensimia
 {
     // Elemento policial colocado en un slot del carril. Todos frenan al 100% a los manifestantes de su carril
     // (solo el encapuchado tiene chance de saltar un retén) y se rompen al quedar sin vida, liberando el slot.
-    public class Defense : MonoBehaviour
+    public partial class Defense : MonoBehaviour
     {
         public static readonly List<Defense> All = new List<Defense>();
 
@@ -43,7 +43,14 @@ namespace Argensimia
         Transform moto;
         HpBar cdBar;
         float motoWait, motoAppear = 1;
-        public bool Targetable => true;
+        // Frena a los que llegan (los que no, dejan pasar: concertina, infiltrado, desvío, estruendo y drone).
+        public bool Blocks => def.defense switch
+        {
+            DefenseKind.Concertina or DefenseKind.Infiltrado or DefenseKind.Desvio or DefenseKind.Estruendo or DefenseKind.Drone => false,
+            _ => true,
+        };
+        // Puede recibir tiros del mortero (el drone y el desvío sí, aunque no frenen).
+        public bool Targetable => Blocks || def.defense == DefenseKind.Drone || def.defense == DefenseKind.Desvio;
 
         void BuildMotos()
         {
@@ -54,7 +61,7 @@ namespace Argensimia
         HpBar bar;
         Transform model;
 
-        float Mul => CardDef.LevelMul(level);
+        float Mul => CardDef.LevelMul(level) * (1 + BuffFor(this)); // el comisario suma daño a las cercanas
         float Rate => CardDef.LevelRate(level);
         float Range => def.stats.range + def.LevelRange(level);
         static readonly List<Enemy> hits = new List<Enemy>();
@@ -93,7 +100,7 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ visual (modelos de la policía de la escena)
 
-        float BarHeight => def.defense == DefenseKind.Hidrante ? 6.4f : 4.6f;
+        float BarHeight => def.defense == DefenseKind.Hidrante || def.defense == DefenseKind.Tanqueta ? 6.4f : def.defense == DefenseKind.Drone ? 9.2f : 4.6f;
         // Agentes un poco más grandes en cada nivel (se lee la mejora de un vistazo).
         float LevelScale => 1f + 0.05f * (level - 1);
 
@@ -257,6 +264,9 @@ namespace Argensimia
                     if (level >= 2) Armor(truck);
                     break;
                 }
+                default:
+                    BuildExtra();
+                    break;
             }
         }
 
@@ -322,7 +332,7 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ mejora (soltar una carta igual encima)
 
-        public bool CanUpgrade => !Dead && level < 3;
+        public bool CanUpgrade => !Dead && level < 3 && def.Upgradable;
 
         public static bool AnyUpgradable(CardDef def)
         {
@@ -364,6 +374,7 @@ namespace Argensimia
             StartCoroutine(PopIn());
             Burst(new Color(1f, 0.8f, 0.3f, 0.95f), 46, 7f);
             Snd.Ui("upgrade");
+            if (level >= 3) Achievements.Unlock("dorado");
         }
 
         // Curación del cierre de mandato (o de cartas): suma frac de la vida máxima, sin pasarse. Devuelve cuántas curó.
@@ -559,7 +570,7 @@ namespace Argensimia
             Defense best = null;
             foreach (var d in All)
             {
-                if (d.Dead || d.lane != e.lane || !d.Targetable) continue;
+                if (d.Dead || d.lane != e.lane || !d.Blocks) continue;
                 float gap = e.x - d.EastFace;
                 if (gap < -0.6f || gap > 0.9f) continue;
                 if (!best || d.EastFace > best.EastFace) best = d;
@@ -594,7 +605,7 @@ namespace Argensimia
             float dt = Time.deltaTime;
             cd -= dt;
             punch = Mathf.MoveTowards(punch, 0, dt * 5);
-            if (def.defense != DefenseKind.Vallado) model.localPosition = Vector3.right * punch * 0.15f;
+            if (def.defense != DefenseKind.Vallado && def.defense != DefenseKind.Drone) model.localPosition = Vector3.right * punch * 0.15f;
             switch (def.defense)
             {
                 case DefenseKind.Vallado: Shake(dt); break;
@@ -604,6 +615,7 @@ namespace Argensimia
                 case DefenseKind.Detencion: Detain(); break;
                 case DefenseKind.Hidrante: Water(dt); Siren(); break;
                 case DefenseKind.Motorizada: Moto(dt); break;
+                default: UpdateExtra(dt); break;
             }
         }
 
@@ -788,7 +800,7 @@ namespace Argensimia
 
         public void TakeDamage(float a)
         {
-            if (Dead) return;
+            if (Dead || !Targetable) return;
             hp -= a;
             punch = Mathf.Max(punch, 0.5f);
             if (def.defense == DefenseKind.Vallado) shake = Mathf.Min(1, shake + 0.65f);
@@ -804,7 +816,7 @@ namespace Argensimia
             blocking.Clear();
             if (def.defense == DefenseKind.Vallado) Headlines.Say("fence_break", 10f); else Headlines.Say("defense_break", 4f, L.CardTitle(def).ToLowerInvariant());
             // vallado y camión se desarman; los agentes caen
-            bool thing = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Hidrante;
+            bool thing = def.defense == DefenseKind.Vallado || def.defense == DefenseKind.Hidrante || def.defense == DefenseKind.Contenedores || def.defense == DefenseKind.Tanqueta || def.defense == DefenseKind.Drone;
             Snd.At(thing ? "break_crash" : "unit_down", transform.position, 1, 0.1f, 0.08f);
             StartCoroutine(Fall());
         }

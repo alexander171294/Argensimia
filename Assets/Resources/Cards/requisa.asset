@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3ddab0789d483a9d475242c942bca, type: 3}
+  m_Name: requisa
+  m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
+  id: requisa
+  title: Requisa
+  kind: 0
+  cost: 1700
+  description: "Cada 8 s desarma al especial m\xE1s peligroso a 2 casilleros: el
+    encapuchado, el piquetero o el mortero pasan a ser manifestantes comunes."
+  art: {fileID: 21300000, guid: b001f4dfa306f46158f25e874f8c0842, type: 3}
+  color: {r: 0.41960785, g: 0.30980393, b: 0.627451, a: 1}
+  copies: 0
+  headline: "Requisa en los accesos a la Plaza: secuestran palos y morteros caseros|Revisan
+    mochilas en los accesos a la Plaza|Secuestran gomeras, palos y pasamonta\xF1as"
+  rarity: 1
+  inPool: 1
+  popularityDelta: 0
+  moneyDelta: 0
+  incomeDelta: 0
+  popPerMandate: 0
+  defenseHpBonus: 0
+  moneyMultiplier: 1
+  extraColumns: 0
+  nextWaveReduction: 0
+  previaOnly: 0
+  salaryDelta: 0
+  govDelta: 0
+  maxGovDelta: 0
+  govPerMandate: 0
+  healNow: 0
+  healBonus: 0
+  defense: 12
+  stats:
+    hp: 250
+    damage: 0
+    rate: 0.125
+    range: 13.6
+    area: 0
+    speed: 0
+  maxBlock: 0
+  slow: 0
+  slowTime: 0
+  stun: 0
+  push: 0
+  cycleOn: 0
+  cycleOff: 0
+  placePrefab: {fileID: 0}
+  slotSize: 1
+  moneyRate: 0
+  buff: 0
+  noJump: 0

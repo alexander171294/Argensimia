@@ -76,6 +76,48 @@ public static class HudSetup
             "Hidrantes en la Plaza: denuncian represión",
             c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
+        // ---- Desbloqueables: una cada 3 mandatos sobrevividos, sumando partidas (Meta.UnlockOrder). Copias 0: solo por el cierre.
+        n += Card("puntero", "Puntero", CardKind.Colocar, 700, "#e0a030", 0, Rarity.Comun,
+            "El puntero del barrio arma su parrillita en la Plaza: mientras está en pie genera $12/s durante la oleada. Es frágil: cuidalo.",
+            "Choripanes gratis en la Plaza: «es una jornada solidaria»",
+            c => { c.defense = DefenseKind.Puntero; c.stats = S(150, 0, 0, 0); c.moneyRate = 12; });
+        n += Card("contenedores", "Contenedores", CardKind.Colocar, 1300, "#3e8e4e", 0, Rarity.Comun,
+            "Dos contenedores de basura atravesados en el carril: aguantan muchísimo y los encapuchados no los pueden saltar.",
+            "Usan contenedores de basura como barricada frente a la Casa Rosada",
+            c => { c.defense = DefenseKind.Contenedores; c.stats = S(1500, 0, 0, 0); c.noJump = true; });
+        n += Card("infiltrado", "Infiltrado", CardKind.Colocar, 900, "#5d6b7a", 0, Rarity.PocoComun,
+            "Un policía de civil entre la gente: tarda 10 s en ubicarse y nadie lo ve. Después, el primero que pasa queda detenido y los de alrededor, aturdidos. Un solo uso; a una columna le pega fuerte.",
+            "Denuncian policías de civil infiltrados en la marcha",
+            c => { c.defense = DefenseKind.Infiltrado; c.stats = S(100, 150, 0, 0, 4); c.stun = 2; c.cycleOn = 10; });
+        n += Card("comisario", "Comisario", CardKind.Colocar, 1600, "#2f4f9f", 0, Rarity.Rara,
+            "El comisario arenga por megáfono: las defensas a 1 casillero pegan 30% más fuerte (45% y 60% en NV2 y NV3). También frena.",
+            "El comisario toma el mando del operativo en la Plaza",
+            c => { c.defense = DefenseKind.Comisario; c.stats = S(300, 0, 0, 6.8f); c.buff = 0.3f; });
+        n += Card("concertina", "Concertina", CardKind.Colocar, 500, "#7b8794", 0, Rarity.Comun,
+            "Rollos de alambre en el piso: no frenan a nadie, pero lastiman y demoran a todos los que pasan. Nadie le puede pegar.",
+            "Alambre de púas en la Plaza: «es una medida preventiva»",
+            c => { c.defense = DefenseKind.Concertina; c.stats = S(100, 6, 0, 0); c.slow = 0.3f; });
+        n += Card("requisa", "Requisa", CardKind.Colocar, 1700, "#6b4fa0", 0, Rarity.PocoComun,
+            "Cada 8 s desarma al especial más peligroso a 2 casilleros: el encapuchado, el piquetero o el mortero pasan a ser manifestantes comunes.",
+            "Requisa en los accesos a la Plaza: secuestran palos y morteros caseros",
+            c => { c.defense = DefenseKind.Requisa; c.stats = S(250, 0, 0.125f, 13.6f); });
+        n += Card("desvio", "Desvío", CardKind.Colocar, 800, "#e8742c", 0, Rarity.PocoComun,
+            "Un agente de tránsito con conos y vallas manda a los que llegan al carril vecino mejor defendido. Nadie le pega, pero no sirve con columnas organizadas.",
+            "Desvían la marcha por una calle lateral",
+            c => { c.defense = DefenseKind.Desvio; c.stats = S(100, 0, 0, 0); });
+        n += Card("estruendo", "Estruendo", CardKind.Colocar, 1100, "#e04a2f", 0, Rarity.PocoComun,
+            "Granada de estruendo: al segundo explota y aturde 3 s a todos en 6 m, con algo de daño. Un solo uso.",
+            "Una granada de estruendo sacude la Plaza de Mayo",
+            c => { c.defense = DefenseKind.Estruendo; c.stats = S(100, 60, 0, 0, 6); c.stun = 3; c.cycleOn = 0.8f; });
+        n += Card("drone", "Drone", CardKind.Colocar, 2100, "#3a9ad9", 0, Rarity.Rara,
+            "Vuela sobre su slot y dispara a cualquier carril hasta 3 casilleros, primero a los especiales. No frena a nadie; el mortero lo puede bajar.",
+            "Un drone policial sobrevuela la Plaza",
+            c => { c.defense = DefenseKind.Drone; c.stats = S(200, 10, 1.2f, 20.4f); });
+        n += Card("tanqueta", "Tanqueta", CardKind.Colocar, 3900, "#4a5560", 0, Rarity.Rara,
+            "Blindado antidisturbios: frena, aguanta muchísimo y cada 16 s dispara espuma al grupo más denso de toda la Plaza (daño en área, moja y frena 70%). Ocupa 2 slots.",
+            "Llega la tanqueta antidisturbios a la Plaza",
+            c => { c.defense = DefenseKind.Tanqueta; c.stats = S(1400, 45, 0, 60, 7); c.slow = 0.7f; c.slowTime = 4; c.cycleOff = 16; c.slotSize = 2; });
+
         // ---- Efecto
         n += Card("impuestazo", "Impuestazo", CardKind.Efecto, 0, "#d8452f", 1, Rarity.Comun,
             "La AFIP sale a recaudar. Entra plata, pero la calle se calienta y las columnas llegan más enojadas.",
@@ -164,6 +206,16 @@ public static class HudSetup
     // Variantes extra de titular por carta (la marquesina elige una al azar sin repetir la última).
     static readonly System.Collections.Generic.Dictionary<string, string> MoreHeadlines = new System.Collections.Generic.Dictionary<string, string>
     {
+        ["puntero"] = "El puntero del barrio reparte choris en la Plaza|«Acá nadie se queda sin su chori», promete un militante",
+        ["contenedores"] = "Contenedores en el medio de la calle: la Ciudad pide devolverlos|Barricada de contenedores frente a Balcarce 50",
+        ["infiltrado"] = "Polémica por agentes de civil entre los manifestantes|«No hay infiltrados», asegura el Ministerio de Seguridad",
+        ["comisario"] = "El comisario a cargo: «acá mando yo»|Arenga por megáfono: la policía se agranda",
+        ["concertina"] = "Ponen alambre de púas alrededor de la Plaza|Organismos de DDHH critican la concertina",
+        ["requisa"] = "Revisan mochilas en los accesos a la Plaza|Secuestran gomeras, palos y pasamontañas",
+        ["desvio"] = "Cambian el recorrido de la marcha a último momento|Operativo de tránsito: la columna dobla por una lateral",
+        ["estruendo"] = "Estruendo en la Plaza: corridas y confusión|Granadas de estruendo: «solo hacen ruido», dicen",
+        ["drone"] = "Drones policiales vigilan la marcha desde el aire|«Big Brother» en la Plaza: denuncian vigilancia con drones",
+        ["tanqueta"] = "La tanqueta llena de espuma la Plaza de Mayo|Blindados en el microcentro: la oposición pide explicaciones",
         ["vallado"] = "Más vallas en la Plaza: el Gobierno blinda la Casa Rosada|Cercan la Plaza de Mayo: vecinos no pueden cruzar",
         ["infanteria"] = "Escudos y cascos: la Infantería forma frente a Balcarce 50|Refuerzan el operativo con la Guardia de Infantería",
         ["balas_goma"] = "Disparos de goma en la Plaza: denuncian represión|Organismos de DDHH condenan el uso de balas de goma",
@@ -216,6 +268,7 @@ public static class HudSetup
         c.popularityDelta = 0; c.moneyDelta = 0; c.incomeDelta = 0; c.popPerMandate = 0; c.defenseHpBonus = 0;
         c.moneyMultiplier = 1; c.extraColumns = 0; c.nextWaveReduction = 0; c.previaOnly = false;
         c.salaryDelta = 0; c.govDelta = 0; c.maxGovDelta = 0; c.govPerMandate = 0; c.healNow = 0; c.healBonus = 0;
+        c.moneyRate = 0; c.buff = 0; c.noJump = false;
         c.stats = default; c.maxBlock = 0; c.slow = 0; c.slowTime = 0; c.stun = 0; c.push = 0; c.cycleOn = 0; c.cycleOff = 0; c.slotSize = 1;
         ColorUtility.TryParseHtmlString(hex, out c.color);
         setup(c);
@@ -286,6 +339,8 @@ public static class HudSetup
         a.people = new[] { Model("person_a"), Model("person_b"), Model("person_c"), Model("person_d") };
         a.officer = Model("police_officer"); a.truck = Model("police_truck"); a.valla = Model("valla_l") ? Model("valla_l") : Model("valla");
         a.flagArg = Model("flag_arg"); a.flagRed = Model("flag_red"); a.banner = Model("banner");
+        a.puntero = Model("puntero"); a.contenedor = Model("contenedor"); a.comisario = Model("comisario"); a.concertina = Model("concertina");
+        a.requisa = Model("requisa"); a.desvio = Model("desvio"); a.drone = Model("drone"); a.tanqueta = Model("tanqueta"); a.tanquetaTurret = Model("tanqueta_torreta");
         a.shirts = Mats("M_Shirt_", 10); a.pants = Mats("M_Pants_", 5); a.skins = Mats("M_SkinV_", 5); a.hairs = Mats("M_HairV_", 6);
 
         var lit = FxMat("M_PropLit", Shader.Find("Universal Render Pipeline/Lit"));
