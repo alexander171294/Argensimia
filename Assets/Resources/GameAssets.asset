@@ -23,6 +23,8 @@ MonoBehaviour:
   flagArg: {fileID: 919132149155446097, guid: e32eb650f5bdc4cc88a879d775a3c5cc, type: 3}
   flagRed: {fileID: 919132149155446097, guid: d9814f55b6b1549e69e06bc57cbf3385, type: 3}
   banner: {fileID: 919132149155446097, guid: 2ec9dc442991c49708c61c7254245568, type: 3}
+  hidranteL2: {fileID: 919132149155446097, guid: 91fac81f5da624996a55c7d5fc1c1f36, type: 3}
+  hidranteL3: {fileID: 919132149155446097, guid: 6f35dcca4bb544619afd082411884b64, type: 3}
   puntero: {fileID: 919132149155446097, guid: d1c514f3ca4e34f7298aa43aae47908d, type: 3}
   contenedor: {fileID: 919132149155446097, guid: 4c498f473ee514324b25af52af51da5f, type: 3}
   comisario: {fileID: 919132149155446097, guid: 7cd1357893eff4a7685c79323f78aee7, type: 3}

@@ -8,6 +8,7 @@ namespace Argensimia
         public GameObject[] people;
         public GameObject officer, truck, valla, flagArg, flagRed, banner;
         [Header("Defensas desbloqueables")]
+        public GameObject hidranteL2, hidranteL3;
         public GameObject puntero, contenedor, comisario, concertina, requisa, desvio, drone, tanqueta, tanquetaTurret;
         public Material[] shirts, pants, skins, hairs;
         [Tooltip("URP Lit base para props primitivos (se instancia)")] public Material lit;

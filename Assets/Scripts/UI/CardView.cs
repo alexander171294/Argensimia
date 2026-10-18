@@ -18,6 +18,7 @@ namespace Argensimia.UI
         public RectTransform body, state;
         public bool Disabled { get; private set; }
         public bool dimWhenPoor = true;
+        public System.Action onSell; // venta desde la mano (botón debajo de SIN LUGAR)
 
         GameObject front, back;
         Image dim;
@@ -131,9 +132,21 @@ namespace Argensimia.UI
             dis.RT().Fill();
             disabledFx = dis.gameObject.AddComponent<CanvasGroup>();
             disabledFx.alpha = 0;
+            disabledFx.blocksRaycasts = false;
             var tag = UiKit.Img(dis.transform, "Tag", UiKit.RR, new Color(0, 0, 0, 0.75f), 14);
             tag.RT().At(new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(250, 60));
             UiKit.Txt(tag.transform, "T", "SIN LUGAR", 34, Color.white, TextAlignmentOptions.Center, true).RT().Fill();
+            // debajo: VENDER, para sacarse de encima la carta que no entra
+            if (def.kind != CardKind.Crisis)
+            {
+                var sb = UiKit.Rect("Sell", dis.transform).At(new Vector2(0.5f, 0.5f), new Vector2(0, -42), new Vector2(250, 72));
+                UiKit.Img(sb, "Base", UiKit.RR, UiKit.Hex("#1d6b2a"), 18, true).RT().Fill();
+                var face = UiKit.Img(sb, "Face", UiKit.RR, UiKit.Hex("#43c157"), 18).RT().Fill(0, 0, 0, 7);
+                UiKit.Txt(face, "T", L.T("VENDER") + " +$" + GameState.Money(GameHud.SellPrice(def)), 30, Color.white, TextAlignmentOptions.Center, true).RT().Fill(6, 6, 0, 0);
+                var st = sb.gameObject.AddComponent<Tap>();
+                st.visual = sb;
+                st.onTap = () => { if (Disabled) onSell?.Invoke(); };
+            }
 
             // Costo
             var bar = UiKit.Img(f, "CostBar", UiKit.RR, UiKit.Shade(c, 0.5f), 16).RT();
@@ -207,6 +220,7 @@ namespace Argensimia.UI
                 state.localScale = Vector3.one * Mathf.Lerp(1f, 0.84f, e);
                 state.anchoredPosition = new Vector2(0, Mathf.Lerp(0, -46f, e));
                 disabledFx.alpha = e;
+                disabledFx.blocksRaycasts = disabledK > 0.5f;
             }
             bool showFront = (transform.rotation * Vector3.forward).z > 0f;
             if (front.activeSelf != showFront)

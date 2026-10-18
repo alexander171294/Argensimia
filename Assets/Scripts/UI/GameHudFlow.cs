@@ -84,22 +84,23 @@ namespace Argensimia.UI
             evadeBtn.gameObject.SetActive(false);
 
             // VENDER ($) en el zoom: la carta sale del juego a cambio de SellPrice (sube con la rareza)
-            sellBtn = UiKit.Rect("Sell", zoomUi).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96, 120));
-            var circ = UiKit.Img(sellBtn, "Btn", UiKit.Circle, UiKit.Hex("#1d6b2a"), 0, true);
-            circ.RT().At(new Vector2(0.5f, 1), Vector2.zero, new Vector2(84, 84), new Vector2(0.5f, 1));
-            UiKit.Img(circ.transform, "Face", UiKit.Circle, UiKit.Hex("#43c157")).RT().Fill(4, 4, 4, 8);
-            UiKit.Txt(circ.transform, "Dollar", "$", 56, Color.white, TextAlignmentOptions.Center, true, UiKit.FontLogo).RT().Fill(0, 0, 4, 8);
+            // mismo estilo que la X: aro blanco, círculo de color y glifo blanco (verde = plata)
+            sellBtn = UiKit.Img(zoomUi, "Sell", null, new Color(0, 0, 0, 0), 0, true).RT().At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(120, 150));
+            var circ = UiKit.Img(sellBtn, "Ring", UiKit.Circle, Color.white).RT();
+            circ.At(new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(84, 84), new Vector2(0.5f, 1));
+            UiKit.Img(circ, "In", UiKit.Circle, UiKit.Hex("#2f9a4a")).RT().Fill(84 * 0.07f, 84 * 0.07f, 84 * 0.07f, 84 * 0.07f);
+            UiKit.Txt(circ, "Dollar", "$", 54, Color.white, TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 4, 0);
             var pill = UiKit.Img(sellBtn, "Price", UiKit.RR, new Color(0, 0, 0, 0.6f), 12).RT();
-            pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(104, 30), new Vector2(0.5f, 0));
+            pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(110, 30), new Vector2(0.5f, 0));
             sellPriceTxt = UiKit.Txt(pill, "T", "+$" + GameState.Money(SellPrice(null)), 22, UiKit.Green, TextAlignmentOptions.Center, true);
             sellPriceTxt.RT().Fill();
             var stp = sellBtn.gameObject.AddComponent<Tap>();
-            stp.visual = sellBtn; stp.onTap = OnSell;
+            stp.visual = circ; stp.onTap = OnSell;
             sellBtn.gameObject.SetActive(false);
         }
 
         // Venta: común $250, poco común $375, rara $500.
-        static int SellPrice(CardDef d) => !d || d.rarity == Rarity.Comun ? 250 : d.rarity == Rarity.PocoComun ? 375 : 500;
+        public static int SellPrice(CardDef d) => !d || d.rarity == Rarity.Comun ? 250 : d.rarity == Rarity.PocoComun ? 375 : 500;
         RectTransform sellBtn;
         TextMeshProUGUI sellPriceTxt;
 
@@ -109,19 +110,31 @@ namespace Argensimia.UI
             StartCoroutine(SellRoutine(zoomed));
         }
 
+        // Vender desde la mano (botón debajo de SIN LUGAR).
+        void SellFromHand(CardView cv)
+        {
+            if (busy || zoomed || placing || paused || dragging || !cv || cv.def.kind == CardKind.Crisis) return;
+            if (gs.phase != Phase.Previa && gs.phase != Phase.Oleada) return;
+            StartCoroutine(SellRoutine(cv));
+        }
+
         // La carta se achica, gira y cae en el tacho; entra la plata y se roba otra.
         IEnumerator SellRoutine(CardView cv)
         {
             busy = true;
-            HideZoomButtons();
+            bool wasZoomed = zoomed == cv;
+            if (wasZoomed) HideZoomButtons();
+            else cv.transform.SetParent(zoomLayer, true);
             Snd.Ui("card_flip");
-            Vector3 from = cv.transform.localPosition, to = sellBtn.anchoredPosition;
+            Vector3 from = cv.transform.localPosition;
+            Vector3 to = wasZoomed ? (Vector3)sellBtn.anchoredPosition : zoomLayer.InverseTransformPoint(moneyPanel.TransformPoint(moneyPanel.rect.center));
+            float s0 = cv.transform.localScale.x;
             yield return UiKit.Tween(0.38f, t =>
             {
                 float e = Ease.InCubic(t);
-                dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
+                if (wasZoomed) dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 60f;
-                cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.05f, e);
+                cv.transform.localScale = Vector3.one * Mathf.Lerp(s0, 0.05f, e);
                 cv.transform.localRotation = Quaternion.Euler(0, 0, e * 160f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.6f) / 0.4f);
             });
@@ -133,9 +146,7 @@ namespace Argensimia.UI
             int slot = cv.slot; // vendida: sale del juego (no vuelve al mazo)
             cards[slot] = null;
             Destroy(cv.gameObject);
-            dim.gameObject.SetActive(false);
-            zoomed = null;
-            Defense.ShowHints(null, false);
+            if (wasZoomed) { dim.gameObject.SetActive(false); zoomed = null; Defense.ShowHints(null, false); }
             yield return new WaitForSecondsRealtime(0.1f);
             yield return DrawInto(slot);
             busy = false;
@@ -199,7 +210,7 @@ namespace Argensimia.UI
             if (sellBtn.gameObject.activeSelf != sell) sellBtn.gameObject.SetActive(sell);
             if (sell)
             {
-                sellBtn.anchoredPosition = new Vector2(-closeBtn.anchoredPosition.x, closeBtn.anchoredPosition.y - 30); // arriba a la izquierda de la carta
+                sellBtn.anchoredPosition = new Vector2(-closeBtn.anchoredPosition.x, closeBtn.anchoredPosition.y - 15); // arriba a la izquierda de la carta
                 sellPriceTxt.text = "+$" + GameState.Money(SellPrice(zoomed.def));
             }
 

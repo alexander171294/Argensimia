@@ -101,8 +101,18 @@ namespace Argensimia
         {
             mandate++;
             MandateChanged?.Invoke(mandate);
+            // Desgaste de gestión: desde el mandato 6 (ya no se suman carriles) cada mandato arranca restando
+            // popularidad: 15% en el 6, 20% en el 7 y 25% desde el 8.
+            float wear = MandateWear(mandate);
+            if (wear > 0)
+            {
+                LosePopularity(wear);
+                Headline?.Invoke(Headlines.Pick("wear", Mathf.RoundToInt(wear)));
+            }
             Achievements.OnMandate(mandate, popularity, usedRepression);
         }
+
+        public static float MandateWear(int m) => m < 6 ? 0 : m == 6 ? 15 : m == 7 ? 20 : 25;
 
         public bool CanAfford(int cost) => money + 0.001f >= cost;
 

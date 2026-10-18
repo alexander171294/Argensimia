@@ -199,7 +199,7 @@ namespace Argensimia.UI
 
             // cerrar
             var x = UiKit.Rect("Close", p).At(new Vector2(1, 1), new Vector2(-18, -18), new Vector2(60, 60), new Vector2(1, 1));
-            UiKit.Img(x, "Bg", UiKit.Circle, UiKit.Hex("#d9534a")).RT().Fill();
+            UiKit.Img(x, "Bg", UiKit.Circle, UiKit.Hex("#d9534a"), 0, true).RT().Fill(); // raycast: sin esto la X no recibía el toque
             UiKit.Txt(x, "X", "X", 30, Color.white, TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 2, 0);
             var tap = x.gameObject.AddComponent<Tap>();
             tap.visual = x;

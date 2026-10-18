@@ -19,6 +19,7 @@ namespace Argensimia
                 "Primeras columnas del mandato {0} llegan desde el Congreso",
                 "Mandato {0}: cortes y bombos en el microcentro",
             },
+            ["wear"] = new[] { "Desgaste de gestión: la imagen del Gobierno cae {0}% al arrancar el mandato", "Encuesta: la gente se cansa del Gobierno (-{0}%)", "«El que gobierna se desgasta», admiten en Casa Rosada (-{0}%)" },
             ["infiltrado"] = new[] { "Un policía de civil detiene a un manifestante en plena marcha", "Denuncian infiltrados entre los manifestantes", "«Parecía uno más», cuenta un testigo de la detención" },
             ["requisa"] = new[] { "Requisa en la Plaza: secuestran palos y morteros caseros", "Desarman a un grupo de encapuchados en los accesos" },
             ["desvio"] = new[] { "Desvían a los manifestantes por una calle lateral", "Operativo de tránsito: la marcha cambia de recorrido" },

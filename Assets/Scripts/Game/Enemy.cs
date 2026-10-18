@@ -420,9 +420,23 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ daño y efectos
 
-        public void TakeDamage(float a)
+        // Agua del hidrante: si en el último segundo nadie más le pegó, crítico ×5 (así no queda lejos y empapado
+        // eternamente mientras se junta plata gratis).
+        float lastHit = -99;
+        public const float WaterCrit = 5f;
+        public void TakeWater(float a)
         {
             if (Dead) return;
+            bool crit = Time.time - lastHit > 1f;
+            TakeDamage(a * (crit ? WaterCrit : 1f), false);
+        }
+
+        public void TakeDamage(float a) => TakeDamage(a, true);
+
+        void TakeDamage(float a, bool other)
+        {
+            if (Dead) return;
+            if (other) lastHit = Time.time;
             hp -= a;
             punch = Mathf.Max(punch, 0.6f);
             if (def.popOnHit > 0 && popCd <= 0 && GameState.I)

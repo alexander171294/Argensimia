@@ -8,13 +8,13 @@
 
 ## Descargar
 
-Última release: **[v0.2.1](https://github.com/alexander171294/Argensimia/releases/latest)**: progresión entre partidas con 10 defensas desbloqueables y logros.
+Última release: **[v0.2.2](https://github.com/alexander171294/Argensimia/releases/latest)**: progresión entre partidas con 10 defensas desbloqueables y logros.
 
 | Plataforma | Archivo | Cómo se instala |
 | --- | --- | --- |
-| Windows 10/11 (64 bits) | `Argensimia-0.2.1-Windows-Setup.exe` | Instalador con acceso directo en el escritorio y desinstalador. Como no está firmado, SmartScreen puede pedir *Más información → Ejecutar de todas formas*. |
-| macOS 11+ (Intel y Apple Silicon) | `Argensimia-0.2.1-macOS.dmg` | Arrastrá Argensimia a Aplicaciones. Está firmado ad hoc (sin notarizar): la primera vez abrilo con clic derecho → *Abrir*. |
-| Linux x86_64 | `Argensimia-0.2.1-Linux-x86_64.AppImage` | `chmod +x Argensimia-*.AppImage && ./Argensimia-*.AppImage` (requiere FUSE). |
+| Windows 10/11 (64 bits) | `Argensimia-0.2.2-Windows-Setup.exe` | Instalador con acceso directo en el escritorio y desinstalador. Como no está firmado, SmartScreen puede pedir *Más información → Ejecutar de todas formas*. |
+| macOS 11+ (Intel y Apple Silicon) | `Argensimia-0.2.2-macOS.dmg` | Arrastrá Argensimia a Aplicaciones. Está firmado ad hoc (sin notarizar): la primera vez abrilo con clic derecho → *Abrir*. |
+| Linux x86_64 | `Argensimia-0.2.2-Linux-x86_64.AppImage` | `chmod +x Argensimia-*.AppImage && ./Argensimia-*.AppImage` (requiere FUSE). |
 
 ## Capturas
 

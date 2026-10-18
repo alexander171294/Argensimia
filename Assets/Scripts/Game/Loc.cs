@@ -130,6 +130,7 @@ namespace Argensimia
             ["ATURDE"] = "STUN",
             ["PLAZA"] = "PLAZA",
             ["LOGROS"] = "AWARDS",
+            ["VENDER"] = "SELL",
             ["¡BIEN!"] = "GREAT!",
             ["¡MEJORA PERMANENTE!"] = "PERMANENT UPGRADE!",
             ["¡NUEVA CARTA DESBLOQUEADA!"] = "NEW CARD UNLOCKED!",
@@ -169,9 +170,9 @@ namespace Argensimia
             ["infanteria"] = ("Infantry", "Cheap tank: a line of shield officers that stops everyone and hits them in melee. Can't reach behind a barricade.", "Riot infantry forms a line in the Plaza"),
             ["balas_goma"] = ("Shotguns", "Shieldless officers with riot shotguns. They fire rubber bullets down their lane; behind a barricade they shoot whoever is hitting it first. They also stop anyone who arrives.", "Rubber bullets fly over the Plaza"),
             ["lanzagases"] = ("Tear Gas", "An officer with a grenade launcher: fires gas at the densest group, in his lane or the neighboring ones. Damage over time in an area and -40% speed.", "Tear gas clouds cover the Plaza"),
-            ["detencion"] = ("Arrests", "Arrest squad: every 4 s an officer sprints to the most dangerous protester within 5 tiles, in any lane, arrests him and comes back. Can't handle columns.", "Arrest squad takes protesters away"),
+            ["detencion"] = ("Arrests", "Arrest squad: when the blue bar fills (5 s; less at LV2 and LV3) an officer sprints to the most dangerous protester within 5 tiles, in any lane, arrests him and comes back. Can't handle columns.", "Arrest squad takes protesters away"),
             ["motorizada"] = ("Motorcycles", "Every 15 s a pass charges down to Av. de Mayo: hits, pushes 3 m and stuns 1 s. Another one is already reloading in the slot, which also blocks and takes hits.", "Police motorcycles charge the protesters"),
-            ["hidrante"] = ("Water Cannon", "A water cannon aiming at the nearest target, in its lane or the neighboring ones: soaks, pushes and slows 60%. 8 s tank, 6 s reload. Takes 2 slots.", "The water cannon truck enters the Plaza"),
+            ["hidrante"] = ("Water Cannon", "A water cannon aiming at the nearest target, in its lane or the neighboring ones: soaks, pushes and slows 60%; x5 damage if nobody else is hitting it. Organized columns are immune. 8 s tank, 6 s reload. Takes 2 slots.", "The water cannon truck enters the Plaza"),
             ["impuestazo"] = ("Tax Hike", "The tax agency goes collecting. Money comes in, but the streets heat up and columns arrive angrier.", "Massive tax hike announced"),
             ["maquinita"] = ("Money Printer", "The Central Bank prints: money now, but inflation is felt in the streets.", "The money printer runs at full speed"),
             ["cadena_nacional"] = ("National Address", "A presidential message on every channel. Popularity goes up a little.", "The President speaks on national TV"),
@@ -224,6 +225,7 @@ namespace Argensimia
         public static readonly Dictionary<string, string[]> Headlines = new Dictionary<string, string[]>
         {
             ["wave_start"] = new[] { "Term {0} begins: columns advance down Av. de Mayo", "Term {0}: protesters gather on Av. de Mayo", "Term {0}: «we are ready», says the Casa Rosada" },
+            ["wear"] = new[] { "Wear and tear: the Government's image drops {0}% as the term begins", "Poll: people grow tired of the Government (-{0}%)" },
             ["infiltrado"] = new[] { "An undercover cop arrests a protester mid-march", "Infiltrators reported among the protesters" },
             ["requisa"] = new[] { "Police search: sticks and homemade mortars seized", "Hooded rioters disarmed at the entrances" },
             ["desvio"] = new[] { "Protesters diverted down a side street", "Traffic operation: the march changes its route" },

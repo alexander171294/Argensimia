@@ -49,8 +49,11 @@ namespace Argensimia.UI
             cv.transform.SetParent(zoomLayer, true);
             cv.transform.SetAsLastSibling();
             cv.group.blocksRaycasts = false;
-            if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
-            Defense.ShowHints(cv.def, true);
+            if (cv.def.kind == CardKind.Colocar)
+            {
+                if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
+                Defense.ShowHints(cv.def, true);
+            }
             DragMove(cv, e);
         }
 
@@ -65,7 +68,8 @@ namespace Argensimia.UI
             cv.transform.localScale = Vector3.one * handScale * (overMap ? 0.6f : 1f);
             Defense up = null;
             bool valid = false;
-            if (overMap && GroundPoint(e.position, out var p))
+            if (cv.def.kind != CardKind.Colocar) valid = overMap && CanPlayDropped(cv.def);
+            else if (overMap && GroundPoint(e.position, out var p))
             {
                 PlaceTarget(cv.def, p, out up, out var t, out _);
                 valid = up || t != null;
@@ -81,10 +85,20 @@ namespace Argensimia.UI
             EndDragFx();
             cv.group.blocksRaycasts = true;
             cv.group.alpha = 1;
-            bool ok = !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada) && !OverHand(e.position)
-                      && GroundPoint(e.position, out var p) && TryUsePlaceCard(cv, p);
+            bool live = !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada) && !OverHand(e.position);
+            if (cv.def.kind != CardKind.Colocar)
+            {
+                // efecto / ministro: soltarla en cualquier lado de la partida la activa (sin abrirla)
+                if (live && CanPlayDropped(cv.def)) { StartCoroutine(PlayEffect(cv)); return; }
+                if (live && !gs.CanAfford(cv.def.cost)) { FloatText(moneyPanel, L.T("FALTA $") + GameState.Money(cv.def.cost - gs.money + 0.999f), UiKit.RedSoft, 0); StartCoroutine(Shake(moneyPanel)); }
+                Snd.Ui("card_flip", 0.6f); StartCoroutine(DragReturn(cv));
+                return;
+            }
+            bool ok = live && GroundPoint(e.position, out var p) && TryUsePlaceCard(cv, p);
             if (!ok) { Snd.Ui("card_flip", 0.6f); StartCoroutine(DragReturn(cv)); }
         }
+
+        bool CanPlayDropped(CardDef d) => gs.CanAfford(d.cost) && (!d.previaOnly || gs.phase == Phase.Previa);
 
         void EndDragFx()
         {

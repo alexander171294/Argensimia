@@ -459,8 +459,9 @@ namespace Argensimia.UI
             cv.slot = i;
             cards[i] = cv;
             cv.tap.onTap = () => OnCardTap(cv);
+            cv.onSell = () => SellFromHand(cv);
             cv.tap.interactable = false;
-            if (def.kind == CardKind.Colocar) AddDrag(cv);
+            if (def.kind != CardKind.Crisis) AddDrag(cv); // colocables al mapa; efectos y ministros se activan soltándolos en cualquier lado
             Vector3 from = hand.InverseTransformPoint(deckTop.position), to = SlotPos(i);
             float zEnd = SlotZ(i);
             yield return UiKit.Tween(0.55f, t =>
@@ -598,7 +599,8 @@ namespace Argensimia.UI
             Snd.Ui("card_play", 0.8f);
             if (!free && def.cost > 0) Snd.Ui("spend", 0.8f);
             if (def.cost > 0 && !free) FloatText(moneyPanel, "-$" + GameState.Money(def.cost), UiKit.RedSoft, 0);
-            yield return UiKit.Tween(0.14f, t => cv.transform.localScale = Vector3.one * zoomScale * (1 + Mathf.Sin(t * Mathf.PI) * 0.07f));
+            float s0 = cv.transform.localScale.x; // zoom o arrastrada (más chica)
+            yield return UiKit.Tween(0.14f, t => cv.transform.localScale = Vector3.one * s0 * (1 + Mathf.Sin(t * Mathf.PI) * 0.07f));
 
             var target = def.popularityDelta != 0 ? popPanel : moneyPanel;
             Vector3 from = cv.transform.localPosition, to = zoomLayer.InverseTransformPoint(target.TransformPoint(target.rect.center));
@@ -607,7 +609,7 @@ namespace Argensimia.UI
                 float e = Ease.InCubic(t);
                 dim.color = new Color(0, 0, 0, dimA * (1 - Ease.OutCubic(t)));
                 cv.transform.localPosition = Vector3.Lerp(from, to, e);
-                cv.transform.localScale = Vector3.one * Mathf.Lerp(zoomScale, 0.06f, e);
+                cv.transform.localScale = Vector3.one * Mathf.Lerp(s0, 0.06f, e);
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.65f) / 0.35f);
             });

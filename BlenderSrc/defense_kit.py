@@ -189,8 +189,63 @@ def foam_turret(name='tanqueta_torreta'):
     a.cy('M_Dark',(0,-1.7,0.55),0.15,0.15,0.04,12,(90,0,0))
     return a.finish()
 
+
+def hidrante(level=2):
+    # camion hidrante blindado (NV2) y de asalto (NV3). Mismas medidas que police_truck (largo en Y, frente -Y)
+    # para que el canon de Unity y el slot doble coincidan. Sin canon: lo agrega Unity (gira).
+    a=A('hidrante_l%d'%level)
+    B,N,S,M='M_PoliceBlue','M_PoliceNavy','M_SteelDark','M_Metal'
+    # chasis y ruedas grandes (4 ejes en NV3)
+    a.box('M_Dark',(0,0.2,0.8),(2.4,7.6,0.65))
+    axles=(-2.6,-0.9,1.0,2.7) if level>=3 else (-2.5,1.0,2.6)
+    for y in axles:
+        for x in (-1.22,1.22):
+            a.cy('M_Tire',(x,y,0.62),0.62,0.62,0.46,14,(0,90,0)); a.cy(M,(x*1.12,y,0.62),0.28,0.28,0.08,10,(0,90,0))
+    # caja blindada con chanfles
+    a.box(N,(0,1.1,2.05),(2.66,5.2,2.6))
+    a.box(N,(0,1.1,3.42),(2.3,5.0,0.22))
+    for x in (-1.2,1.2): a.box(N,(x,1.1,3.3),(0.32,5.1,0.3),(0,x*25,0))
+    # cabina blindada en cuna
+    a.box(N,(0,-2.6,1.75),(2.66,2.3,2.0))
+    a.box(N,(0,-3.35,2.55),(2.5,0.9,0.7),(-38,0,0))
+    a.box('M_Glass',(0,-3.62,2.45),(2.0,0.08,0.45),(-38,0,0))
+    for k in range(5): a.box(S,(-0.8+k*0.4,-3.7,2.45),(0.06,0.1,0.55),(-38,0,0))           # rejilla del parabrisas
+    for x in (-1.34,1.34):
+        a.box('M_Glass',(x,-2.6,2.25),(0.05,1.0,0.45))
+        for k in range(3): a.box(S,(x*1.02,-2.95+k*0.35,2.25),(0.05,0.06,0.5))
+    # placas laterales con remaches y franja amarilla/negra
+    for x in (-1.36,1.36):
+        a.box(S,(x,1.1,1.75),(0.1,5.0,1.25))
+        for k in range(10): a.box('M_RoadYellow' if k%2==0 else 'M_Dark',(x*1.01,-1.15+k*0.5,1.05),(0.08,0.5,0.22),(0,0,0))
+        for k in range(8): a.sp(M,(x*1.03,-1.4+k*0.65,2.3),0.05,1)
+        a.box('M_White',(x*1.005,1.1,2.75),(0.06,4.8,0.18))
+    # paragolpes con defensa (bull bar); en NV3 una pala en cuna
+    a.box(S,(0,-3.85,0.95),(2.7,0.35,0.55))
+    for x in (-0.9,0,0.9): a.box(M,(x,-4.05,1.35),(0.12,0.12,0.9))
+    a.box(M,(0,-4.05,1.75),(2.2,0.12,0.12))
+    if level>=3:
+        a.box(S,(0,-4.35,0.75),(2.9,0.25,1.1),(-30,0,0))
+        for k in range(5): a.box('M_RoadYellow' if k%2==0 else 'M_Dark',(-1.1+k*0.55,-4.5,0.75),(0.5,0.05,0.9),(-30,0,25))
+    for x in (-0.95,0.95): a.box('M_LampGlow',(x,-3.75,1.3),(0.35,0.06,0.22))
+    # tanque de agua atras
+    a.cy(S,(0,2.6,2.2),1.05,1.05,2.4,16,(90,0,0))
+    a.cy(M,(0,3.82,2.2),0.6,0.6,0.08,16,(90,0,0))
+    # balizas largas y techo
+    a.box('M_LightRed',(-0.55,-2.2,2.86),(0.9,0.35,0.18)); a.box('M_LightBlue',(0.55,-2.2,2.86),(0.9,0.35,0.18))
+    a.box(S,(0,-2.2,2.78),(2.2,0.4,0.06))
+    if level>=3:
+        # jaula sobre el techo, pasamanos, segunda barra de luces atras, escalera
+        for x in (-1.0,1.0):
+            a.box(M,(x,1.1,4.15),(0.09,4.6,0.09))
+            for k in range(5): a.box(M,(x,-1.1+k*1.1,3.8),(0.09,0.09,0.7))
+        for k in range(5): a.box(M,(0,-1.1+k*1.1,4.15),(2.0,0.08,0.08))
+        a.box('M_LightRed',(-0.55,3.5,3.62),(0.9,0.3,0.16)); a.box('M_LightBlue',(0.55,3.5,3.62),(0.9,0.3,0.16))
+        for k in range(6): a.box(M,(0.9,3.95,0.9+k*0.42),(0.5,0.06,0.06))
+        for x in (-1.36,1.36): a.box(S,(x*1.02,-2.6,1.2),(0.1,2.2,0.9))   # puertas blindadas
+    return a.finish()
+
 def build_all():
     out={}
-    for f in (puntero,contenedor,comisario,concertina,requisa,desvio,drone,tanqueta,foam_turret):
+    for f in (puntero,contenedor,comisario,concertina,requisa,desvio,drone,tanqueta,foam_turret,lambda: hidrante(2),lambda: hidrante(3)):
         o=f(); out[o.name]=len(o.data.polygons)
     return out

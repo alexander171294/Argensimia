@@ -109,7 +109,7 @@ namespace Argensimia
             BuildModel();
             if (def.defense == DefenseKind.Motorizada) motoWait = 1f;
             bar = HpBar.Create(transform, BarHeight, 3.6f, 0.55f);
-            if (def.defense == DefenseKind.Motorizada)
+            if (def.defense == DefenseKind.Motorizada || def.defense == DefenseKind.Detencion)
             {
                 cdBar = HpBar.Create(transform, 4.0f, 3.6f, 0.28f);
                 cdBar.fixedColor = new Color(0.45f, 0.75f, 1f);
@@ -249,7 +249,9 @@ namespace Argensimia
                     break;
                 case DefenseKind.Hidrante:
                 {
-                    var truck = Inst(a.truck, Vector3.zero, 90, 1.25f);
+                    // NV1 camión común; NV2 blindado; NV3 de asalto (jaula, pala, 4 ejes). Sin modelo, primitivas encima.
+                    var armored = level >= 3 ? a.hidranteL3 : level == 2 ? a.hidranteL2 : null;
+                    var truck = Inst(armored ? armored : a.truck, Vector3.zero, 90, 1.25f);
                     Sirens(truck);
                     // cañón de agua en el techo: gira hacia el manifestante más cercano
                     turret = new GameObject("Cannon").transform;
@@ -262,7 +264,7 @@ namespace Argensimia
                     jet = FxKit.Particles(turret, new Vector3(0, 0, 1.1f), Quaternion.identity, a.water,
                         new Color(0.85f, 0.93f, 1f, 0.8f), WaterSpeed, 1.4f, 0.35f, 0.9f, 220, 3f, WaterGravity, 0.1f, 2.4f, 3000);
                     var em = jet.emission; em.enabled = false;
-                    if (level >= 2) Armor(truck);
+                    if (level >= 2 && !armored) Armor(truck);
                     break;
                 }
                 default:
@@ -730,6 +732,7 @@ namespace Argensimia
             float bd = float.MaxValue;
             foreach (var e in tmp)
             {
+                if (e.def.kind == UnitKind.Columna) continue; // la columna organizada es inmune al hidrante
                 float d = (e.transform.position - turret.position).sqrMagnitude;
                 if (d < bd) { bd = d; t = e; }
             }
@@ -757,7 +760,7 @@ namespace Argensimia
             if (tank <= 0) { reloading = true; reload = def.cycleOff; }
             var main = jet.main;
             main.startLifetime = Mathf.Clamp(dist / WaterSpeed + 0.25f, 0.4f, 1.8f);
-            t.TakeDamage(def.stats.damage * Mul * dt);
+            t.TakeWater(def.stats.damage * Mul * dt);
             t.Wet(1.5f);
             t.Slow(def.slow, 0.5f);
             t.Push(def.push * (1 + 0.25f * (level - 1)) * dt);

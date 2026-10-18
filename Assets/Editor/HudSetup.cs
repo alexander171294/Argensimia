@@ -64,7 +64,7 @@ public static class HudSetup
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
             c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
         n += Card("detencion", "Detenciones", CardKind.Colocar, 1760, "#4b4f9e", 1, Rarity.PocoComun,
-            "Brigada de detención: cada 4 s un agente sale corriendo hasta el manifestante más peligroso a 5 casilleros, en cualquier carril, lo detiene y vuelve. No puede con columnas.",
+            "Brigada de detención: cuando se llena la barra azul (5 s; menos en NV2 y NV3) un agente sale corriendo hasta el manifestante más peligroso a 5 casilleros, en cualquier carril, lo detiene y vuelve. No puede con columnas.",
             "Detenciones en la Plaza: la oposición pide explicaciones",
             c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 34f); });
         n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 0, Rarity.Rara,
@@ -72,7 +72,7 @@ public static class HudSetup
             "Irrumpe la policía motorizada en la Plaza",
             c => { c.defense = DefenseKind.Motorizada; c.stats = S(300, 40, 0, 0); c.push = 3; c.stun = 1; c.cycleOff = 12; });
         n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 0, Rarity.Rara,
-            "Cañón de agua que apunta al más cercano, en su carril o los de al lado: lo moja, lo empuja y lo frena 60%. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
+            "Cañón de agua que apunta al más cercano, en su carril o los de al lado: lo moja, lo empuja y lo frena 60%; si nadie más le pega, daño ×5. Las columnas organizadas son inmunes. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
             "Hidrantes en la Plaza: denuncian represión",
             c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
@@ -339,6 +339,7 @@ public static class HudSetup
         a.people = new[] { Model("person_a"), Model("person_b"), Model("person_c"), Model("person_d") };
         a.officer = Model("police_officer"); a.truck = Model("police_truck"); a.valla = Model("valla_l") ? Model("valla_l") : Model("valla");
         a.flagArg = Model("flag_arg"); a.flagRed = Model("flag_red"); a.banner = Model("banner");
+        a.hidranteL2 = Model("hidrante_l2"); a.hidranteL3 = Model("hidrante_l3");
         a.puntero = Model("puntero"); a.contenedor = Model("contenedor"); a.comisario = Model("comisario"); a.concertina = Model("concertina");
         a.requisa = Model("requisa"); a.desvio = Model("desvio"); a.drone = Model("drone"); a.tanqueta = Model("tanqueta"); a.tanquetaTurret = Model("tanqueta_torreta");
         a.shirts = Mats("M_Shirt_", 10); a.pants = Mats("M_Pants_", 5); a.skins = Mats("M_SkinV_", 5); a.hairs = Mats("M_HairV_", 6);

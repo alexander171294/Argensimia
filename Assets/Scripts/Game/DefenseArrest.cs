@@ -6,7 +6,7 @@ namespace Argensimia
 {
     // Detenciones: cada tanto un agente de la brigada sale corriendo hasta el manifestante más peligroso a alcance
     // (cualquier carril, 5 casilleros: un poco más que el hidrante), lo agarra (queda aturdido y desaparece detenido)
-    // y vuelve a su lugar. Varios agentes pueden salir a la vez según el nivel (1 / 2 / 3). No puede con columnas.
+    // y vuelve a su lugar. Sale de a uno; la barra azul muestra la carga. No puede con columnas.
     public partial class Defense
     {
         readonly List<Transform> squad = new List<Transform>();
@@ -17,9 +17,17 @@ namespace Argensimia
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetArrests() => targeted.Clear();
 
+        // Carga visible en la barra azul (como la motorizada): 1 s + el enfriamiento del nivel (5 s / 3,3 s / 2,3 s).
+        // Llena y con alguien a tiro, sale un agente; la carga vuelve a empezar recién cuando el agente regresa.
+        float charge;
+        float ArrestTime => 1f + 1f / Mathf.Max(0.05f, def.stats.rate * Mul);
+
         void Arrest()
         {
-            if (cd > 0 || running >= Mathf.Min(level, Mathf.Max(1, squad.Count - 1))) return;
+            if (running > 0) { if (cdBar) cdBar.Set(0.001f); return; }
+            charge = Mathf.Min(ArrestTime, charge + Time.deltaTime);
+            if (cdBar) cdBar.Set(Mathf.Max(0.001f, charge / ArrestTime));
+            if (charge < ArrestTime) return;
             targeted.RemoveWhere(e => !e || e.Dead);
             Enemy t = null;
             float r = def.stats.range + HalfLen, r2 = r * r, bestD = float.MaxValue;
@@ -33,7 +41,6 @@ namespace Argensimia
                 if (!t || e.Cost > t.Cost || (Mathf.Approximately(e.Cost, t.Cost) && d2 < bestD)) { t = e; bestD = d2; }
             }
             if (!t) return;
-            // el agente más cercano al objetivo que esté en su lugar
             Transform cop = null;
             float cd2 = float.MaxValue;
             foreach (var o in squad)
@@ -43,7 +50,7 @@ namespace Argensimia
                 if (d < cd2) { cd2 = d; cop = o; }
             }
             if (!cop) return;
-            cd = 1f / Mathf.Max(0.05f, def.stats.rate * Mul);
+            charge = 0;
             targeted.Add(t);
             StartCoroutine(RunAndArrest(cop, t));
             Snd.At("whistle_short", transform.position, 0.7f, 0.4f);

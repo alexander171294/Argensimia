@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.2.1** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.2.2** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.2.2**: efectos y ministros se activan arrastrándolos a la partida; VENDER debajo de SIN LUGAR; botón $ con el estilo de la X; X de LOGROS arreglada; detenciones de a un agente con barra de carga (1 s + enfriamiento); hidrante NV2/NV3 con modelos blindados, columnas inmunes y crítico ×5 si es el único que pega; desgaste de popularidad desde el mandato 6 (−15/−20/−25%). |
 | 2026-10-17 | **0.2.1**: vender con botón $ por rareza ($250 / $375 / $500); CAMBIAR CARTAS a $250 y solo con cartas en el mazo; colocables ×2 en el sorteo (~27% → ~43%); el reloj ya no cierra la carta abierta; Detenciones rehecha (un agente corre hasta 5 casilleros, detiene y vuelve). |
 | 2026-10-17 | **0.2.0**: progresión entre partidas (cada 3 mandatos sobrevividos se desbloquea 1 de 10 defensas nuevas inspiradas en Plants vs Zombies, con modelo y arte; después, mejoras permanentes), 19 logros con aviso y panel LOGROS en el menú; efectos en PCM (el build de Linux quedaba mudo). |
 | 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
 | 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
-| 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
 
 ## Resumen
 
@@ -195,6 +195,8 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 
 ## Popularidad
 
+**Desgaste de gestión:** desde el mandato 6 (el primero sin carriles nuevos) cada mandato arranca restando popularidad: −15% en el 6, −20% en el 7 y −25% desde el 8 (`GameState.MandateWear`, titular `wear`).
+
 La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan enojada.
 
 | Estado | Rango | Efecto |
@@ -241,9 +243,9 @@ Todas ocupan slots, frenan al 100% y se rompen al quedar sin gobernabilidad (vid
 | Infantería | 600 | Cuerpo a cuerpo (8 de daño, 1/s, 1,5 m). No llega detrás de un vallado. | 6 agentes (2 filas de 3) → 8 → 10 |
 | Escopeteros | 400 | Dispara en su carril hasta 2 casilleros (9 de daño, 1,2/s); prioriza a los que golpean un vallado adelante, después a los que frenan otra defensa, después al más cercano. Trazador rápido con impacto. | Misma formación sin escudo, escopetas con guardamano naranja: 6 → 8 → 10 |
 | Lanzagases | 120 | Granada de gas hasta 3 casilleros, al azar entre su carril y los vecinos (los que tengan gente), al grupo más denso: 4 dps en 3,5 m y −40% de velocidad. Tira un agente al azar. | 1 agente → 2 → 3 + cajones de granadas |
-| Detenciones | 200 | Cada 4 s un agente sale corriendo hasta el manifestante de mayor costo a 5 casilleros (34 m, cualquier carril; más que el hidrante), lo aturde, lo detiene y vuelve. Salen hasta 1/2/3 a la vez según el nivel. No puede con columnas (`DefenseArrest.cs`). | 3 agentes → 4 → 5 |
+| Detenciones | 200 | Cuando se llena la barra azul (1 s + 4 s / multiplicador de nivel: 5 / 3,3 / 2,3 s) un agente sale corriendo hasta el manifestante de mayor costo a 5 casilleros (34 m, cualquier carril; más que el hidrante), lo aturde, lo detiene y vuelve; la carga empieza al volver. De a uno. No puede con columnas (`DefenseArrest.cs`). | 3 agentes → 4 → 5 |
 | Motorizada | 300 | Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: 40 de daño, empuja 3 m y aturde 1 s; en el slot aparece otra recargando. | 2 motos → 3 → 4 (primitivas) |
-| Camión hidrante | 900 | Cañón giratorio en el techo, hasta 4 casilleros, en su carril o los vecinos, apuntando solo al más cercano: moja, empuja 2 m/s, −60% de velocidad, 3 dps. Tanque de 8 s que se gasta solo mientras moja; vacío, recarga 6 s. Sirena roja y azul titilando. Ocupa 2 slots. | `police_truck` × 1,25 → + chapas laterales con franja y paragolpes → + jaula en el techo y cañón ×1,3 |
+| Camión hidrante (las columnas organizadas son inmunes; ×5 de daño si nadie más le pegó en el último segundo; NV2/NV3 = modelos `hidrante_l2/l3` de `defense_kit.py`) | 900 | Cañón giratorio en el techo, hasta 4 casilleros, en su carril o los vecinos, apuntando solo al más cercano: moja, empuja 2 m/s, −60% de velocidad, 3 dps. Tanque de 8 s que se gasta solo mientras moja; vacío, recarga 6 s. Sirena roja y azul titilando. Ocupa 2 slots. | `police_truck` × 1,25 → + chapas laterales con franja y paragolpes → + jaula en el techo y cañón ×1,3 |
 
 - **Niveles:** vida ×2 / ×3,5; daño ×1,75 / ×3; ritmo ×1,25 / ×1,6 (Detenciones usa el de daño: cada 4 s → 2,3 s → 1,3 s). NV3 suma 1 casillero de alcance a Escopeteros, Lanzagases e Hidrante. La infantería pega a 1 / 2 / 3 manifestantes por golpe; el gas agranda su área 20% por nivel; el hidrante empuja +25% y su tanque dura más. Los agentes crecen 5% por nivel.
 - **Mejora:** se suelta una carta igual sobre la defensa del mapa (arrastrando desde la mano, o tocándola en modo colocar). Cobra el costo de la carta y la consume. La vida máxima sube y la vida actual suma la diferencia. Estallido de partículas doradas y "¡NIVEL N!" flotando.
@@ -343,7 +345,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el sueldo del cierre y por cartas que bajan la popularidad.
 
 - **Tipos:** Colocar (policía en slots), Efecto, Ministro (pasivo, gabinete de 3; si está lleno reemplaza al más viejo) y Crisis (entran solas a la mano desde el mandato 2; se evitan pagando su costo o se aplican al arrancar).
-- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR CARTAS ($250, solo si queda al menos 1 carta en el mazo) devuelve la mano al fondo del mazo y roba otra. **Vender:** en el zoom, el botón $ saca la carta del juego por $250 (común), $375 (poco común) o $500 (rara). La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
+- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR CARTAS ($250, solo si queda al menos 1 carta en el mazo) devuelve la mano al fondo del mazo y roba otra. **Arrastrar:** efectos y ministros también se arrastran; soltarlos en cualquier lugar fuera de la mano los activa sin abrirlos (si alcanza la plata y, si es solo de previa, en la previa). **Vender:** en el zoom, el botón $ (mismo estilo que la X; también VENDER debajo de SIN LUGAR en la mano) saca la carta del juego por $250 (común), $375 (poco común) o $500 (rara). La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
 - **Cartas del cierre:** al cerrar cada mandato entran 3 cartas al mazo (pantalla OBTUVISTE 3 CARTAS PARA TU MAZO) (Común 60 / Poco común 30 / Rara 10, raras ×1,8 desde el mandato 4, y las colocables ×2 (`CardDeck.KindPlace`: ~43% de lo que entra es policía), sin repetir en la tanda). Cada una tiene CAMBIAR $100: gira y aparece otra al azar distinta de las que están en pantalla; se puede usar una sola vez por carta (queda CAMBIADA). CONTINUAR las mete en lugares al azar del mazo.
 - **Colocables:** se juegan con tap → ACTIVAR → tocar el mapa, o arrastrando la carta desde la mano al mapa (chica y por arriba del dedo; soltar sobre la mano la devuelve). Sobre una defensa igual la sube de nivel; si no, ocupa el slot libre más cercano. No hay fusión en la mano. Una colocable se ve deshabilitada solo si no hay slot libre ni defensa igual para mejorar.
 - **Datos:** `CardDef` (ScriptableObject) en `Assets/Resources/Cards/`, creados o actualizados por `HudSetup` (menú 4) sin pisar el arte. Campos nuevos: `salaryDelta`, `govDelta`, `maxGovDelta`, `govPerMandate`, `healNow`, `healBonus`.
