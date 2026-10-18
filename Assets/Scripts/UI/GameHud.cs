@@ -480,6 +480,7 @@ namespace Argensimia.UI
         {
             if (busy || zoomed || placing || paused) return;
             if (gs.phase != Phase.Previa && gs.phase != Phase.Oleada) return;
+            if (!TutAllows("sell", cv.def) && TutBlock("card", cv.def, cv.Rt)) return; // en el paso de vender se puede abrir para usar el $
             if (cv.Disabled) { StartCoroutine(Shake(cv.Rt)); return; }
             StartCoroutine(Zoom(cv));
         }
@@ -587,6 +588,7 @@ namespace Argensimia.UI
         void OnActivate()
         {
             if (busy || !zoomed) return;
+            if (TutBlock("card", zoomed.def, activateBtn)) return;
             if (zoomed.def.kind == CardKind.Crisis) { StartCoroutine(PlayEffect(zoomed, true)); return; }
             if (!gs.CanAfford(zoomed.def.cost) || Blocked(zoomed.def) || (zoomed.def.previaOnly && gs.phase != Phase.Previa)) { StartCoroutine(Shake(activateBtn)); return; }
             StartCoroutine(zoomed.def.kind == CardKind.Colocar ? BeginPlacement(zoomed) : PlayEffect(zoomed));
@@ -851,6 +853,7 @@ namespace Argensimia.UI
         void OnRenew()
         {
             if (busy || zoomed || placing || paused || (gs.phase != Phase.Previa && gs.phase != Phase.Oleada)) return;
+            if (TutBlock("renew", null, renewRt)) return;
             // sin cartas en el mazo te devolvería las mismas: no se cobra
             if (deck.DrawCount < 1) { StartCoroutine(Shake(renewRt)); FloatText(renewRt, L.T("MAZO VACÍO"), UiKit.RedSoft, 0); Snd.Ui("ui_error"); return; }
             if (!gs.CanAfford(deck.renewCost)) { StartCoroutine(Shake(renewRt)); return; }

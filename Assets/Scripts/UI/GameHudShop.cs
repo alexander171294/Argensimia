@@ -79,6 +79,7 @@ namespace Argensimia.UI
         void OnBuy(int n, int cost, RectTransform btn)
         {
             if (busy || flowBusy || zoomed || placing || paused || overlay || dragging || deck.DrawCount > 0) return;
+            if (TutBlock("buy", null, btn)) return;
             if (!gs.Spend(cost))
             {
                 StartCoroutine(Shake(btn));

@@ -29,21 +29,25 @@ namespace Argensimia.UI
         {
             if (!sellZone)
             {
-                sellZone = UiKit.Rect("SellZone", zoomLayer).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(230, 250));
-                UiKit.Img(sellZone, "Ring", UiKit.RR, Color.white, 30).RT().Fill();
-                sellZoneFace = UiKit.Img(sellZone, "Face", UiKit.RR, UiKit.Hex("#2f9a4a"), 26);
-                sellZoneFace.RT().Fill(6, 6, 6, 6);
-                UiKit.Txt(sellZone, "Dollar", "$", 110, Color.white, TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().At(new Vector2(0.5f, 1), new Vector2(0, -6), new Vector2(200, 130), new Vector2(0.5f, 1));
-                sellZoneTxt = UiKit.Txt(sellZone, "T", "", 30, Color.white, TextAlignmentOptions.Center, true);
-                sellZoneTxt.RT().At(new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(210, 90), new Vector2(0.5f, 0));
+                // del tamaño del mazo, justo encima de él
+                sellZone = UiKit.Rect("SellZone", zoomLayer).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(CardView.W * deckScale, CardView.H * deckScale));
+                UiKit.Img(sellZone, "Ring", UiKit.RR, Color.white, 20).RT().Fill();
+                sellZoneFace = UiKit.Img(sellZone, "Face", UiKit.RR, UiKit.Hex("#2f9a4a"), 16);
+                sellZoneFace.RT().Fill(5, 5, 5, 5);
+                // Midline: centra el glifo por su forma, no por la altura de línea de la fuente (si no, queda alto)
+                UiKit.Txt(sellZone, "Dollar", "$", 72, Color.white, TextAlignmentOptions.Midline, false, UiKit.FontLogo).RT().At(new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(110, 84), new Vector2(0.5f, 1));
+                sellZoneTxt = UiKit.Txt(sellZone, "T", "", 21, Color.white, TextAlignmentOptions.Center, true);
+                sellZoneTxt.RT().At(new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(120, 56), new Vector2(0.5f, 0));
+                sellZoneTxt.lineSpacing = -10;
             }
             sellZone.gameObject.SetActive(on);
             if (!on) return;
             // sobre el mazo, pero entera en pantalla (sin pisar la marquesina)
             var lp = zoomLayer.InverseTransformPoint(deckRt.TransformPoint(deckRt.rect.center));
             var r = zoomLayer.rect;
-            lp.x = Mathf.Max(lp.x, r.xMin + 115 + 20);
-            lp.y = Mathf.Max(lp.y, r.yMin + tickerHeight + 125 + 20);
+            var hs = sellZone.sizeDelta * 0.5f;
+            lp.x = Mathf.Max(lp.x, r.xMin + hs.x + 8);
+            lp.y = Mathf.Max(lp.y, r.yMin + tickerHeight + hs.y + 8);
             sellZone.localPosition = lp;
             sellZone.localScale = Vector3.one;
             sellZoneTxt.text = L.T("VENDER") + "\n+$" + GameState.Money(SellPrice(cv.def));
@@ -77,12 +81,14 @@ namespace Argensimia.UI
         void DragBegin(CardView cv, PointerEventData e)
         {
             if (!CanDrag(cv)) return;
+            // tutorial: solo la carta que pide el paso (o cualquiera si el paso es vender)
+            if (!TutAllows("card", cv.def) && !TutAllows("sell", cv.def)) { TutBlock("card", cv.def, cv.Rt); return; }
             dragging = cv;
             Snd.Ui("card_zoom", 0.6f, 1.15f);
             cv.transform.SetParent(zoomLayer, true);
             cv.transform.SetAsLastSibling();
             cv.group.blocksRaycasts = false;
-            ShowSellZone(cv, true);
+            ShowSellZone(cv, TutAllows("sell", cv.def));
             if (cv.def.kind == CardKind.Colocar)
             {
                 if (PoliceSlots.I && !cv.def.TargetsDefense) PoliceSlots.I.SetHighlight(true);
@@ -126,7 +132,8 @@ namespace Argensimia.UI
             EndDragFx();
             cv.group.blocksRaycasts = true;
             cv.group.alpha = 1;
-            if (sell && !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada)) { QuickSell(cv); return; }
+            if (sell && TutAllows("sell", cv.def) && !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada)) { QuickSell(cv); return; }
+            if (!TutAllows("card", cv.def)) { TutBlock("card", cv.def, null); Snd.Ui("card_flip", 0.6f); StartCoroutine(DragReturn(cv)); return; }
             bool live = !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada) && !OverHand(e.position);
             if (cv.def.kind != CardKind.Colocar)
             {

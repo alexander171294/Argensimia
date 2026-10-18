@@ -32,6 +32,44 @@ namespace Argensimia.UI
         float tutDimA, tutDimShown, tutBoxY;
         float? tutBoxYOverride;
 
+        // Qué se puede hacer en el paso actual: null = libre; "wait" = nada; "card:<id>" = solo esa carta;
+        // "sell" = solo vender; "crisis" = solo abrir la crisis. Así no se puede romper el guion (vender la
+        // carta pedida, gastar la plata en otra cosa, cambiar la mano…).
+        string tutLock = "wait";
+
+        bool TutAllows(string action, CardDef d = null)
+        {
+            if (!Tutorial.Active || !tutRoot || tutLock == null) return true;
+            switch (action)
+            {
+                case "card": return d && (tutLock == "card:" + d.id || (tutLock == "crisis" && d.kind == CardKind.Crisis));
+                case "sell": return tutLock == "sell";
+                default: return false; // renovar, comprar
+            }
+        }
+
+        // true = bloqueado: sacude lo tocado y hace saltar el cuadro de Don Anselmo para que se lea qué pide.
+        bool TutBlock(string action, CardDef d, RectTransform shake)
+        {
+            if (TutAllows(action, d)) return false;
+            if (shake) StartCoroutine(Shake(shake));
+            else Snd.Ui("ui_error");
+            if (tutBox && tutBox.gameObject.activeInHierarchy)
+                StartCoroutine(UiKit.Tween(0.3f, k => { if (tutBox) tutBox.localScale = Vector3.one * (1 + Mathf.Sin(k * Mathf.PI) * 0.06f); }));
+            return true;
+        }
+
+        // Si la carta que pide el paso no se puede pagar, Don Anselmo pone la diferencia: el tutorial nunca se traba.
+        void TutEnsureMoney(string id)
+        {
+            var cv = Array.Find(cards, c => c && c.def && c.def.id == id);
+            if (!cv || gs.CanAfford(cv.def.cost)) return;
+            int add = Mathf.CeilToInt(cv.def.cost - gs.money) + 10;
+            gs.money += add;
+            FloatText(moneyPanel, "+$" + GameState.Money(add), UiKit.Green, 0);
+            Snd.Ui("coin");
+        }
+
         const float TutBigW = 900, TutBigH = 224, TutSmallW = 620, TutSmallH = 200;
 
         public void BeginTutorial()
@@ -48,8 +86,10 @@ namespace Argensimia.UI
             yield return new WaitForSecondsRealtime(0.4f);
             while (busy) yield return null;
 
-            yield return Info("¡Bienvenido a la presidencia! Soy Don Anselmo, el presidente saliente. Antes de tomarme el helicóptero… digo, las vacaciones, te explico cómo se gobierna este país.",
-                "Welcome to the presidency! I'm Don Anselmo, the outgoing president. Before I catch my helicopter… I mean, my vacation, let me show you how to run this country.");
+            yield return Info("¡Bienvenido, flamante presidente! Veo que por ahora sos popular… disfrutalo, que eso dura menos que una promesa de campaña.",
+                "Welcome, brand-new president! I see you're popular… for now. Enjoy it: it lasts less than a campaign promise.");
+            yield return Info("Yo soy Don Anselmo, tu antecesor. Ando medio apurado por llegar al helicóptero… digo, a mis merecidas vacaciones. Pero antes te dejo un repaso rápido de cómo se gobierna este cambalache… ejem, este país.",
+                "I'm Don Anselmo, your predecessor. I'm in a bit of a hurry to catch the helicopter… I mean, to start my well-deserved vacation. But first, a quick rundown on how to run this mess… ahem, this country.");
             yield return Info("Cada MANDATO es una oleada de manifestantes que entra por Avenida de Mayo y marcha hacia la Casa Rosada. Tu trabajo: aguantar mandato tras mandato.",
                 "Each TERM is a wave of protesters coming down Avenida de Mayo toward the Casa Rosada. Your job: hold on, term after term.", Of(mandatePanel));
             yield return Info("Esta es la GOBERNABILIDAD. Cada manifestante que llega a la reja de la Casa Rosada te saca un poco. Si llega a cero… helicóptero. Creeme, sé de lo que hablo.",
@@ -65,19 +105,19 @@ namespace Argensimia.UI
 
             yield return Act("Arrastrá el VALLADO al camino de la flecha roja. Frena a todos los que llegan, hasta que lo rompen.",
                 "Drag the BARRICADE onto the path with the red arrow. It stops everyone who reaches it, until they break it.",
-                () => CardRect("vallado"), () => Defense.Count(DefenseKind.Vallado) >= 1, () => !InHand("vallado"));
+                () => CardRect("vallado"), () => Defense.Count(DefenseKind.Vallado) >= 1, () => !InHand("vallado"), "card:vallado");
             yield return Act("¡Así se hace! Te queda otro VALLADO: soltalo encima del que pusiste y sube de nivel (hasta el 3).",
                 "That's it! You have another BARRICADE: drop it on top of the one you placed to level it up (up to 3).",
-                () => CardRect("vallado"), AnyUpgraded, () => !InHand("vallado") || Defense.Count(DefenseKind.Vallado) >= 2);
+                () => CardRect("vallado"), AnyUpgraded, () => !InHand("vallado") || Defense.Count(DefenseKind.Vallado) >= 2, "card:vallado");
             yield return Act("Ahora la INFANTERÍA: pelea cuerpo a cuerpo. Ponela adelante del vallado, más cerca de donde entran (hacia la izquierda).",
                 "Now the RIOT SQUAD: it fights hand to hand. Place it in front of the barricade, closer to where they come in (to the left).",
-                () => CardRect("infanteria"), () => Defense.Count(DefenseKind.Infanteria) >= 1, () => !InHand("infanteria"));
+                () => CardRect("infanteria"), () => Defense.Count(DefenseKind.Infanteria) >= 1, () => !InHand("infanteria"), "card:infanteria");
 
             yield return Info("Uy, la caja quedó flaca. Para eso están las medidas impopulares: dan plata, pero bajan la popularidad.",
                 "Oops, the treasury is running thin. That's what unpopular measures are for: they bring in money, but popularity drops.", Of(moneyPanel));
             yield return Act("Jugá el IMPUESTAZO: soltalo en cualquier lado (o tocalo y ACTIVAR).",
                 "Play the TAX HIKE: drop it anywhere (or tap it and PLAY CARD).",
-                () => CardRect("impuestazo"), () => tutPlayed.Contains("impuestazo"), () => !InHand("impuestazo"));
+                () => CardRect("impuestazo"), () => tutPlayed.Contains("impuestazo"), () => !InHand("impuestazo"), "card:impuestazo");
             if (tutPlayed.Contains("impuestazo"))
             {
                 yield return new WaitForSecondsRealtime(0.9f);
@@ -86,14 +126,14 @@ namespace Argensimia.UI
             }
             yield return Act("Para levantarla, jugá CADENA NACIONAL. Nada como hablarle al pueblo en horario central.",
                 "To win them back, play NATIONAL ADDRESS. Nothing like talking to the people in prime time.",
-                () => CardRect("cadena_nacional"), () => tutPlayed.Contains("cadena_nacional"), () => !InHand("cadena_nacional"));
+                () => CardRect("cadena_nacional"), () => tutPlayed.Contains("cadena_nacional"), () => !InHand("cadena_nacional"), "card:cadena_nacional");
 
             yield return Act("Las cartas que no te sirven se VENDEN: abrí una y tocá el botón $ de arriba a la izquierda, o arrastrala sobre el mazo. Probá vender una.",
                 "Cards you don't need can be SOLD: open one and tap the $ button at the top left, or drag it onto the deck. Try selling one.",
-                HandRect, () => tutSold >= 1);
+                HandRect, () => tutSold >= 1, null, "sell");
             yield return Info(
-                L.F("CAMBIAR CARTAS devuelve toda la mano al fondo del mazo y te da cinco nuevas por ${0}. Sirve cuando la mano no te cierra.", GameState.Money(deck.renewCost)),
-                L.F("SWAP CARDS sends your whole hand to the bottom of the deck and deals five new ones for ${0}. Handy when your hand doesn't fit.", GameState.Money(deck.renewCost)), Of(renewRt));
+                L.F("CAMBIAR CARTAS manda tu mano al fondo del mazo y roba cinco de arriba por ${0}. No son necesariamente nuevas: si cambiás seguido, te pueden volver las mismas.", GameState.Money(deck.renewCost)),
+                L.F("SWAP CARDS sends your hand to the bottom of the deck and draws five from the top for ${0}. They're not necessarily new: swap often and the same ones can come back.", GameState.Money(deck.renewCost)), Of(renewRt));
             yield return Info("El MAZO no se rebaraja: lo que jugás o vendés, se gasta. Al cerrar cada mandato ganás 3 cartas nuevas, y si se vacía vas a poder comprar cartas al azar ahí arriba.",
                 "The DECK is never reshuffled: whatever you play or sell is gone. Each term you earn 3 new cards, and if it runs out you can buy random cards right above it.", Of(deckRt));
 
@@ -109,6 +149,7 @@ namespace Argensimia.UI
                 yield return Info("¡Ahí vienen! La barra del mandato muestra cuánto falta. Mientras dura la oleada entra plata y podés seguir jugando cartas.",
                     "Here they come! The term bar shows how much is left. While the wave lasts money keeps coming in and you can keep playing cards.", Of(mandatePanel));
             TutHide();
+            tutLock = null;
             while (gs.phase == Phase.Oleada) yield return null;
 
             // cierre del mandato 1
@@ -122,6 +163,7 @@ namespace Argensimia.UI
             // mandato 2: crisis
             while (!(gs.mandate >= 2 && gs.phase == Phase.Previa)) yield return null;
             tutAllowStart = false;
+            tutLock = "wait";
             wait = 0;
             while ((busy || flowBusy || CrisesInHand().Count == 0) && wait < 8f) { wait += Time.unscaledDeltaTime; yield return null; }
             if (CrisesInHand().Count > 0)
@@ -130,7 +172,7 @@ namespace Argensimia.UI
                     "Uh-oh! A CRISIS. From the second term on they land in your hand by themselves. If you start with it in hand, it applies: this one cuts your popularity.", CrisisRect);
                 yield return Act("Abrila: podés ACEPTARLA ya o EVITARLA pagando su costo. Vos decidís.",
                     "Open it: you can ACCEPT it now or AVOID it by paying its cost. Your call.",
-                    CrisisRect, () => CrisesInHand().Count == 0);
+                    CrisisRect, () => CrisesInHand().Count == 0, null, "crisis");
             }
             yield return Info("Ahora entran por DOS caminos: fijate las flechas rojas del mapa y reforzá el nuevo con lo que tengas en la mano.",
                 "Now they come in on TWO paths: check the red arrows on the map and reinforce the new one with what you have in hand.");
@@ -192,15 +234,18 @@ namespace Argensimia.UI
         }
 
         // Paso de acción: resalta sin bloquear y espera a que se cumpla done (o que skip diga que ya no aplica).
-        IEnumerator Act(string es, string en, Func<Rect?> target, Func<bool> done, Func<bool> skip = null)
+        IEnumerator Act(string es, string en, Func<Rect?> target, Func<bool> done, Func<bool> skip = null, string lockTo = "free")
         {
             if (done() || (skip != null && skip())) yield break;
+            tutLock = lockTo == "free" ? null : lockTo;
+            if (lockTo.StartsWith("card:")) TutEnsureMoney(lockTo.Substring(5));
             ShowStep(false, target);
             tutHint.text = L.T("TU TURNO");
             var typing = StartCoroutine(Type(L.En ? en : es));
             while (!done() && (skip == null || !skip())) yield return null;
             StopCoroutine(typing);
             tutTalking = false;
+            tutLock = lockTo == "free" ? null : "wait"; // un paso libre deja libre (antes trababa la oleada del mandato 2)
             if (done()) Snd.Ui("pop_up", 0.7f);
             yield return new WaitForSecondsRealtime(0.35f);
         }

@@ -89,7 +89,7 @@ namespace Argensimia.UI
             var circ = UiKit.Img(sellBtn, "Ring", UiKit.Circle, Color.white).RT();
             circ.At(new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(84, 84), new Vector2(0.5f, 1));
             UiKit.Img(circ, "In", UiKit.Circle, UiKit.Hex("#2f9a4a")).RT().Fill(84 * 0.07f, 84 * 0.07f, 84 * 0.07f, 84 * 0.07f);
-            UiKit.Txt(circ, "Dollar", "$", 54, Color.white, TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 4, 0);
+            UiKit.Txt(circ, "Dollar", "$", 54, Color.white, TextAlignmentOptions.Midline, false, UiKit.FontLogo).RT().Fill(); // Midline: centrado por el glifo
             var pill = UiKit.Img(sellBtn, "Price", UiKit.RR, new Color(0, 0, 0, 0.6f), 12).RT();
             pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(110, 30), new Vector2(0.5f, 0));
             sellPriceTxt = UiKit.Txt(pill, "T", "+$" + GameState.Money(SellPrice(null)), 22, UiKit.Green, TextAlignmentOptions.Center, true);
@@ -107,6 +107,7 @@ namespace Argensimia.UI
         void OnSell()
         {
             if (busy || !zoomed || zoomed.def.kind == CardKind.Crisis) return;
+            if (TutBlock("sell", zoomed.def, sellBtn)) return;
             StartCoroutine(SellRoutine(zoomed));
         }
 
@@ -117,6 +118,7 @@ namespace Argensimia.UI
             if (zoomed || placing || paused || dragging || !cv || cv.def.kind == CardKind.Crisis) return;
             if (gs.phase != Phase.Previa && gs.phase != Phase.Oleada) return;
             if (cv.slot < 0 || cv.slot >= cards.Length || cards[cv.slot] != cv) return;
+            if (TutBlock("sell", cv.def, cv.Rt)) return;
             QuickSell(cv);
         }
 
