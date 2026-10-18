@@ -28,6 +28,16 @@ namespace Argensimia
         {
             // menú y carga
             ["NUEVA PARTIDA"] = "NEW GAME",
+            // tutorial
+            ["TUTORIAL"] = "TUTORIAL",
+            ["¡NUEVO!"] = "NEW!",
+            ["SALTEAR TUTORIAL"] = "SKIP TUTORIAL",
+            ["TOCÁ PARA SEGUIR"] = "TAP TO CONTINUE",
+            ["TU TURNO"] = "YOUR TURN",
+            ["¡A GOBERNAR!"] = "TIME TO GOVERN!",
+            ["DON ANSELMO  <color=#fbf1dc><size=16>·  PRESIDENTE SALIENTE</size></color>"] = "DON ANSELMO  <color=#fbf1dc><size=16>·  OUTGOING PRESIDENT</size></color>",
+            ["<color=#f2c14e>¡TUTORIAL COMPLETADO!</color>\nDon Anselmo se fue en helicóptero: ahora la banda es tuya"] = "<color=#f2c14e>TUTORIAL COMPLETE!</color>\nDon Anselmo flew off by helicopter: the sash is yours now",
+            ["<color=#ff7a70>SALISTE DEL TUTORIAL</color>\nPodés retomarlo cuando quieras desde el menú"] = "<color=#ff7a70>YOU LEFT THE TUTORIAL</color>\nYou can pick it up again anytime from the menu",
             ["¡Defendé la Casa Rosada!"] = "Defend the Casa Rosada!",
             ["MÚSICA"] = "MUSIC",
             ["EFECTOS"] = "SOUND FX",

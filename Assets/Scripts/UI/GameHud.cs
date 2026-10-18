@@ -373,6 +373,7 @@ namespace Argensimia.UI
             UpdateShop();
             UpdateFlow();
             UpdateTicker();
+            UpdateTutorial();
         }
 
         void ApplySafeArea(bool force)
@@ -614,7 +615,7 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(0, e * 360f, e * 25f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.65f) / 0.35f);
             });
-            if (!free) Achievements.Count("play_" + def.id);
+            if (!free) { Achievements.Count("play_" + def.id); tutPlayed.Add(def.id); }
             if (def.kind == CardKind.Ministro) { var gone = gs.AddMinister(def); if (gone) Headlines.Say("minister_swap", L.CardTitle(gone), L.CardTitle(def)); }
             else gs.ApplyEffect(def);
             StartCoroutine(Pulse(target));
@@ -731,6 +732,7 @@ namespace Argensimia.UI
             }
             if (d0.cost > 0) { FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0); Snd.Ui("spend", 0.6f); }
             Achievements.Count("place_" + d0.id);
+            tutPlayed.Add(d0.id);
             if (d0.TargetsDefense)
             {
                 // Desafectar: retira la defensa y reintegra la mitad de lo pagado
@@ -861,6 +863,7 @@ namespace Argensimia.UI
         {
             busy = true;
             Headlines.Say("renew", 20f);
+            tutRenewed++;
             Snd.Ui("card_shuffle");
             Snd.Ui("spend", 0.6f);
             StartCoroutine(UiKit.Tween(0.7f, t => renewIcon.localRotation = Quaternion.Euler(0, 0, -Ease.InOutCubic(t) * 360f)));

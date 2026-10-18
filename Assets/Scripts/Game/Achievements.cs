@@ -53,6 +53,7 @@ namespace Argensimia
 
         public static void Unlock(string id)
         {
+            if (Tutorial.Active) return;
             var a = Get(id);
             if (a == null || !Meta.AddAchievement(id)) return;
             Unlocked?.Invoke(a);
@@ -61,6 +62,7 @@ namespace Argensimia
         // Suma n al contador y desbloquea los logros que lo usen y hayan llegado a la meta.
         public static void Count(string counter, int n = 1)
         {
+            if (Tutorial.Active) return;
             int v = Meta.Add(counter, n);
             foreach (var a in All)
                 if (a.counter == counter && v >= a.goal) Unlock(a.id);
@@ -69,6 +71,7 @@ namespace Argensimia
         // Logros por llegar a un mandato (se llama al empezar cada uno).
         public static void OnMandate(int mandate, float popularity, bool usedRepression)
         {
+            if (Tutorial.Active) return;
             Meta.Max("max_mandate", mandate);
             if (mandate >= 5) Unlock("segundo_mandato");
             if (mandate >= 10) Unlock("reeleccion");

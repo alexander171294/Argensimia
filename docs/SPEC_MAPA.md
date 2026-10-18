@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.2.3** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-18 · Alex. **Versión 0.3.0** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,10 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-18 | **0.3.0**: tutorial guiado por Don Anselmo, el presidente saliente (botón TUTORIAL en el menú, con ¡NUEVO! hasta completarlo); el idioma pasa a un botón chico EN/ES a la izquierda de SALIR; dificultad: vuelve la curva de vida y oleadas de antes (×1,18 / ×1,08 desde el 6) y el daño de los manifestantes crece +8% por mandato. |
 | 2026-10-18 | **0.2.3**: carta Desafectar (2ª desbloqueable: retira una defensa y devuelve 50%); venta rápida desde la mano y zona VENDER al arrastrar; el cartel de $/s suma los punteros; crisis forzadas +1 cada 10 mandatos (hasta 5); jubilado −0,1% −0,05% por mandato; enemigos +6% vida y +4% daño por mandato (lineal) y presupuesto ×1,15 desde el 6. |
 | 2026-10-17 | **0.2.2**: efectos y ministros se activan arrastrándolos a la partida; VENDER debajo de SIN LUGAR; botón $ con el estilo de la X; X de LOGROS arreglada; detenciones de a un agente con barra de carga (1 s + enfriamiento); hidrante NV2/NV3 con modelos blindados, columnas inmunes y crítico ×5 si es el único que pega; desgaste de popularidad desde el mandato 6 (−15/−20/−25%). |
 | 2026-10-17 | **0.2.1**: vender con botón $ por rareza ($250 / $375 / $500); CAMBIAR CARTAS a $250 y solo con cartas en el mazo; colocables ×2 en el sorteo (~27% → ~43%); el reloj ya no cierra la carta abierta; Detenciones rehecha (un agente corre hasta 5 casilleros, detiene y vuelve). |
-| 2026-10-17 | **0.2.0**: progresión entre partidas (cada 3 mandatos sobrevividos se desbloquea 1 de 10 defensas nuevas inspiradas en Plants vs Zombies, con modelo y arte; después, mejoras permanentes), 19 logros con aviso y panel LOGROS en el menú; efectos en PCM (el build de Linux quedaba mudo). |
-| 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
 
 ## Resumen
 
@@ -63,8 +62,8 @@ Los modelos se generan por código en Blender y se exportan a FBX. Los colores s
 | `Assets/Editor/IconBuilder.cs` | Ícono de la app (menú 7): renderiza en Play la "A" con bandera sobre el Sol de Mayo a `Assets/Art/Icon/AppIcon.png` y lo asigna en Player Settings. |
 | `Assets/Editor/SlotBuilder.cs` | Genera los slots policiales desde lanes, sus texturas y materiales (menú 6). |
 | `Assets/Shaders/TiltShift.shader` | Desenfoque de bordes (Full Screen Pass) y blur circular del menú (globales `_MenuBlur`, `_MenuCenter`). |
-| `Assets/Scripts/Game/` | `Loc` (idioma `L`: español/inglés, interfaz, cartas, unidades y titulares), `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `Meta` (progresión entre partidas: mandatos totales, desbloqueos, mejoras, contadores), `Achievements` (logros), `DefenseUnlocks` (parcial de `Defense`: las 10 desbloqueables + `FoamShell`), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
-| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre; parcial `MenuScreenMeta`: carta desbloqueada y panel LOGROS), `AchievementToast` (aviso de logro, canvas persistente), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
+| `Assets/Scripts/Game/` | `Loc` (idioma `L`: español/inglés, interfaz, cartas, unidades y titulares), `Headlines` (banco de titulares de la marquesina), `GameState` (dinero, popularidad, gobernabilidad, mandatos, gabinete, curación del cierre), `CardDeck` (mazo finito), `CardDef`, `UnitDef`, `WaveDirector` (oleadas), `Enemy`, `Defense` (+ niveles, mejora, curación, proyectiles, gas, motorizada), `PoliceSlots`, `LaneArrows`, `StreetMood` (decorado por popularidad), `Fidget` (micro-movimientos), `GameFlow` (menú ↔ partida y tutorial), `Tutorial` (estado, mazo y oleadas fijas del tutorial), `GameAudio` (música, volúmenes, pool de efectos y ambiente), `Snd` (API de efectos + `SndLoop` por objeto), `Leaderboard` (ranking top 10), `Meta` (progresión entre partidas: mandatos totales, desbloqueos, mejoras, contadores), `Achievements` (logros), `DefenseUnlocks` (parcial de `Defense`: las 10 desbloqueables + `FoamShell`), `SirenLights` (balizas de patrulleros), `Spin`, `FxKit`. |
+| `Assets/Scripts/UI/` | `GameHud` (parcial: HUD, flujo y cierre, alertas, arrastre de cartas `GameHudDrag`, compra con mazo vacío `GameHudShop`, guía del tutorial `GameHudTutorial`, menú), `CardView`, `MenuScreen` (menú, ranking y pedido de nombre; parcial `MenuScreenMeta`: carta desbloqueada y panel LOGROS), `AchievementToast` (aviso de logro, canvas persistente), `LoadingScreen`, `VolumeSlider`, `UiKit` (fuentes, logo con `LogoWave`). |
 | `Assets/Resources/` | `Cards/`, `Units/`, `Music/` (5 temas MP3, streaming), `SFX/` (45 WAV), `UI/` (fuentes), `FX/`, `GameAssets.asset`. |
 
 **Orden para regenerar todo**
@@ -193,6 +192,16 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 - **Valores iniciales:** $2.500, +$40/s (solo durante la oleada), 78% de popularidad (TRANQUI), gobernabilidad 20/20, mazo de 15 (quedan 10 tras repartir la mano de 5).
 - **Sueldo de cierre:** $2.000 + $40 × popularidad (+$500 con Super Ministro).
 
+## Tutorial
+
+Partida guiada por **Don Anselmo, el presidente saliente** (personaje ficticio: pelado con costados canosos, bigote, traje y banda presidencial, sobre fondo de bandera). Se entra con TUTORIAL en el menú; siempre recarga la escena con `Tutorial.Active = true` (estático, sobrevive a la recarga) y arranca el paneo.
+
+- **Reglas del modo (`Tutorial.cs`):** mazo fijo de 15 (mano: Vallado ×2, Infantería, Impuestazo, Cadena nacional; después Escopeteros, La maquinita, Vallado, Lanzagases, Infantería, Plan platita, Cadena nacional, Detenciones, Blanqueo, Escopeteros). Oleadas fijas a 78% de popularidad (M1: 5 manifestantes + 2 caceroleros; M2: 7 manifestantes, 2 jubilados, 1 cacerolero, 1 encapuchado), escaladas con `Difficulty` para que crezcan si baja la popularidad. Crisis forzada del M2: Escándalo. Sin reloj en la previa, ¡ARRANCAR! bloqueado hasta que la guía lo pide, sin bonus de Meta, sin logros, sin progreso de mandatos ni ranking; la gobernabilidad no baja de 1.
+- **Guía (`GameHudTutorial.cs`):** canvas propio (orden 25). Pasos de información (oscurece todo menos el elemento con un hueco, marco dorado pulsante y flecha; texto tipo máquina de escribir; toque para seguir; en oleada congela el tiempo) y pasos de acción (resaltan sin bloquear, cuadro chico a la derecha, "TU TURNO", esperan a que se cumpla). Botón SALTEAR TUTORIAL en el cuadro (= renunciar). Se oculta en la pausa y en los paneos.
+- **Guion:** bienvenida → mandato → gobernabilidad → popularidad → presupuesto → próxima oleada → cartas → colocar Vallado → mejorarlo con el segundo → Infantería → caja flaca → Impuestazo → "todo tiene un precio" → Cadena nacional → vender una carta → CAMBIAR CARTAS → mazo (no se rebaraja, 3 por cierre, compra con mazo vacío) → ¡ARRANCAR! → oleada → cierre (sueldo, curación, CAMBIAR, CONTINUAR) → crisis (aceptar o evitar) → dos carriles → ¡ARRANCAR! → despedida (ministros, raras y especiales) con ¡A GOBERNAR!.
+- **Fin:** ¡A GOBERNAR! guarda `tutorial_done` en PlayerPrefs, Don Anselmo se va en el helicóptero y el menú muestra "¡TUTORIAL COMPLETADO!". Saltear o renunciar muestra "SALISTE DEL TUTORIAL". El botón TUTORIAL lleva la marca ¡NUEVO! hasta completarlo.
+- **Capturas:** `capture_game_view` no muestra el oscurecido cuando el canvas tiene una `Mask` (el retrato); en el juego sí se ve. Para verificar, `ScreenCapture.CaptureScreenshotAsTexture()` al final del cuadro y medir píxeles.
+
 ## Popularidad
 
 **Jubilados:** pegarle o detener a uno resta 0,1% + 0,05% por mandato (0,55% en el 10).
@@ -216,7 +225,7 @@ La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan
 
 ## Oleadas y manifestantes
 
-`WaveDirector` arma cada oleada gastando un presupuesto por mandato: 20, 32, 48, 68, 100 y después ×1,15 por mandato. Además los manifestantes se curten con cada mandato, de forma lineal para que no sea una bola de nieve: +6% de vida, +4% de daño y +1% de velocidad (tope +20%) por mandato (`HpPerMandate`, `DmgPerMandate`). Masa de vida aprox. respecto del mandato 5: ×2,5 en el 10, ×6 en el 15, ×14 en el 20 (antes ×3,4 / ×11 / ×38). Se multiplica por la dificultad y se reduce con Feriado puente o Pacto social.
+`WaveDirector` arma cada oleada gastando un presupuesto por mandato: 20, 32, 48, 68, 100 y después ×1,18 por mandato (vida ×1,08 compuesto desde el 6, columnas incluidas). El **daño** crece +8% lineal por mandato (`DmgPerMandate`: ×1,72 en el 10, ×2,12 en el 15, ×2,52 en el 20) y la velocidad +1% (tope +20%), para que las defensas puestas también caigan en mandatos altos. Se multiplica por la dificultad y se reduce con Feriado puente o Pacto social.
 
 - **Carriles activos:** uno más por mandato: 1, 2, 3 y desde el mandato 4 los 4 (primero los interiores). Una flecha **roja** en el extremo este marca cada carril activo; los nuevos titilan fuerte en la previa.
 - **Entradas norte y sur:** recién desde el mandato 5 (50% de la oleada entra por el refuerzo, x = 0, y toma un carril de su lado).
@@ -279,7 +288,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 - **Helicóptero:** recién despegado, inclinado y saliendo hacia la derecha de la pantalla (offset (−3, 8,4, −5,5) desde el helipuerto, rotación (13, −120, 10)). Suspendido con una flotación muy sutil (~20 cm, 1–2° de balanceo) y el rotor en "cámara lenta" (230°/s). Si se mueve a mano en Play, flota alrededor de la nueva pose.
 - **Ambiente:** ~170 manifestantes en anillo alrededor del helipuerto y ~80 de relleno a los costados (quedan desenfocados), 5 gomas prendidas con humo, el hidrante tirando agua en arco a la multitud sur con la sirena encendida, y los patrulleros en barricada.
 - **Ranking:** panel RANKING abajo a la izquierda (28 px de margen) con el top 5 (medallas, nombre, puntaje, mandatos).
-- **Derecha (abajo, de abajo hacia arriba):** SALIR, idioma ENGLISH/ESPAÑOL (recarga la escena), GITHUB (abre el repo) y PANTALLA COMPLETA/VENTANA (pantalla completa en el monitor donde está la ventana; ventana al 75% de ese monitor), con la versión en blanco debajo. SALIR y el modo de pantalla solo aparecen en escritorio.
+- **Derecha (abajo, de abajo hacia arriba):** SALIR con el idioma a su izquierda (botón cuadrado chico que dice EN, o ES en inglés; recarga la escena), LOGROS, TUTORIAL (turquesa, ícono "?", marca ¡NUEVO! hasta completarlo), GITHUB (abre el repo) y PANTALLA COMPLETA/VENTANA (pantalla completa en el monitor donde está la ventana; ventana al 75% de ese monitor), con la versión en blanco debajo. SALIR y el modo de pantalla solo aparecen en escritorio; en mobile el idioma queda abajo de todo, en el lugar de SALIR (`MenuScreen.BuildSideButtons`).
 - **UI:** logo ARGENSIMIA (ARG con la bandera, ENSIMIA banana, ondita por letra); cinta roja inclinada con filetes dorados "¡DEFENDÉ LA CASA ROSADA!" (entra sellada con rebote y pulsa cada 2,4 s; tras una partida muestra el resultado y el detalle abajo, con el contorno TMP por defecto); MÚSICA y EFECTOS en contenedores individuales flotantes; NUEVA PARTIDA.
 
 ## Audio

@@ -35,6 +35,14 @@ namespace Argensimia
             if (catalog.Count == 0) catalog.AddRange(Resources.LoadAll<CardDef>("Cards"));
             // las desbloqueables entran recién en la partida siguiente a ganarlas (Meta se consulta al arrancar)
             catalog.RemoveAll(c => !c || !Meta.IsUnlocked(c.id));
+            if (Tutorial.Active)
+            {
+                // tutorial: mazo fijo, la primera de la lista sale primero (el tope es el final)
+                var order = Tutorial.Deck(catalog);
+                for (int i = order.Count - 1; i >= 0; i--) drawPile.Add(new CardInst(order[i]));
+                StartCount = drawPile.Count;
+                return;
+            }
             foreach (var c in catalog)
             {
                 if (c.kind == CardKind.Crisis) continue;

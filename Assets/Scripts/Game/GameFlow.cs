@@ -143,6 +143,7 @@ namespace Argensimia
         {
             if (state != State.Menu) return;
             Time.timeScale = 1;
+            Tutorial.Active = false;
             if (played)
             {
                 autoStart = true;
@@ -153,10 +154,31 @@ namespace Argensimia
             StartCoroutine(ToGame());
         }
 
+        // Tutorial: siempre recarga la escena para que el mazo, el estado y las oleadas arranquen en modo tutorial.
+        public void StartTutorial()
+        {
+            if (state != State.Menu) return;
+            Time.timeScale = 1;
+            Tutorial.Active = true;
+            autoStart = true;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        // Fin del tutorial: Don Anselmo se va en el helicóptero y vuelve el menú (sin puntaje ni progreso).
+        public void EndTutorial()
+        {
+            if (state != State.Playing || !heli) return;
+            played = true;
+            Time.timeScale = 1;
+            Tutorial.MarkDone();
+            StartCoroutine(ToMenuRoutine(L.T("<color=#f2c14e>¡TUTORIAL COMPLETADO!</color>\nDon Anselmo se fue en helicóptero: ahora la banda es tuya"), false));
+        }
+
         // Fin de partida: sale el helicóptero y queda el menú.
         public void ToMenu(bool win)
         {
             if (state != State.Playing || !heli) return;
+            if (Tutorial.Active) { EndTutorial(); return; }
             played = true;
             Time.timeScale = 1;
             var gs = GameState.I;
@@ -175,6 +197,12 @@ namespace Argensimia
             played = true;
             Time.timeScale = 1;
             var gs = GameState.I;
+            if (Tutorial.Active)
+            {
+                StartCoroutine(ToMenuRoutine(L.T("<color=#ff7a70>SALISTE DEL TUTORIAL</color>\nPodés retomarlo cuando quieras desde el menú"), false));
+                if (WaveDirector.I) WaveDirector.I.Lose();
+                return;
+            }
             TakeScore();
             if (gs && gs.mandate <= 1) Achievements.Unlock("que_se_vayan");
             Meta.Save();
@@ -190,9 +218,9 @@ namespace Argensimia
             lastMandates = gs ? gs.MandatesSurvived : 0;
         }
 
-        IEnumerator ToMenuRoutine(string sub)
+        IEnumerator ToMenuRoutine(string sub, bool score = true)
         {
-            sub += L.F("  ·  Puntaje <color=#f2c14e>{0}</color>", GameState.Money(lastScore));
+            if (score) sub += L.F("  ·  Puntaje <color=#f2c14e>{0}</color>", GameState.Money(lastScore));
             state = State.ToMenu;
             var hud = FindAnyObjectByType<GameHud>();
             if (hud) hud.SetHudVisible(false, 0.5f);
@@ -205,7 +233,8 @@ namespace Argensimia
             while (!hovering) yield return null;
             // recarga limpia: la partida de fondo (manifestantes, defensas, oleada) deja de correr
             pendingSub = sub;
-            pendingScore = lastScore;
+            pendingScore = score ? lastScore : -1;
+            Tutorial.Active = false;
             pendingMandates = lastMandates;
             Time.timeScale = 1;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -221,6 +250,7 @@ namespace Argensimia
             state = State.Playing;
             var hud = FindAnyObjectByType<GameHud>();
             if (hud) hud.SetHudVisible(true, 0.6f);
+            if (hud && Tutorial.Active) hud.BeginTutorial();
         }
 
         IEnumerator Delayed(float d, IEnumerator r)

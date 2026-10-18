@@ -78,19 +78,21 @@ namespace Argensimia.UI
             return m;
         }
 
-        // ------------------------------------------------------------------ botones de la derecha: GitHub e idioma
+        // ------------------------------------------------------------------ botones de la derecha
 
         public const string RepoUrl = "https://github.com/alexander171294/Argensimia";
 
+        // Columna de la derecha, de abajo hacia arriba: SALIR (con el idioma EN/ES chico a su izquierda), LOGROS,
+        // TUTORIAL, GITHUB y PANTALLA COMPLETA. SALIR y pantalla completa solo en escritorio; en mobile el
+        // idioma queda abajo de todo, en el lugar de SALIR.
         void BuildSideButtons()
         {
-            // idioma (abajo) y GitHub (arriba), con el mismo margen que el ranking
-            // escritorio: salir (abajo de todo) y ventana / pantalla completa (arriba)
             bool desktop = !Application.isMobilePlatform && Application.platform != RuntimePlatform.WebGLPlayer;
-            float y0 = 50;
+            const float y0 = 50, step = 98;
+            float y = y0;
             if (desktop)
             {
-                var quit = SideButton("Quit", "SALIR", "#d9534a", "#7a231d", y0);
+                var quit = SideButton("Quit", "SALIR", "#d9534a", "#7a231d", y);
                 var qi = UiKit.Rect("Icon", quit).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 40), new Vector2(0, 0.5f));
                 UiKit.Img(qi, "Ring", UiKit.Circle, Color.white).RT().Fill();
                 UiKit.Txt(qi, "X", "X", 24, UiKit.Hex("#7a231d"), TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 2, 0);
@@ -103,34 +105,22 @@ namespace Argensimia.UI
                     Application.Quit();
 #endif
                 };
-                y0 += 98;
             }
-            var lang = SideButton("Lang", L.En ? "ESPAÑOL" : "ENGLISH", "#2f6fd6", "#163a7a", y0);
-            var flag = UiKit.Rect("Flag", lang).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(46, 32), new Vector2(0, 0.5f));
-            if (L.En)
-            {
-                // a español: bandera argentina
-                UiKit.Img(flag, "C1", null, UiKit.Celeste).RT().Fill(0, 0, 0, 21);
-                UiKit.Img(flag, "W", null, Color.white).RT().Fill(0, 0, 11, 11);
-                UiKit.Img(flag, "C2", null, UiKit.Celeste).RT().Fill(0, 0, 21, 0);
-                UiKit.Img(flag, "Sun", UiKit.Circle, UiKit.Hex("#f6b40e")).RT().At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(8, 8));
-            }
-            else
-            {
-                // a inglés: "EN" en una pastilla blanca
-                var pill = UiKit.Img(flag, "Pill", UiKit.RR, Color.white, 6).RT(); pill.Fill();
-                UiKit.Txt(pill, "T", "EN", 20, UiKit.Hex("#163a7a"), TextAlignmentOptions.Center).RT().Fill();
-            }
-            lang.GetComponent<Tap>().onTap = () =>
-            {
-                L.En = !L.En;
-                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-            };
-            var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", y0 + 98);
-            BuildAchievementsButton(y0 + (desktop ? 294 : 196));
+            BuildLangButton(desktop ? -28 - 280 - 12 : -28, y0);
+            y += step;
+            BuildAchievementsButton(y);
+            y += step;
+            BuildTutorialButton(y);
+            y += step;
+            var gh = SideButton("GitHub", "GITHUB", "#2b3137", "#0d1117", y);
+            var ic = UiKit.Img(gh, "Icon", UiKit.Circle, Color.white).RT();
+            ic.At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 40), new Vector2(0, 0.5f));
+            UiKit.Txt(ic, "T", "</>", 17, UiKit.Hex("#0d1117"), TextAlignmentOptions.Center).RT().Fill();
+            gh.GetComponent<Tap>().onTap = () => Application.OpenURL(RepoUrl);
+            y += step;
             if (desktop)
             {
-                var win = SideButton("Window", ScreenLabel(), "#6a4fb3", "#35246b", y0 + 196);
+                var win = SideButton("Window", ScreenLabel(), "#6a4fb3", "#35246b", y);
                 var wi = UiKit.Rect("Icon", win).At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 32), new Vector2(0, 0.5f));
                 // cuatro esquinas: "expandir"
                 foreach (var c in new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) })
@@ -141,13 +131,42 @@ namespace Argensimia.UI
                 var lbl = win.Find("Face/T").GetComponent<TextMeshProUGUI>();
                 win.GetComponent<Tap>().onTap = () => { ToggleFullscreen(); StartCoroutine(RefreshScreenLabel(lbl)); };
             }
-            // versión, debajo del botón de idioma
+            // versión, abajo de todo
             UiKit.Txt(root, "Version", "v" + Application.version, 20, Color.white, TextAlignmentOptions.Center, false, UiKit.FontBody)
                 .RT().At(new Vector2(1, 0), new Vector2(-28, 16), new Vector2(280, 26), new Vector2(1, 0));
-            var ic = UiKit.Img(gh, "Icon", UiKit.Circle, Color.white).RT();
+        }
+
+        // Idioma: botón cuadrado chico con el código del otro idioma (EN en español, ES en inglés). Cambia y recarga.
+        void BuildLangButton(float x, float y)
+        {
+            var b = UiKit.Rect("Lang", root).At(new Vector2(1, 0), new Vector2(x, y), new Vector2(84, 84), new Vector2(1, 0));
+            UiKit.Img(b, "Base", UiKit.RR, UiKit.Hex("#163a7a"), 22, true).RT().Fill();
+            var face = UiKit.Img(b, "Face", UiKit.RR, UiKit.Hex("#2f6fd6"), 22).RT().Fill(0, 0, 0, 8);
+            var t = UiKit.Txt(face, "T", L.En ? "ES" : "EN", 36, Color.white, TextAlignmentOptions.Center, true);
+            t.RT().Fill(0, 0, 2, 0);
+            var tap = b.gameObject.AddComponent<Tap>();
+            tap.visual = b;
+            tap.onTap = () =>
+            {
+                L.En = !L.En;
+                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            };
+        }
+
+        // Tutorial: partida guiada por Don Anselmo. Hasta completarlo lleva la marca ¡NUEVO!.
+        void BuildTutorialButton(float y)
+        {
+            var b = SideButton("Tutorial", "TUTORIAL", "#1fa39a", "#0d5a55", y);
+            var ic = UiKit.Img(b, "Icon", UiKit.Circle, Color.white).RT();
             ic.At(new Vector2(0, 0.5f), new Vector2(22, 2), new Vector2(40, 40), new Vector2(0, 0.5f));
-            UiKit.Txt(ic, "T", "</>", 17, UiKit.Hex("#0d1117"), TextAlignmentOptions.Center).RT().Fill();
-            gh.GetComponent<Tap>().onTap = () => Application.OpenURL(RepoUrl);
+            UiKit.Txt(ic, "T", "?", 30, UiKit.Hex("#0d5a55"), TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().Fill(0, 0, 3, 0);
+            if (!Tutorial.Done)
+            {
+                var badge = UiKit.Img(b, "New", UiKit.RR, UiKit.Hex("#d9342b"), 12).RT();
+                badge.At(new Vector2(1, 1), new Vector2(10, 12), new Vector2(96, 32), new Vector2(1, 1));
+                UiKit.Txt(badge, "T", "¡NUEVO!", 18, Color.white, TextAlignmentOptions.Center, true).RT().Fill();
+            }
+            b.GetComponent<Tap>().onTap = () => { if (GameFlow.I) GameFlow.I.StartTutorial(); };
         }
 
         static bool IsFullscreen => Screen.fullScreenMode != FullScreenMode.Windowed;

@@ -132,6 +132,7 @@ namespace Argensimia.UI
             Snd.Ui("coin");
             FloatText(moneyPanel, "+$" + GameState.Money(price), UiKit.Green, 0);
             StartCoroutine(Pulse(moneyPanel));
+            tutSold++;
             StartCoroutine(SellFly(cv));
             StartCoroutine(RefillLater(slot));
         }
@@ -188,6 +189,7 @@ namespace Argensimia.UI
             Snd.Ui("coin");
             FloatText(moneyPanel, "+$" + GameState.Money(price), UiKit.Green, 0);
             StartCoroutine(Pulse(moneyPanel));
+            tutSold++;
             int slot = cv.slot; // vendida: sale del juego (no vuelve al mazo)
             cards[slot] = null;
             Destroy(cv.gameObject);
@@ -271,6 +273,7 @@ namespace Argensimia.UI
 
         void UpdateClock(bool previa)
         {
+            if (Tutorial.Active) { clockRt.gameObject.SetActive(false); return; } // el tutorial no apura
             clockRt.gameObject.SetActive(previa);
             if (!previa) { startLeft = -1; lastTick = -1; return; }
             if (startLeft < 0) startLeft = StartTime;
@@ -326,6 +329,7 @@ namespace Argensimia.UI
         void OnStart()
         {
             if (busy || flowBusy || zoomed || placing || paused || overlay || gs.phase != Phase.Previa) return;
+            if (Tutorial.Active && !tutAllowStart) { StartCoroutine(Shake(startBtn)); return; } // primero termina la explicación
             ConfirmStart();
         }
 
@@ -448,6 +452,7 @@ namespace Argensimia.UI
             if (placing) CancelPlacement();
             CancelDrag();
             while (busy || flowBusy) yield return null;
+            if (Tutorial.Active && gs.mandate >= Tutorial.LastMandate) { tutFinal = true; yield break; } // despedida de Don Anselmo
             yield return new WaitForSecondsRealtime(0.6f);
             Snd.Ui("fanfare");
             int salary = gs.CloseMandate();
@@ -587,6 +592,12 @@ namespace Argensimia.UI
             yield return DealHand(0.1f);
             while (busy) yield return null;
             var crises = deck.Crises();
+            if (Tutorial.Active)
+            {
+                var tc = crises.Find(c => c.id == Tutorial.Crisis);
+                if (tc && gs.mandate == 2) yield return InjectCrisis(tc);
+                yield break;
+            }
             if (gs.mandate >= 2 && crises.Count > 0)
             {
                 int n = Mathf.Min(5, 1 + gs.mandate / 10 + (gs.popularity < 30 ? 1 : 0)); // +1 en el 10, 20, 30 y 40

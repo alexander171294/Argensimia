@@ -12,7 +12,7 @@ namespace Argensimia
         public static WaveDirector I { get; private set; }
 
         public int[] baseBudget = { 20, 32, 48, 68, 100 };
-        [Tooltip("Endless: crecimiento del presupuesto y de la vida por mandato")] public float endlessGrowth = 1.15f, endlessHp = 1f; // vida: además +6% lineal por mandato (HpPerMandate)
+        [Tooltip("Endless: crecimiento del presupuesto y de la vida por mandato")] public float endlessGrowth = 1.18f, endlessHp = 1.08f; // el daño además crece por mandato (DmgPerMandate)
         [Tooltip("Multiplicador global de velocidad de los manifestantes")] public float speedScale = 1.3f;
         public float spawnInterval = 0.75f;
         [Tooltip("Pausa entre pulsos con ESTALLIDO")] public float pulseGap = 9f;
@@ -69,7 +69,7 @@ namespace Argensimia
 
         // ------------------------------------------------------------------ armado de la oleada
 
-        public const float HpPerMandate = 0.06f, DmgPerMandate = 0.04f;
+        public const float DmgPerMandate = 0.08f;
 
         public float Budget(int m)
         {
@@ -91,11 +91,21 @@ namespace Argensimia
             plan.Clear();
             int m = gs.mandate;
             float budget = Budget(m) * gs.Difficulty * (1 - reduction);
-            var avail = units.FindAll(u => u.minMandate <= m);
+            if (Tutorial.Active)
+            {
+                foreach (var (id, n) in Tutorial.Wave(m))
+                {
+                    var u = units.Find(x => x.id == id);
+                    int k = Mathf.Max(1, Mathf.RoundToInt(n * gs.Difficulty / Tutorial.BaseDifficulty)); // también crece si baja la popularidad
+                    for (int i = 0; u && i < k; i++) plan.Add(new Entry { unit = u });
+                }
+                budget = 0;
+            }
+            var avail = Tutorial.Active ? new List<UnitDef>() : units.FindAll(u => u.minMandate <= m);
             UnitDef col = units.Find(u => u.kind == UnitKind.Columna);
             int cols = extraColumns + (IsFinal ? 3 : 0);
             for (int i = 0; i < cols && col; i++) { plan.Add(new Entry { unit = col }); budget -= col.cost; }
-            if (gs.MoodIndex >= 2)
+            if (gs.MoodIndex >= 2 && !Tutorial.Active)
             {
                 var specials = avail.FindAll(u => u.special && u.kind != UnitKind.Columna);
                 if (specials.Count > 0) { var s = specials[rnd.Next(specials.Count)]; plan.Add(new Entry { unit = s }); budget -= s.cost; }
@@ -271,8 +281,12 @@ namespace Argensimia
             var slots = PoliceSlots.I;
             int m = gs.MoodIndex;
             float endlessK = gs.mandate > baseBudget.Length ? Mathf.Pow(endlessHp, gs.mandate - baseBudget.Length) : 1;
-            float mk = gs.mandate - 1; // curtido por mandato, lineal: +6% vida, +4% daño, +1% velocidad (tope +20%)
-            float hpK = 1 + HpPerMandate * mk, dmgK = 1 + DmgPerMandate * mk, spdK = Mathf.Min(1.2f, 1 + 0.01f * mk);
+            // Curtido por mandato: el daño sube +8% lineal por mandato (×1,72 en el 10, ×2,5 en el 20) para que las defensas
+            // de siempre también caigan; velocidad +1% (tope +20%). La vida sigue la curva de siempre (×1,08 desde el 6),
+            // columnas incluidas, sin nada extra.
+            float mk = gs.mandate - 1;
+            float dmgK = 1 + DmgPerMandate * mk, spdK = Mathf.Min(1.2f, 1 + 0.01f * mk);
+            float hpK = endlessK;
             var path = new List<Vector3>();
             int lane;
             if (e.side == 0)
@@ -291,7 +305,7 @@ namespace Argensimia
                 path.Add(SpawnPoint(e.side, lane));
                 path.Add(slots.LanePoint(lane, Random.Range(-0.5f, 0.5f)));
             }
-            var en = Enemy.Spawn(e.unit, path, lane, GameState.HpMul[m] * endlessK * hpK, GameState.DmgMul[m] * dmgK, GameState.SpdMul[m] * spdK);
+            var en = Enemy.Spawn(e.unit, path, lane, GameState.HpMul[m] * hpK, GameState.DmgMul[m] * dmgK, GameState.SpdMul[m] * spdK);
             en.PopIn();
         }
     }

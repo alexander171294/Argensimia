@@ -81,8 +81,11 @@ namespace Argensimia
         {
             I = this;
             // mejoras permanentes ganadas con mandatos sobrevividos (ver Meta)
-            money += Meta.StartMoneyBonus;
-            maxGovernability += Meta.MaxGovBonus;
+            if (!Tutorial.Active)
+            {
+                money += Meta.StartMoneyBonus;
+                maxGovernability += Meta.MaxGovBonus;
+            }
             governability = maxGovernability;
         }
 
@@ -191,7 +194,7 @@ namespace Argensimia
             int s = Salary;
             money += s;
             // progresión entre partidas y logros del cierre
-            Meta.MandateSurvived();
+            if (!Tutorial.Active) Meta.MandateSurvived();
             if (mandate == 1) Achievements.Unlock("asumio");
             if (WaveDirector.I && WaveDirector.I.ArrivedThisWave == 0) Achievements.Unlock("orden");
             if (MoodIndex == 3) Achievements.Unlock("mal_bien");
@@ -207,7 +210,7 @@ namespace Argensimia
         public void LoseGovernability(int n, Vector3? at = null)
         {
             if (phase != Phase.Oleada) return;
-            governability = Mathf.Max(0, governability - n);
+            governability = Mathf.Max(Tutorial.Active ? 1 : 0, governability - n); // en el tutorial no se pierde
             Lost?.Invoke("gov", n, at);
             if (governability <= 0)
             {
