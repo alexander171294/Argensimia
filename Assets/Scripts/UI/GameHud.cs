@@ -337,7 +337,7 @@ namespace Argensimia.UI
             shownMoney = Mathf.Abs(diff) > gs.income * 0.6f + 2 ? Mathf.Lerp(shownMoney, gs.money, 1 - Mathf.Exp(-7 * Time.unscaledDeltaTime)) : gs.money;
             int m = Mathf.FloorToInt(shownMoney);
             if (m != lastMoney) { lastMoney = m; moneyTxt.text = "$ " + GameState.Money(m); }
-            int inc = Mathf.RoundToInt(gs.income);
+            int inc = Mathf.RoundToInt(gs.income + Defense.ExtraIncome); // + punteros
             if (inc != lastIncome) { lastIncome = inc; incomeTxt.text = "+$" + GameState.Money(inc) + "/s"; }
 
             if (gs.mandate != lastMandate)
@@ -398,7 +398,8 @@ namespace Argensimia.UI
 
         static bool NoFreeSlot() => PoliceSlots.I && !PoliceSlots.I.HasFree();
         // Sin slot libre y sin una defensa igual para mejorar.
-        static bool Blocked(CardDef d) => d.UsesSlot && PoliceSlots.I && !PoliceSlots.I.HasFree(d.slotSize) && !Defense.AnyUpgradable(d);
+        static bool Blocked(CardDef d) => d.TargetsDefense ? !Defense.AnyOnField
+            : d.UsesSlot && PoliceSlots.I && !PoliceSlots.I.HasFree(d.slotSize) && !Defense.AnyUpgradable(d);
 
         // ------------------------------------------------------------------ marquesina
 
@@ -676,8 +677,8 @@ namespace Argensimia.UI
             });
             cv.gameObject.SetActive(false);
             dim.gameObject.SetActive(false);
-            placeTxt.text = L.T(Defense.AnyUpgradable(cv.def) ? "Elegí un lugar o tocá una igual para mejorarla: " : "Elegí un lugar en el camino para ") + "<color=#f2c14e>" + L.CardTitle(cv.def).ToUpperInvariant() + "</color>";
-            if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
+            placeTxt.text = cv.def.TargetsDefense ? L.T("Tocá la defensa que querés retirar con ") + "<color=#f2c14e>" + L.CardTitle(cv.def).ToUpperInvariant() + "</color>" : L.T(Defense.AnyUpgradable(cv.def) ? "Elegí un lugar o tocá una igual para mejorarla: " : "Elegí un lugar en el camino para ") + "<color=#f2c14e>" + L.CardTitle(cv.def).ToUpperInvariant() + "</color>";
+            if (PoliceSlots.I && !cv.def.TargetsDefense) PoliceSlots.I.SetHighlight(true);
             Defense.ShowHints(cv.def, true);
             placeBanner.gameObject.SetActive(true);
             mapCatcher.gameObject.SetActive(true);
@@ -708,8 +709,9 @@ namespace Argensimia.UI
         // Lo que haría una carta colocable soltada en p: mejorar una defensa igual (prioridad) o ocupar el slot libre más cercano.
         void PlaceTarget(CardDef d0, Vector3 p, out Defense up, out PoliceSlots.Slot target, out PoliceSlots.Slot second)
         {
-            up = Defense.UpgradableAt(d0, p, 1.2f);
             target = second = null;
+            if (d0.TargetsDefense) { up = Defense.AnyAt(p, 1.2f); return; }
+            up = Defense.UpgradableAt(d0, p, 1.2f);
             if (up || !PoliceSlots.I) return;
             if (d0.slotSize >= 2) target = PoliceSlots.I.NearestPair(p, slotSnapDistance + 2f, out second);
             else target = PoliceSlots.I.Nearest(p, slotSnapDistance);
@@ -729,6 +731,22 @@ namespace Argensimia.UI
             }
             if (d0.cost > 0) { FloatText(moneyPanel, "-$" + GameState.Money(d0.cost), UiKit.RedSoft, 0); Snd.Ui("spend", 0.6f); }
             Achievements.Count("place_" + d0.id);
+            if (d0.TargetsDefense)
+            {
+                // Desafectar: retira la defensa y reintegra la mitad de lo pagado
+                var pos = up.transform.position;
+                int back = up.Dismiss();
+                gs.money += back;
+                Snd.Ui("coin");
+                FloatText(moneyPanel, "+$" + GameState.Money(back), UiKit.Green, 0.1f);
+                WorldFloat(pos + Vector3.up * 5f, "+$" + GameState.Money(back), UiKit.Green);
+                if (!string.IsNullOrEmpty(d0.headline)) gs.PushHeadline(Headlines.PickVariant(L.CardHeadline(d0)));
+                int s0 = cv.slot;
+                cards[s0] = null;
+                Destroy(cv.gameObject);
+                StartCoroutine(DrawInto(s0));
+                return true;
+            }
             if (d0.defense == DefenseKind.BalasGoma || d0.defense == DefenseKind.Lanzagases) gs.usedRepression = true;
             if (up)
             {

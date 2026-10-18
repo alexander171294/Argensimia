@@ -131,6 +131,7 @@ namespace Argensimia
             ["PLAZA"] = "PLAZA",
             ["LOGROS"] = "AWARDS",
             ["VENDER"] = "SELL",
+            ["Tocá la defensa que querés retirar con "] = "Tap the defense you want to withdraw with ",
             ["¡BIEN!"] = "GREAT!",
             ["¡MEJORA PERMANENTE!"] = "PERMANENT UPGRADE!",
             ["¡NUEVA CARTA DESBLOQUEADA!"] = "NEW CARD UNLOCKED!",
@@ -157,6 +158,7 @@ namespace Argensimia
         static readonly Dictionary<string, (string t, string d, string h)> Cards = new Dictionary<string, (string, string, string)>
         {
             ["puntero"] = ("Broker", "The neighborhood political broker sets up his grill in the Plaza: while he stands he makes $12/s during the wave. He's fragile: protect him.", "Free choripán in the Plaza: «it's a solidarity day»"),
+            ["desafectar"] = ("Stand Down", "Drop it on any defense on the map: it's withdrawn, the spot is freed and you get back half of what you paid (cost × level).", "Officers stood down: «reassigned to other duties»"),
             ["contenedores"] = ("Dumpsters", "Two trash dumpsters across the lane: they take a huge beating and hooded rioters can't jump them.", "Dumpsters become a barricade in front of the Casa Rosada"),
             ["infiltrado"] = ("Undercover", "A plainclothes cop in the crowd: takes 10 s to settle in and nobody sees him. Then the first one to pass gets arrested and those around are stunned. Single use; hits columns hard.", "Undercover police reported among the protesters"),
             ["comisario"] = ("Commissioner", "The commissioner rallies through a megaphone: defenses within 1 tile hit 30% harder (45% and 60% at LV2 and LV3). He also blocks.", "The commissioner takes command in the Plaza"),

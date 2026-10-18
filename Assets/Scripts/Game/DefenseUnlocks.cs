@@ -39,6 +39,17 @@ namespace Argensimia
             return b;
         }
 
+        // $/s que suman los punteros en pie (para el cartel de ingreso).
+        public static float ExtraIncome
+        {
+            get
+            {
+                float s = 0;
+                foreach (var d in All) if (!d.Dead && d.def.defense == DefenseKind.Puntero) s += d.def.moneyRate * CardDef.LevelRate(d.level);
+                return s;
+            }
+        }
+
         public static int Count(DefenseKind k)
         {
             int n = 0;
@@ -464,6 +475,40 @@ namespace Argensimia
             Snd.At("mortar_launch", from, 1, 0.1f, 0.05f, 0.7f);
             punch = 1;
             Headlines.Say("tanqueta", 25f);
+        }
+
+        // ------------------------------------------------------------------ Desafectar (retirar una defensa del mapa)
+
+        public static bool AnyOnField { get { foreach (var d in All) if (!d.Dead) return true; return false; } }
+
+        // Defensa (cualquiera) bajo el punto p, con r metros de tolerancia.
+        public static Defense AnyAt(Vector3 p, float r)
+        {
+            Defense best = null;
+            float bd = float.MaxValue;
+            foreach (var d in All)
+            {
+                if (d.Dead) continue;
+                var q = d.transform.position;
+                float dist = new Vector2(p.x - q.x, p.z - q.z).magnitude;
+                if (dist > d.HalfLen + r || dist >= bd) continue;
+                bd = dist; best = d;
+            }
+            return best;
+        }
+
+        // Devuelve el 50% de lo pagado (costo de la carta × nivel), mínimo $100.
+        public int RefundValue => Mathf.Max(100, Mathf.RoundToInt(def.cost * level * 0.5f / 10f) * 10);
+
+        // Se retira: estallido, libera el lugar. Devuelve la plata reintegrada.
+        public int Dismiss()
+        {
+            if (Dead) return 0;
+            int r = RefundValue;
+            Burst(new Color(0.55f, 0.9f, 0.5f, 0.9f), 30, 5f);
+            Snd.At("whistle_short", transform.position, 0.6f, 0.3f);
+            Consume();
+            return r;
         }
 
         // Defensas de un solo uso: desaparecen y liberan el slot sin titular de "cae la línea".

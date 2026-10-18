@@ -289760,8 +289760,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.WaveDirector
   baseBudget: 1400000020000000300000004400000064000000
-  endlessGrowth: 1.18
-  endlessHp: 1.08
+  endlessGrowth: 1.15
+  endlessHp: 1
   speedScale: 1.3
   spawnInterval: 0.75
   pulseGap: 9

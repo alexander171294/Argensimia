@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using TMPro;
 
 namespace Argensimia.UI
 {
@@ -19,6 +20,38 @@ namespace Argensimia.UI
     public partial class GameHud
     {
         CardView dragging;
+        RectTransform sellZone;
+        TMPro.TextMeshProUGUI sellZoneTxt;
+        UnityEngine.UI.Image sellZoneFace;
+
+        // Zona de venta mientras se arrastra: aparece sobre el mazo (fuera del campo, no tapa slots). Soltar ahí vende.
+        void ShowSellZone(CardView cv, bool on)
+        {
+            if (!sellZone)
+            {
+                sellZone = UiKit.Rect("SellZone", zoomLayer).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(230, 250));
+                UiKit.Img(sellZone, "Ring", UiKit.RR, Color.white, 30).RT().Fill();
+                sellZoneFace = UiKit.Img(sellZone, "Face", UiKit.RR, UiKit.Hex("#2f9a4a"), 26);
+                sellZoneFace.RT().Fill(6, 6, 6, 6);
+                UiKit.Txt(sellZone, "Dollar", "$", 110, Color.white, TextAlignmentOptions.Center, false, UiKit.FontLogo).RT().At(new Vector2(0.5f, 1), new Vector2(0, -6), new Vector2(200, 130), new Vector2(0.5f, 1));
+                sellZoneTxt = UiKit.Txt(sellZone, "T", "", 30, Color.white, TextAlignmentOptions.Center, true);
+                sellZoneTxt.RT().At(new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(210, 90), new Vector2(0.5f, 0));
+            }
+            sellZone.gameObject.SetActive(on);
+            if (!on) return;
+            // sobre el mazo, pero entera en pantalla (sin pisar la marquesina)
+            var lp = zoomLayer.InverseTransformPoint(deckRt.TransformPoint(deckRt.rect.center));
+            var r = zoomLayer.rect;
+            lp.x = Mathf.Max(lp.x, r.xMin + 115 + 20);
+            lp.y = Mathf.Max(lp.y, r.yMin + tickerHeight + 125 + 20);
+            sellZone.localPosition = lp;
+            sellZone.localScale = Vector3.one;
+            sellZoneTxt.text = L.T("VENDER") + "\n+$" + GameState.Money(SellPrice(cv.def));
+            sellZone.SetAsLastSibling();
+            cv.transform.SetAsLastSibling();
+        }
+
+        bool OverSellZone(Vector2 screen) => sellZone && sellZone.gameObject.activeSelf && RectTransformUtility.RectangleContainsScreenPoint(sellZone, screen, null);
 
         void AddDrag(CardView cv)
         {
@@ -49,9 +82,10 @@ namespace Argensimia.UI
             cv.transform.SetParent(zoomLayer, true);
             cv.transform.SetAsLastSibling();
             cv.group.blocksRaycasts = false;
+            ShowSellZone(cv, true);
             if (cv.def.kind == CardKind.Colocar)
             {
-                if (PoliceSlots.I) PoliceSlots.I.SetHighlight(true);
+                if (PoliceSlots.I && !cv.def.TargetsDefense) PoliceSlots.I.SetHighlight(true);
                 Defense.ShowHints(cv.def, true);
             }
             DragMove(cv, e);
@@ -61,6 +95,12 @@ namespace Argensimia.UI
         {
             if (dragging != cv || !cv) return;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(zoomLayer, e.position, null, out var lp);
+            bool overSell = OverSellZone(e.position);
+            if (sellZone && sellZone.gameObject.activeSelf)
+            {
+                sellZone.localScale = Vector3.one * (overSell ? 1.1f : 1f);
+                sellZoneFace.color = overSell ? UiKit.Hex("#43c157") : UiKit.Hex("#2f9a4a");
+            }
             // chica y por arriba del dedo, para que se vea dónde cae
             bool overMap = !OverHand(e.position);
             cv.transform.localPosition = (Vector3)lp + Vector3.up * (overMap ? 95f : 30f);
@@ -82,9 +122,11 @@ namespace Argensimia.UI
         {
             if (dragging != cv || !cv) return;
             dragging = null;
+            bool sell = OverSellZone(e.position);
             EndDragFx();
             cv.group.blocksRaycasts = true;
             cv.group.alpha = 1;
+            if (sell && !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada)) { QuickSell(cv); return; }
             bool live = !paused && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada) && !OverHand(e.position);
             if (cv.def.kind != CardKind.Colocar)
             {
@@ -102,6 +144,7 @@ namespace Argensimia.UI
 
         void EndDragFx()
         {
+            ShowSellZone(null, false);
             if (PoliceSlots.I) PoliceSlots.I.SetHighlight(false);
             Defense.HoverHint(null);
             Defense.ShowHints(null, false);

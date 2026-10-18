@@ -54,9 +54,9 @@ namespace Argensimia
         [Tooltip("Contenedores: el encapuchado no puede saltarlo")] public bool noJump;
 
         // De un solo uso (no se suben de nivel): el infiltrado y el estruendo se consumen al actuar.
-        public bool Upgradable => kind == CardKind.Colocar && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio;
+        public bool Upgradable => kind == CardKind.Colocar && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio && defense != DefenseKind.Desafectar;
         // Las que no frenan ni reciben golpes no muestran VIDA.
-        public bool HasHp => defense != DefenseKind.Concertina && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio;
+        public bool HasHp => defense != DefenseKind.Desafectar && defense != DefenseKind.Concertina && defense != DefenseKind.Infiltrado && defense != DefenseKind.Estruendo && defense != DefenseKind.Desvio;
         public float LevelBuff(int level) => buff * (1 + 0.5f * (level - 1));
 
         // Nivel 2 = +40% al stat principal; nivel 3 = x2 y +30% de vida. Se sube soltando la carta sobre una igual del mapa.
@@ -69,7 +69,9 @@ namespace Argensimia
         public float LevelRange(int level) => level >= 3 && (defense == DefenseKind.BalasGoma || defense == DefenseKind.Lanzagases || defense == DefenseKind.Hidrante) ? 6.8f : 0f;
 
         public bool IsPolice => kind == CardKind.Colocar;
-        public bool UsesSlot => kind == CardKind.Colocar;
+        public bool UsesSlot => kind == CardKind.Colocar && defense != DefenseKind.Desafectar;
+        // Desafectar: se suelta sobre una defensa del mapa (cualquiera) en vez de sobre un slot.
+        public bool TargetsDefense => kind == CardKind.Colocar && defense == DefenseKind.Desafectar;
 
         // Stats de las colocables para los badges de la carta. Vida = lo que aguanta la defensa antes de romperse
         // (los golpes de los manifestantes la bajan; en 0 se rompe y libera el slot).

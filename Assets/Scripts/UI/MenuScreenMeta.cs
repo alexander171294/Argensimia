@@ -142,7 +142,7 @@ namespace Argensimia.UI
             UiKit.Txt(p, "Head", head, 22, UiKit.Cream, TextAlignmentOptions.Center, false, UiKit.FontBody)
                 .RT().At(new Vector2(0.5f, 1), new Vector2(0, -84), new Vector2(1360, 30), new Vector2(0.5f, 1));
             var order = Meta.UnlockOrder;
-            const float cw = 128, cgap = 8;
+            const float cw = 116, cgap = 7;
             float total = order.Length * cw + (order.Length - 1) * cgap;
             for (int i = 0; i < order.Length; i++)
             {

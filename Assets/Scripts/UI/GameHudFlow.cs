@@ -111,11 +111,56 @@ namespace Argensimia.UI
         }
 
         // Vender desde la mano (botón debajo de SIN LUGAR).
+        // No bloquea el HUD: se pueden vender varias seguidas sin esperar la animación.
         void SellFromHand(CardView cv)
         {
-            if (busy || zoomed || placing || paused || dragging || !cv || cv.def.kind == CardKind.Crisis) return;
+            if (zoomed || placing || paused || dragging || !cv || cv.def.kind == CardKind.Crisis) return;
             if (gs.phase != Phase.Previa && gs.phase != Phase.Oleada) return;
-            StartCoroutine(SellRoutine(cv));
+            if (cv.slot < 0 || cv.slot >= cards.Length || cards[cv.slot] != cv) return;
+            QuickSell(cv);
+        }
+
+        // Venta instantánea (mano o zona de venta al arrastrar): cobra ya, la carta vuela a la plata y se repone el hueco.
+        void QuickSell(CardView cv)
+        {
+            int slot = cv.slot;
+            if (slot >= 0 && slot < cards.Length && cards[slot] == cv) cards[slot] = null;
+            cv.tap.interactable = false;
+            cv.group.blocksRaycasts = false;
+            int price = SellPrice(cv.def);
+            gs.money += price;
+            Snd.Ui("coin");
+            FloatText(moneyPanel, "+$" + GameState.Money(price), UiKit.Green, 0);
+            StartCoroutine(Pulse(moneyPanel));
+            StartCoroutine(SellFly(cv));
+            StartCoroutine(RefillLater(slot));
+        }
+
+        IEnumerator SellFly(CardView cv)
+        {
+            if (cv.transform.parent != zoomLayer) cv.transform.SetParent(zoomLayer, true);
+            Vector3 from = cv.transform.localPosition, to = zoomLayer.InverseTransformPoint(moneyPanel.TransformPoint(moneyPanel.rect.center));
+            float s0 = cv.transform.localScale.x;
+            Snd.Ui("card_flip", 0.7f);
+            yield return UiKit.Tween(0.35f, t =>
+            {
+                if (!cv) return;
+                float e = Ease.InCubic(t);
+                cv.transform.localPosition = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 60f;
+                cv.transform.localScale = Vector3.one * Mathf.Lerp(s0, 0.05f, e);
+                cv.transform.localRotation = Quaternion.Euler(0, 0, e * 160f);
+                cv.group.alpha = 1 - Mathf.Clamp01((t - 0.6f) / 0.4f);
+            });
+            if (cv) Destroy(cv.gameObject);
+        }
+
+        IEnumerator RefillLater(int slot)
+        {
+            yield return new WaitForSecondsRealtime(0.3f);
+            while (busy || flowBusy) yield return null;
+            if (slot < 0 || slot >= cards.Length || cards[slot] != null) yield break;
+            if (gs.phase != Phase.Previa && gs.phase != Phase.Oleada) yield break;
+            yield return DrawInto(slot);
         }
 
         // La carta se achica, gira y cae en el tacho; entra la plata y se roba otra.
@@ -544,7 +589,7 @@ namespace Argensimia.UI
             var crises = deck.Crises();
             if (gs.mandate >= 2 && crises.Count > 0)
             {
-                int n = gs.popularity < 30 ? 2 : 1;
+                int n = Mathf.Min(5, 1 + gs.mandate / 10 + (gs.popularity < 30 ? 1 : 0)); // +1 en el 10, 20, 30 y 40
                 for (int i = 0; i < n; i++) yield return InjectCrisis(crises[Random.Range(0, crises.Count)]);
             }
         }

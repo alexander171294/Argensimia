@@ -415,7 +415,7 @@ namespace Argensimia
 
         public static void ShowHints(CardDef def, bool on)
         {
-            foreach (var d in All) d.SetHint(on && def && d.def == def && d.CanUpgrade);
+            foreach (var d in All) d.SetHint(on && def && ((d.def == def && d.CanUpgrade) || (def.TargetsDefense && !d.Dead)));
         }
 
         public static void HoverHint(Defense h)

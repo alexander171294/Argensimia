@@ -16,7 +16,7 @@ namespace Argensimia
         public const int MandatesPerUnlock = 3;
 
         public static readonly string[] UnlockOrder =
-            { "puntero", "contenedores", "infiltrado", "comisario", "concertina", "requisa", "desvio", "estruendo", "drone", "tanqueta" };
+            { "puntero", "desafectar", "contenedores", "infiltrado", "comisario", "concertina", "requisa", "desvio", "estruendo", "drone", "tanqueta" };
 
         [System.Serializable]
         class Data
@@ -62,10 +62,12 @@ namespace Argensimia
         public static int TotalMandates => D.mandates;
         public static int UnlockedCount => D.unlocked.Count;
         public static int Perks => D.perks;
-        public static bool AllUnlocked => D.unlocked.Count >= UnlockOrder.Length;
+        public static bool AllUnlocked { get { foreach (var id in UnlockOrder) if (!D.unlocked.Contains(id)) return false; return true; } }
+        // la primera del orden que falta (si se agrega una carta al orden, la ganan también los que ya avanzaron)
+        static string FirstLocked { get { foreach (var id in UnlockOrder) if (!D.unlocked.Contains(id)) return id; return null; } }
         public static bool IsLockable(string id) => System.Array.IndexOf(UnlockOrder, id) >= 0;
         public static bool IsUnlocked(string id) => !IsLockable(id) || D.unlocked.Contains(id);
-        public static string NextUnlock => AllUnlocked ? null : UnlockOrder[D.unlocked.Count];
+        public static string NextUnlock => FirstLocked;
         // mandatos que faltan para la próxima recompensa (carta o mejora)
         public static int ToNextReward => MandatesPerUnlock - D.mandates % MandatesPerUnlock;
 
@@ -85,7 +87,7 @@ namespace Argensimia
             {
                 if (!AllUnlocked)
                 {
-                    got = UnlockOrder[D.unlocked.Count];
+                    got = FirstLocked;
                     D.unlocked.Add(got);
                 }
                 else { D.perks++; got = "perk:" + D.perks; }

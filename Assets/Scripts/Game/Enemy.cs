@@ -442,7 +442,7 @@ namespace Argensimia
             if (def.popOnHit > 0 && popCd <= 0 && GameState.I)
             {
                 popCd = 1f;
-                GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
+                GameState.I.LosePopularity(PopHit, transform.position + Vector3.up * 4.5f);
             }
             if (bar) bar.Set(hp / maxHp);
             if (hp <= 0) Die(false);
@@ -499,11 +499,14 @@ namespace Argensimia
             return true;
         }
 
+        // Pegarle o detener a un jubilado cuesta más con cada mandato: 0,1% + 0,05% por mandato (0,55% en el 10).
+        float PopHit => def.popOnHit + 0.05f * Mathf.Max(0, (GameState.I ? GameState.I.mandate : 1) - 1);
+
         public void Capture()
         {
             if (Dead) return;
             Achievements.Count("detenidos");
-            if (def.popOnHit > 0 && GameState.I) GameState.I.LosePopularity(def.popOnHit, transform.position + Vector3.up * 4.5f);
+            if (def.popOnHit > 0 && GameState.I) GameState.I.LosePopularity(PopHit, transform.position + Vector3.up * 4.5f);
             if (def.kind == UnitKind.Jubilado) Headlines.Say("capture_jubilado", 12f); else Headlines.Say("capture", 20f);
             Die(true);
         }

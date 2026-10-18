@@ -6,7 +6,9 @@ namespace Argensimia
     public enum Rarity { Comun, PocoComun, Rara }
     public enum DefenseKind { Vallado, Infanteria, Lanzagases, Detencion, Motorizada, Hidrante, BalasGoma,
         // desbloqueables (cada 3 mandatos sobrevividos, ver Meta)
-        Puntero, Contenedores, Infiltrado, Comisario, Concertina, Requisa, Desvio, Estruendo, Drone, Tanqueta }
+        Puntero, Contenedores, Infiltrado, Comisario, Concertina, Requisa, Desvio, Estruendo, Drone, Tanqueta,
+        // utilidad: retira una defensa del mapa y devuelve parte de la plata
+        Desafectar }
     public enum UnitKind { Comun, Cacerolero, Jubilado, Encapuchado, Piquetero, Mortero, Columna }
     public enum Phase { Previa, Oleada, Cierre, Victoria, Derrota }
 

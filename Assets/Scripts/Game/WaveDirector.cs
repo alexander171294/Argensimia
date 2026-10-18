@@ -12,7 +12,7 @@ namespace Argensimia
         public static WaveDirector I { get; private set; }
 
         public int[] baseBudget = { 20, 32, 48, 68, 100 };
-        [Tooltip("Endless: crecimiento del presupuesto y de la vida por mandato")] public float endlessGrowth = 1.18f, endlessHp = 1.08f;
+        [Tooltip("Endless: crecimiento del presupuesto y de la vida por mandato")] public float endlessGrowth = 1.15f, endlessHp = 1f; // vida: además +6% lineal por mandato (HpPerMandate)
         [Tooltip("Multiplicador global de velocidad de los manifestantes")] public float speedScale = 1.3f;
         public float spawnInterval = 0.75f;
         [Tooltip("Pausa entre pulsos con ESTALLIDO")] public float pulseGap = 9f;
@@ -68,6 +68,8 @@ namespace Argensimia
         }
 
         // ------------------------------------------------------------------ armado de la oleada
+
+        public const float HpPerMandate = 0.06f, DmgPerMandate = 0.04f;
 
         public float Budget(int m)
         {
@@ -269,6 +271,8 @@ namespace Argensimia
             var slots = PoliceSlots.I;
             int m = gs.MoodIndex;
             float endlessK = gs.mandate > baseBudget.Length ? Mathf.Pow(endlessHp, gs.mandate - baseBudget.Length) : 1;
+            float mk = gs.mandate - 1; // curtido por mandato, lineal: +6% vida, +4% daño, +1% velocidad (tope +20%)
+            float hpK = 1 + HpPerMandate * mk, dmgK = 1 + DmgPerMandate * mk, spdK = Mathf.Min(1.2f, 1 + 0.01f * mk);
             var path = new List<Vector3>();
             int lane;
             if (e.side == 0)
@@ -287,7 +291,7 @@ namespace Argensimia
                 path.Add(SpawnPoint(e.side, lane));
                 path.Add(slots.LanePoint(lane, Random.Range(-0.5f, 0.5f)));
             }
-            var en = Enemy.Spawn(e.unit, path, lane, GameState.HpMul[m] * endlessK, GameState.DmgMul[m], GameState.SpdMul[m]);
+            var en = Enemy.Spawn(e.unit, path, lane, GameState.HpMul[m] * endlessK * hpK, GameState.DmgMul[m] * dmgK, GameState.SpdMul[m] * spdK);
             en.PopIn();
         }
     }

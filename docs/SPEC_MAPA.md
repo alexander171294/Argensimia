@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.2.2** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.2.3** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-18 | **0.2.3**: carta Desafectar (2ª desbloqueable: retira una defensa y devuelve 50%); venta rápida desde la mano y zona VENDER al arrastrar; el cartel de $/s suma los punteros; crisis forzadas +1 cada 10 mandatos (hasta 5); jubilado −0,1% −0,05% por mandato; enemigos +6% vida y +4% daño por mandato (lineal) y presupuesto ×1,15 desde el 6. |
 | 2026-10-17 | **0.2.2**: efectos y ministros se activan arrastrándolos a la partida; VENDER debajo de SIN LUGAR; botón $ con el estilo de la X; X de LOGROS arreglada; detenciones de a un agente con barra de carga (1 s + enfriamiento); hidrante NV2/NV3 con modelos blindados, columnas inmunes y crítico ×5 si es el único que pega; desgaste de popularidad desde el mandato 6 (−15/−20/−25%). |
 | 2026-10-17 | **0.2.1**: vender con botón $ por rareza ($250 / $375 / $500); CAMBIAR CARTAS a $250 y solo con cartas en el mazo; colocables ×2 en el sorteo (~27% → ~43%); el reloj ya no cierra la carta abierta; Detenciones rehecha (un agente corre hasta 5 casilleros, detiene y vuelve). |
 | 2026-10-17 | **0.2.0**: progresión entre partidas (cada 3 mandatos sobrevividos se desbloquea 1 de 10 defensas nuevas inspiradas en Plants vs Zombies, con modelo y arte; después, mejoras permanentes), 19 logros con aviso y panel LOGROS en el menú; efectos en PCM (el build de Linux quedaba mudo). |
 | 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
-| 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
 
 ## Resumen
 
@@ -195,6 +195,8 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 
 ## Popularidad
 
+**Jubilados:** pegarle o detener a uno resta 0,1% + 0,05% por mandato (0,55% en el 10).
+
 **Desgaste de gestión:** desde el mandato 6 (el primero sin carriles nuevos) cada mandato arranca restando popularidad: −15% en el 6, −20% en el 7 y −25% desde el 8 (`GameState.MandateWear`, titular `wear`).
 
 La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan enojada.
@@ -214,7 +216,7 @@ La popularidad (0–100) es la dificultad: define cuánta gente viene y qué tan
 
 ## Oleadas y manifestantes
 
-`WaveDirector` arma cada oleada gastando un presupuesto por mandato: 20, 32, 48, 68, 100 y después ×1,18 por mandato (vida ×1,08). Se multiplica por la dificultad y se reduce con Feriado puente o Pacto social.
+`WaveDirector` arma cada oleada gastando un presupuesto por mandato: 20, 32, 48, 68, 100 y después ×1,15 por mandato. Además los manifestantes se curten con cada mandato, de forma lineal para que no sea una bola de nieve: +6% de vida, +4% de daño y +1% de velocidad (tope +20%) por mandato (`HpPerMandate`, `DmgPerMandate`). Masa de vida aprox. respecto del mandato 5: ×2,5 en el 10, ×6 en el 15, ×14 en el 20 (antes ×3,4 / ×11 / ×38). Se multiplica por la dificultad y se reduce con Feriado puente o Pacto social.
 
 - **Carriles activos:** uno más por mandato: 1, 2, 3 y desde el mandato 4 los 4 (primero los interiores). Una flecha **roja** en el extremo este marca cada carril activo; los nuevos titilan fuerte en la previa.
 - **Entradas norte y sur:** recién desde el mandato 5 (50% de la oleada entra por el refuerzo, x = 0, y toma un carril de su lado).
@@ -320,7 +322,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 
 `Meta.cs` guarda todo en PlayerPrefs (`meta_v1`, JSON). Para pruebas: `Meta.DebugAddMandates(n)` y el menú `Argensimia/Debug/Borrar progresión y logros`.
 
-- **Mandatos sobrevividos:** cada cierre de mandato suma 1 al total (todas las partidas). Cada 3 se gana la siguiente carta de `Meta.UnlockOrder`; con las 10, cada 3 mandatos una **mejora permanente** (alterna +$250 iniciales y +1 de gobernabilidad máxima, se aplican en `GameState.Awake`).
+- **Mandatos sobrevividos:** cada cierre de mandato suma 1 al total (todas las partidas). Cada 3 se gana la primera carta de `Meta.UnlockOrder` que falte (11 cartas: si se agrega una al orden, la ganan también los que ya avanzaron); con las 10, cada 3 mandatos una **mejora permanente** (alterna +$250 iniciales y +1 de gobernabilidad máxima, se aplican en `GameState.Awake`).
 - **Cuándo se ve:** al volver al menú (perder o renunciar), después del cartel del top 5: pantalla ¡NUEVA CARTA DESBLOQUEADA! / ¡MEJORA PERMANENTE! con la carta, el total y cuánto falta para la próxima (`MenuScreen.ShowRewards`).
 - **Cuándo entra:** desde la partida siguiente; `CardDeck.Awake` saca del catálogo las bloqueadas, así que entran solo al sorteo del cierre y a la compra con mazo vacío (copias iniciales 0).
 - **Logros (`Achievements.cs`, 19):** de un paso (`Unlock`) o con contador (`Count(clave)`, ej. `play_<id>`, `place_<id>`, `detenidos`, `crisis_evitadas`). Aviso deslizante arriba a la derecha (`AchievementToast`, persiste entre escenas) y panel LOGROS en el menú (botón dorado con contador, grilla de 2 columnas con barra de progreso y la fila de las 10 cartas a desbloquear). Los `id` quedan listos para Steamworks.
@@ -328,15 +330,16 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 | Mandatos | Carta | Rareza | Costo | Qué hace | Modelo |
 | --- | --- | --- | --- | --- | --- |
 | 3 | Puntero | Común | $700 | +$12/s durante la oleada mientras esté en pie (×1,25/×1,6 por nivel). 150 de vida. | Gordito con delantal y parrilla con choris; NV2 sombrilla, NV3 bafle y bandera |
-| 6 | Contenedores | Común | $1.300 | 1.500 de vida; el encapuchado no lo puede saltar (`noJump`). | 2 contenedores verdes; NV2 doble fila, NV3 gomas y chapas |
-| 9 | Infiltrado | Poco común | $900 | Se arma en 10 s; no frena ni lo atacan. El primero que lo pisa queda detenido (a una columna le pega 150) y los de 4 m, aturdidos 2 s. Un solo uso. | Civil de buzo gris, gorra y mochila |
-| 12 | Comisario | Rara | $1.600 | +30% de daño (45/60% en NV2/NV3) a las defensas a 1 casillero; no se acumula. Frena. | Comisario panzón con megáfono; escolta en NV2/NV3 |
-| 15 | Concertina | Común | $500 | No frena ni recibe golpes: 6 dps y −30% de velocidad a los que la cruzan. NV2/NV3 suman rollos. | Rollos de alambre sobre caballetes |
-| 18 | Requisa | Poco común | $1.700 | Cada 8 s desarma al especial más caro a 2 casilleros (encapuchado, piquetero, mortero → manifestante común). | Mesa con palos, tubos y pasamontañas + 2-4 agentes |
-| 21 | Desvío | Poco común | $800 | Manda a los que llegan al carril vecino mejor defendido (no a las columnas). No frena ni lo atacan, salvo el mortero. Sin niveles. | Barrera a rayas, conos y agente de tránsito con chaleco |
-| 24 | Estruendo | Poco común | $1.100 | A los 0,8 s explota: 60 de daño y 3 s de aturdimiento en 6 m. Un solo uso. | Granada con luz que titila |
-| 27 | Drone | Rara | $2.100 | Vuela; 10 de daño, 1,2/s, a cualquier carril hasta 3 casilleros, primero los especiales. No frena; el mortero lo puede bajar. | Cuadricóptero con balizas y hélices que giran |
-| 30 | Tanqueta | Rara | $3.900 | 2 slots, 1.400 de vida, frena. Cada 16 s dispara espuma al grupo más denso de toda la Plaza: 45 en 7 m, moja y frena 70% por 4 s. | Blindado de 6 ruedas con torreta giratoria |
+| 6 | Desafectar | Poco común | Gratis | Soltada sobre cualquier defensa la retira, libera el lugar y devuelve el 50% de lo pagado (costo × nivel, mínimo $100). | Sin modelo |
+| 9 | Contenedores | Común | $1.300 | 1.500 de vida; el encapuchado no lo puede saltar (`noJump`). | 2 contenedores verdes; NV2 doble fila, NV3 gomas y chapas |
+| 12 | Infiltrado | Poco común | $900 | Se arma en 10 s; no frena ni lo atacan. El primero que lo pisa queda detenido (a una columna le pega 150) y los de 4 m, aturdidos 2 s. Un solo uso. | Civil de buzo gris, gorra y mochila |
+| 15 | Comisario | Rara | $1.600 | +30% de daño (45/60% en NV2/NV3) a las defensas a 1 casillero; no se acumula. Frena. | Comisario panzón con megáfono; escolta en NV2/NV3 |
+| 18 | Concertina | Común | $500 | No frena ni recibe golpes: 6 dps y −30% de velocidad a los que la cruzan. NV2/NV3 suman rollos. | Rollos de alambre sobre caballetes |
+| 21 | Requisa | Poco común | $1.700 | Cada 8 s desarma al especial más caro a 2 casilleros (encapuchado, piquetero, mortero → manifestante común). | Mesa con palos, tubos y pasamontañas + 2-4 agentes |
+| 24 | Desvío | Poco común | $800 | Manda a los que llegan al carril vecino mejor defendido (no a las columnas). No frena ni lo atacan, salvo el mortero. Sin niveles. | Barrera a rayas, conos y agente de tránsito con chaleco |
+| 27 | Estruendo | Poco común | $1.100 | A los 0,8 s explota: 60 de daño y 3 s de aturdimiento en 6 m. Un solo uso. | Granada con luz que titila |
+| 30 | Drone | Rara | $2.100 | Vuela; 10 de daño, 1,2/s, a cualquier carril hasta 3 casilleros, primero los especiales. No frena; el mortero lo puede bajar. | Cuadricóptero con balizas y hélices que giran |
+| 33 | Tanqueta | Rara | $3.900 | 2 slots, 1.400 de vida, frena. Cada 16 s dispara espuma al grupo más denso de toda la Plaza: 45 en 7 m, moja y frena 70% por 4 s. | Blindado de 6 ruedas con torreta giratoria |
 
 `Defense.Blocks` (frena) y `Defense.Targetable` (el mortero le puede tirar) separan a las que no frenan. Arte en `Assets/Art/Cards/<id>.jpg` (prompts en `card_art.py`).
 
@@ -345,7 +348,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el sueldo del cierre y por cartas que bajan la popularidad.
 
 - **Tipos:** Colocar (policía en slots), Efecto, Ministro (pasivo, gabinete de 3; si está lleno reemplaza al más viejo) y Crisis (entran solas a la mano desde el mandato 2; se evitan pagando su costo o se aplican al arrancar).
-- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR CARTAS ($250, solo si queda al menos 1 carta en el mazo) devuelve la mano al fondo del mazo y roba otra. **Arrastrar:** efectos y ministros también se arrastran; soltarlos en cualquier lugar fuera de la mano los activa sin abrirlos (si alcanza la plata y, si es solo de previa, en la previa). **Vender:** en el zoom, el botón $ (mismo estilo que la X; también VENDER debajo de SIN LUGAR en la mano) saca la carta del juego por $250 (común), $375 (poco común) o $500 (rara). La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
+- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR CARTAS ($250, solo si queda al menos 1 carta en el mazo) devuelve la mano al fondo del mazo y roba otra. **Arrastrar:** mientras se arrastra cualquier carta aparece sobre el mazo la zona VENDER +$X (fuera del campo): soltarla ahí la vende. La venta desde la mano (VENDER bajo SIN LUGAR) es instantánea y no bloquea: se pueden vender varias seguidas. Efectos y ministros también se arrastran; soltarlos en cualquier lugar fuera de la mano los activa sin abrirlos (si alcanza la plata y, si es solo de previa, en la previa). **Vender:** en el zoom, el botón $ (mismo estilo que la X; también VENDER debajo de SIN LUGAR en la mano) saca la carta del juego por $250 (común), $375 (poco común) o $500 (rara). La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
 - **Cartas del cierre:** al cerrar cada mandato entran 3 cartas al mazo (pantalla OBTUVISTE 3 CARTAS PARA TU MAZO) (Común 60 / Poco común 30 / Rara 10, raras ×1,8 desde el mandato 4, y las colocables ×2 (`CardDeck.KindPlace`: ~43% de lo que entra es policía), sin repetir en la tanda). Cada una tiene CAMBIAR $100: gira y aparece otra al azar distinta de las que están en pantalla; se puede usar una sola vez por carta (queda CAMBIADA). CONTINUAR las mete en lugares al azar del mazo.
 - **Colocables:** se juegan con tap → ACTIVAR → tocar el mapa, o arrastrando la carta desde la mano al mapa (chica y por arriba del dedo; soltar sobre la mano la devuelve). Sobre una defensa igual la sube de nivel; si no, ocupa el slot libre más cercano. No hay fusión en la mano. Una colocable se ve deshabilitada solo si no hay slot libre ni defensa igual para mejorar.
 - **Datos:** `CardDef` (ScriptableObject) en `Assets/Resources/Cards/`, creados o actualizados por `HudSetup` (menú 4) sin pisar el arte. Campos nuevos: `salaryDelta`, `govDelta`, `maxGovDelta`, `govPerMandate`, `healNow`, `healBonus`.
@@ -389,7 +392,7 @@ Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el
 | Tarifazo | Crisis | — | $1.240 | −$10/s | — |
 | Escándalo | Crisis | — | $1.520 | −15% popularidad | — |
 
-Las crisis forzadas entran 1 por cierre desde el mandato 2 (2 si la popularidad es < 30%). Todo es provisorio hasta balancear.
+Las crisis forzadas entran desde el mandato 2: 1 por cierre, +1 en el 10, 20, 30 y 40 (máximo 5 = la mano entera), +1 si la popularidad es < 30%. Todo es provisorio hasta balancear.
 
 ## Slots policiales
 

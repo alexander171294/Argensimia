@@ -86,6 +86,9 @@ CARDS = {
  "tanqueta": ("Tanqueta", "Colocar", "#4A5560",
    "A chunky cartoonish armored riot-control vehicle with big wheels, navy and grey armor plates and a turret cannon "
    "launching a huge arc of white foam over the crowd, foam bubbles everywhere, siren lights glowing."),
+ "desafectar": ("Desafectar", "Colocar", "#8C6D3F",
+   "A tired riot police officer handing his shield and helmet back over a desk to a bored clerk with a rubber stamp marked with a big seal, "
+   "a small stack of banknotes being refunded on the desk, other officers walking away from the plaza in the background, ironic bureaucratic tone."),
  # --- efectos
  "impuestazo": ("Impuestazo", "Efecto", "#D8452F",
    "A giant cartoon tax-collector magnet hovering over the city, pulling coins and banknotes out of the pockets of small surprised citizens, "

@@ -81,6 +81,10 @@ public static class HudSetup
             "El puntero del barrio arma su parrillita en la Plaza: mientras está en pie genera $12/s durante la oleada. Es frágil: cuidalo.",
             "Choripanes gratis en la Plaza: «es una jornada solidaria»",
             c => { c.defense = DefenseKind.Puntero; c.stats = S(150, 0, 0, 0); c.moneyRate = 12; });
+        n += Card("desafectar", "Desafectar", CardKind.Colocar, 0, "#8c6d3f", 0, Rarity.PocoComun,
+            "Soltala sobre cualquier defensa del mapa: la retirás, liberás el lugar y te devuelven la mitad de lo que pagaste (costo × nivel).",
+            "Desafectan efectivos del operativo: «se reasignan a otras tareas»",
+            c => { c.defense = DefenseKind.Desafectar; c.stats = default; });
         n += Card("contenedores", "Contenedores", CardKind.Colocar, 1300, "#3e8e4e", 0, Rarity.Comun,
             "Dos contenedores de basura atravesados en el carril: aguantan muchísimo y los encapuchados no los pueden saltar.",
             "Usan contenedores de basura como barricada frente a la Casa Rosada",
@@ -207,6 +211,7 @@ public static class HudSetup
     static readonly System.Collections.Generic.Dictionary<string, string> MoreHeadlines = new System.Collections.Generic.Dictionary<string, string>
     {
         ["puntero"] = "El puntero del barrio reparte choris en la Plaza|«Acá nadie se queda sin su chori», promete un militante",
+        ["desafectar"] = "Pasan a disponibilidad a efectivos del operativo|Reasignan policías de la Plaza a tareas administrativas",
         ["contenedores"] = "Contenedores en el medio de la calle: la Ciudad pide devolverlos|Barricada de contenedores frente a Balcarce 50",
         ["infiltrado"] = "Polémica por agentes de civil entre los manifestantes|«No hay infiltrados», asegura el Ministerio de Seguridad",
         ["comisario"] = "El comisario a cargo: «acá mando yo»|Arenga por megáfono: la policía se agranda",
