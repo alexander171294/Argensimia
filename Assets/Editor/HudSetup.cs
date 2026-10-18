@@ -64,9 +64,9 @@ public static class HudSetup
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
             c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
         n += Card("detencion", "Detenciones", CardKind.Colocar, 1760, "#4b4f9e", 1, Rarity.PocoComun,
-            "Brigada de detención: cada 4 s saca de juego a un manifestante cercano. Prioriza a los especiales; no puede con columnas.",
+            "Brigada de detención: cada 4 s un agente sale corriendo hasta el manifestante más peligroso a 5 casilleros, en cualquier carril, lo detiene y vuelve. No puede con columnas.",
             "Detenciones en la Plaza: la oposición pide explicaciones",
-            c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 2.5f); });
+            c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 34f); });
         n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 0, Rarity.Rara,
             "Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s. En el slot ya aparece otra recargando, que también frena y recibe golpes.",
             "Irrumpe la policía motorizada en la Plaza",

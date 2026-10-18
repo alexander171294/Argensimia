@@ -1,6 +1,6 @@
 # Argensimia — Spec del juego y del mapa Plaza de Mayo
 
-Actualizado: 2026-10-17 · Alex. **Versión 0.2.0** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
+Actualizado: 2026-10-17 · Alex. **Versión 0.2.1** (`PlayerSettings.bundleVersion`, se muestra en el menú; semver: subir el menor con cada tanda de features y el parche con arreglos). Versión editable: https://claude.ai/code/artifact/966a4aee-2203-47c0-8cd8-33cb5aacf6e0
 
 ## Últimos cambios
 
@@ -8,11 +8,11 @@ Solo los últimos 5 cambios como máximo, del más nuevo al más viejo; al sumar
 
 | Fecha | Cambio |
 | --- | --- |
+| 2026-10-17 | **0.2.1**: vender con botón $ por rareza ($250 / $375 / $500); CAMBIAR CARTAS a $250 y solo con cartas en el mazo; colocables ×2 en el sorteo (~27% → ~43%); el reloj ya no cierra la carta abierta; Detenciones rehecha (un agente corre hasta 5 casilleros, detiene y vuelve). |
 | 2026-10-17 | **0.2.0**: progresión entre partidas (cada 3 mandatos sobrevividos se desbloquea 1 de 10 defensas nuevas inspiradas en Plants vs Zombies, con modelo y arte; después, mejoras permanentes), 19 logros con aviso y panel LOGROS en el menú; efectos en PCM (el build de Linux quedaba mudo). |
 | 2026-10-17 | **0.1.2**: botones SALIR y PANTALLA COMPLETA/VENTANA en el menú (escritorio). |
 | 2026-10-17 | **0.1.1**: el puntaje y el ranking cuentan el mandato en el que estabas (antes mostraba uno menos). |
 | 2026-10-17 | **0.1.0**: inglés completo con botón de idioma; GitHub y versión en el menú; ranking top 5 abajo a la izquierda; MANIFESTANTES RESTANTES durante la oleada; vallas NV2/NV3 más robustas; al terminar se recarga la escena; sin warnings de compilación. |
-| 2026-10-17 | Reloj de 30 s en la previa; abucheo al perder popularidad; MAZO VACÍO sobre el mazo; columna roja de 5 (3 + 2); carriles 1-2-3-4; el mortero avanza con línea libre; balizas en patrulleros; logo con ARG en bandera e ícono de la app. |
 
 ## Resumen
 
@@ -185,7 +185,7 @@ La clave es luz principal cálida con sombras frías, verdes y rosas vivos, y un
 
 - **Arranque:** pantalla de carga (`LoadingScreen`) hasta que haya ~15 cuadros fluidos seguidos (mín. 0,6 s, máx. 8 s); recién ahí entra el menú con la cinta.
 - **Menú → partida:** el juego abre en el menú. NUEVA PARTIDA panea la cámara (6,5 s, curva por arriba del mapa) hasta la vista de juego mientras el helicóptero aterriza; al llegar aparece el HUD. Si ya se jugó, la escena se recarga en la pose del menú (estado inicial limpio) y arranca el paneo: el corte no se nota.
-- **Mandato:** previa de planificación con reloj de 30 s a la izquierda de ¡ARRANCAR! (se pausa con la pausa y en los paneos; tictac los últimos 5 s; al agotarse cierra zoom/colocación/confirmación y arranca, aplicando las crisis); el cierre con las 3 cartas no tiene tiempo (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
+- **Mandato:** previa de planificación con reloj de 30 s a la izquierda de ¡ARRANCAR! (se pausa con la pausa y en los paneos; tictac los últimos 5 s; al agotarse cierra la colocación y la confirmación y arranca (la carta abierta en zoom queda abierta, salvo una crisis), aplicando las crisis); el cierre con las 3 cartas no tiene tiempo (se juegan cartas y se colocan o mejoran defensas; la oleada se recalcula en vivo con la popularidad) → ¡ARRANCAR! → oleada → cierre → siguiente previa. Sin límite de mandatos (`totalMandates = 0`).
 - **Cierre:** sueldo + efecto de los ministros + la policía en el mapa recupera hasta 25% de su vida máxima (30% con Min. Seguridad, solo a las que les falta) → pantalla OBTUVISTE 3 CARTAS PARA TU MAZO (ver Sistema de cartas) → CONTINUAR → se completa la mano con lo que haya en el mazo → crisis forzadas.
 - **Fin:** al perder la gobernabilidad, o al RENUNCIAR desde la pausa (cuando el helicóptero queda suspendido se recarga la escena para cortar la partida de fondo y el menú arranca con el resultado), se oculta el HUD, aparece la multitud en el helipuerto, la cámara panea hasta la vista del menú y el helicóptero despega y se detiene justo en la pose de flotación. El menú queda con la cinta del resultado ("PERDISTE LA GOBERNABILIDAD" / "EL PRESIDENTE RENUNCIÓ") y el detalle debajo ("Se fue en helicóptero en el mandato N").
 - **Puntaje:** (25 × costo de cada unidad eliminada o detenida + dinero restante / 10) × mandatos jugados (el que estabas jugando cuenta) × popularidad final (mín. 10%). Se muestra en la cinta del menú al terminar; si entra al top 5 se pide el nombre (`Leaderboard`, PlayerPrefs) y aparece en el panel RANKING del menú.
@@ -241,7 +241,7 @@ Todas ocupan slots, frenan al 100% y se rompen al quedar sin gobernabilidad (vid
 | Infantería | 600 | Cuerpo a cuerpo (8 de daño, 1/s, 1,5 m). No llega detrás de un vallado. | 6 agentes (2 filas de 3) → 8 → 10 |
 | Escopeteros | 400 | Dispara en su carril hasta 2 casilleros (9 de daño, 1,2/s); prioriza a los que golpean un vallado adelante, después a los que frenan otra defensa, después al más cercano. Trazador rápido con impacto. | Misma formación sin escudo, escopetas con guardamano naranja: 6 → 8 → 10 |
 | Lanzagases | 120 | Granada de gas hasta 3 casilleros, al azar entre su carril y los vecinos (los que tengan gente), al grupo más denso: 4 dps en 3,5 m y −40% de velocidad. Tira un agente al azar. | 1 agente → 2 → 3 + cajones de granadas |
-| Detenciones | 200 | Cada 4 s saca de juego a un manifestante cercano (prioriza el de mayor costo; no puede con columnas). | 3 agentes → 4 → 5 |
+| Detenciones | 200 | Cada 4 s un agente sale corriendo hasta el manifestante de mayor costo a 5 casilleros (34 m, cualquier carril; más que el hidrante), lo aturde, lo detiene y vuelve. Salen hasta 1/2/3 a la vez según el nivel. No puede con columnas (`DefenseArrest.cs`). | 3 agentes → 4 → 5 |
 | Motorizada | 300 | Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: 40 de daño, empuja 3 m y aturde 1 s; en el slot aparece otra recargando. | 2 motos → 3 → 4 (primitivas) |
 | Camión hidrante | 900 | Cañón giratorio en el techo, hasta 4 casilleros, en su carril o los vecinos, apuntando solo al más cercano: moja, empuja 2 m/s, −60% de velocidad, 3 dps. Tanque de 8 s que se gasta solo mientras moja; vacío, recarga 6 s. Sirena roja y azul titilando. Ocupa 2 slots. | `police_truck` × 1,25 → + chapas laterales con franja y paragolpes → + jaula en el techo y cañón ×1,3 |
 
@@ -259,7 +259,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 | Arriba izquierda | Presupuesto con moneda e ingreso por segundo. Debajo, en la previa, PRÓXIMA OLEADA con la lista de unidades (especiales en rojo); durante la oleada pasa a MANIFESTANTES RESTANTES con el total y el detalle por tipo (por entrar + en la Plaza). |
 | Arriba centro | MANDATO N con barra de progreso de la oleada y GOBERNABILIDAD x/20. |
 | Arriba derecha | POPULARIDAD % con barra y cinta de estado (TRANQUI / TENSO / CALLE CALIENTE / ESTALLIDO). Gabinete de ministros y botón de menú (hamburguesa) que abre la pausa. |
-| Abajo | Mano de 5 cartas en abanico leve (quedan huecos si el mazo se vació). Mazo a la izquierda con contador (rojo en 0; con 0 el mazo se atenúa y arriba aparece MAZO VACÍO con 1 CARTA $500 y 10 CARTAS $4.200); CAMBIAR MANO ($300) y ¡ARRANCAR! a la derecha. |
+| Abajo | Mano de 5 cartas en abanico leve (quedan huecos si el mazo se vació). Mazo a la izquierda con contador (rojo en 0; con 0 el mazo se atenúa y arriba aparece MAZO VACÍO con 1 CARTA $500 y 10 CARTAS $4.200); CAMBIAR CARTAS ($250; atenuado sin cartas en el mazo) y ¡ARRANCAR! a la derecha. |
 | Footer | Marquesina de noticiero con ÚLTIMO MOMENTO; los titulares de cartas y eventos entran al instante (ver Marquesina). |
 
 - **Pausa:** fondo oscuro, título PAUSA afuera y arriba del contenedor. Adentro: volumen de MÚSICA y EFECTOS (barras tipo progressbar sin %, pasos de 5%), CONTINUAR y RENUNCIAR.
@@ -308,7 +308,7 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 | Detención / detención de jubilado | 20 s / 12 s |
 | Cae una defensa / cae un vallado | 4 s / 10 s |
 | Mejora de nivel, cambio de ministro, crisis evitada, cartas nuevas, cierre (si hubo curación) | — |
-| CAMBIAR MANO / CAMBIAR carta del cierre / mazo vacío / compra de cartas | 20 s / 10 s / 90 s / 8 s |
+| CAMBIAR CARTAS / CAMBIAR carta del cierre / mazo vacío / compra de cartas | 20 s / 10 s / 90 s / 8 s |
 
 - **Títulos:** cortos, para que el título de la carta no baje de ~33 pt (autoajuste 22–40 en 324 de ancho); el detalle va en la descripción.
 - **Cartas:** `CardDef.headline` admite variantes separadas por `|` (las extra salen de `HudSetup.MoreHeadlines`); todas las cartas tienen 3.
@@ -343,8 +343,8 @@ El HUD es uGUI generado por código en runtime (`GameHud.cs` y parciales), sin U
 Las cartas cuestan dinero; el dinero entra por segundo durante la oleada, por el sueldo del cierre y por cartas que bajan la popularidad.
 
 - **Tipos:** Colocar (policía en slots), Efecto, Ministro (pasivo, gabinete de 3; si está lleno reemplaza al más viejo) y Crisis (entran solas a la mano desde el mandato 2; se evitan pagando su costo o se aplican al arrancar).
-- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR MANO ($300) devuelve la mano al fondo del mazo y roba otra. La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
-- **Cartas del cierre:** al cerrar cada mandato entran 3 cartas al mazo (pantalla OBTUVISTE 3 CARTAS PARA TU MAZO) (Común 60 / Poco común 30 / Rara 10, raras ×1,8 desde el mandato 4, sin repetir en la tanda). Cada una tiene CAMBIAR $100: gira y aparece otra al azar distinta de las que están en pantalla; se puede usar una sola vez por carta (queda CAMBIADA). CONTINUAR las mete en lugares al azar del mazo.
+- **Mazo finito:** arranca con 15 cartas (se reparten 5 y quedan 10) (las copias iniciales) y no se rebaraja: lo que se juega se consume y, cuando se vacía, aparece encima del mazo (superpuesto, por delante) el panel MAZO VACÍO para comprar cartas al azar: 1 CARTA $500 o 10 CARTAS $4.200 (−16%), en previa u oleada (`CardDeck.buyCost`/`buy10Cost`, `GameHudShop.cs`). Usan las mismas probabilidades por rareza que el cierre; llenan primero los huecos de la mano y el resto queda en el mazo. CAMBIAR CARTAS ($250, solo si queda al menos 1 carta en el mazo) devuelve la mano al fondo del mazo y roba otra. **Vender:** en el zoom, el botón $ saca la carta del juego por $250 (común), $375 (poco común) o $500 (rara). La carta que pisa una crisis (Escándalo, etc.) también vuelve al fondo del mazo; si hay un hueco en la mano, la crisis lo ocupa.
+- **Cartas del cierre:** al cerrar cada mandato entran 3 cartas al mazo (pantalla OBTUVISTE 3 CARTAS PARA TU MAZO) (Común 60 / Poco común 30 / Rara 10, raras ×1,8 desde el mandato 4, y las colocables ×2 (`CardDeck.KindPlace`: ~43% de lo que entra es policía), sin repetir en la tanda). Cada una tiene CAMBIAR $100: gira y aparece otra al azar distinta de las que están en pantalla; se puede usar una sola vez por carta (queda CAMBIADA). CONTINUAR las mete en lugares al azar del mazo.
 - **Colocables:** se juegan con tap → ACTIVAR → tocar el mapa, o arrastrando la carta desde la mano al mapa (chica y por arriba del dedo; soltar sobre la mano la devuelve). Sobre una defensa igual la sube de nivel; si no, ocupa el slot libre más cercano. No hay fusión en la mano. Una colocable se ve deshabilitada solo si no hay slot libre ni defensa igual para mejorar.
 - **Datos:** `CardDef` (ScriptableObject) en `Assets/Resources/Cards/`, creados o actualizados por `HudSetup` (menú 4) sin pisar el arte. Campos nuevos: `salaryDelta`, `govDelta`, `maxGovDelta`, `govPerMandate`, `healNow`, `healBonus`.
 - **Arte:** generado con `BlenderSrc/card_art.py` (Nano Banana 2 Lite en Atlas Cloud; prompts en `docs/CARD_ART_PROMPTS.md`). Revisión en `CardArt/review/index.html` (no versionado); las elegidas (`_selected.json`) se copian a `Assets/Art/Cards/<id>.jpg` (sprite, máx. 1024) y se asignan en `CardDef.art`. Marco 3:2 de 320×218. Sin arte se dibuja la inicial con "ARTE PENDIENTE".

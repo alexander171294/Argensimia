@@ -17,7 +17,7 @@ namespace Argensimia
     public class CardDeck : MonoBehaviour
     {
         public int handSize = 5;
-        [Tooltip("Costo de devolver la mano al fondo del mazo y robar una nueva")] public int renewCost = 300;
+        [Tooltip("Costo de devolver la mano al fondo del mazo y robar una nueva")] public int renewCost = 250;
         [Tooltip("Cartas que entran al mazo al cerrar cada mandato")] public int rewardCount = 3;
         [Tooltip("Costo de cambiar una carta del cierre por otra al azar (1 vez por carta)")] public int rerollCost = 100;
         [Tooltip("Mazo vacío: comprar 1 carta al azar")] public int buyCost = 500;
@@ -93,8 +93,11 @@ namespace Argensimia
             return pool[pool.Count - 1];
         }
 
+        // Rareza (común 60 / poco común 30 / rara 10) × tipo: las colocables salen el doble para que haya más
+        // policía que efectos de plata o política (pasan de ~27% a ~43% de lo que entra al mazo).
         static float Weight(CardDef c, float rareBoost) =>
-            c.rarity == Rarity.Comun ? 60 : c.rarity == Rarity.PocoComun ? 30 : 10 * rareBoost;
+            (c.rarity == Rarity.Comun ? 60 : c.rarity == Rarity.PocoComun ? 30 : 10 * rareBoost) * (c.kind == CardKind.Colocar ? KindPlace : 1f);
+        public const float KindPlace = 2f;
 
         public List<CardDef> Crises() => catalog.FindAll(c => c.kind == CardKind.Crisis);
 

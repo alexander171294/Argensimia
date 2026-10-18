@@ -83,27 +83,25 @@ namespace Argensimia.UI
             et.visual = evadeBtn; et.onTap = OnEvade;
             evadeBtn.gameObject.SetActive(false);
 
-            // VENDER (tacho) en el zoom: descarta la carta a cambio de SellPrice
+            // VENDER ($) en el zoom: la carta sale del juego a cambio de SellPrice (sube con la rareza)
             sellBtn = UiKit.Rect("Sell", zoomUi).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96, 120));
-            var circ = UiKit.Img(sellBtn, "Btn", UiKit.Circle, UiKit.Hex("#7a231d"), 0, true);
+            var circ = UiKit.Img(sellBtn, "Btn", UiKit.Circle, UiKit.Hex("#1d6b2a"), 0, true);
             circ.RT().At(new Vector2(0.5f, 1), Vector2.zero, new Vector2(84, 84), new Vector2(0.5f, 1));
-            UiKit.Img(circ.transform, "Face", UiKit.Circle, UiKit.Hex("#d9534a")).RT().Fill(4, 4, 4, 8);
-            var ic = UiKit.Rect("Trash", circ.transform).At(new Vector2(0.5f, 0.5f), new Vector2(0, 2), new Vector2(44, 50));
-            UiKit.Img(ic, "Lid", UiKit.RR, Color.white, 3).RT().At(new Vector2(0.5f, 1), Vector2.zero, new Vector2(44, 8), new Vector2(0.5f, 1));
-            UiKit.Img(ic, "Handle", UiKit.RR, Color.white, 3).RT().At(new Vector2(0.5f, 1), new Vector2(0, 5), new Vector2(16, 8), new Vector2(0.5f, 1));
-            var body = UiKit.Img(ic, "Body", UiKit.RR, Color.white, 5).RT();
-            body.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(34, 38), new Vector2(0.5f, 0));
-            for (int i = -1; i <= 1; i++) UiKit.Img(body, "L", UiKit.RR, UiKit.Hex("#d9534a"), 2).RT().At(new Vector2(0.5f, 0.5f), new Vector2(i * 10, 0), new Vector2(4, 26));
+            UiKit.Img(circ.transform, "Face", UiKit.Circle, UiKit.Hex("#43c157")).RT().Fill(4, 4, 4, 8);
+            UiKit.Txt(circ.transform, "Dollar", "$", 56, Color.white, TextAlignmentOptions.Center, true, UiKit.FontLogo).RT().Fill(0, 0, 4, 8);
             var pill = UiKit.Img(sellBtn, "Price", UiKit.RR, new Color(0, 0, 0, 0.6f), 12).RT();
-            pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(96, 30), new Vector2(0.5f, 0));
-            UiKit.Txt(pill, "T", "+$" + SellPrice, 22, UiKit.Green, TextAlignmentOptions.Center, true).RT().Fill();
+            pill.At(new Vector2(0.5f, 0), Vector2.zero, new Vector2(104, 30), new Vector2(0.5f, 0));
+            sellPriceTxt = UiKit.Txt(pill, "T", "+$" + GameState.Money(SellPrice(null)), 22, UiKit.Green, TextAlignmentOptions.Center, true);
+            sellPriceTxt.RT().Fill();
             var stp = sellBtn.gameObject.AddComponent<Tap>();
             stp.visual = sellBtn; stp.onTap = OnSell;
             sellBtn.gameObject.SetActive(false);
         }
 
-        const int SellPrice = 100;
+        // Venta: común $250, poco común $375, rara $500.
+        static int SellPrice(CardDef d) => !d || d.rarity == Rarity.Comun ? 250 : d.rarity == Rarity.PocoComun ? 375 : 500;
         RectTransform sellBtn;
+        TextMeshProUGUI sellPriceTxt;
 
         void OnSell()
         {
@@ -127,9 +125,10 @@ namespace Argensimia.UI
                 cv.transform.localRotation = Quaternion.Euler(0, 0, e * 160f);
                 cv.group.alpha = 1 - Mathf.Clamp01((t - 0.6f) / 0.4f);
             });
-            gs.money += SellPrice;
+            int price = SellPrice(cv.def);
+            gs.money += price;
             Snd.Ui("coin");
-            FloatText(moneyPanel, "+$" + SellPrice, UiKit.Green, 0);
+            FloatText(moneyPanel, "+$" + GameState.Money(price), UiKit.Green, 0);
             StartCoroutine(Pulse(moneyPanel));
             int slot = cv.slot; // vendida: sale del juego (no vuelve al mazo)
             cards[slot] = null;
@@ -198,7 +197,11 @@ namespace Argensimia.UI
             else if (!zoomed && evadeBtn.gameObject.activeSelf) evadeBtn.gameObject.SetActive(false);
             bool sell = zoomed && !busy && zoomed.def.kind != CardKind.Crisis && (gs.phase == Phase.Previa || gs.phase == Phase.Oleada);
             if (sellBtn.gameObject.activeSelf != sell) sellBtn.gameObject.SetActive(sell);
-            if (sell) sellBtn.anchoredPosition = new Vector2(-closeBtn.anchoredPosition.x, closeBtn.anchoredPosition.y - 30); // arriba a la izquierda de la carta
+            if (sell)
+            {
+                sellBtn.anchoredPosition = new Vector2(-closeBtn.anchoredPosition.x, closeBtn.anchoredPosition.y - 30); // arriba a la izquierda de la carta
+                sellPriceTxt.text = "+$" + GameState.Money(SellPrice(zoomed.def));
+            }
 
             if (gs.phase != lastPhase)
             {
@@ -238,7 +241,7 @@ namespace Argensimia.UI
         {
             autoStarting = true;
             if (overlay) CloseOverlay();
-            if (zoomed) CancelZoom();
+            if (zoomed && zoomed.def.kind == CardKind.Crisis) CancelZoom(); // la carta que estás mirando queda abierta
             if (placing) CancelPlacement();
             CancelDrag();
             while (busy || flowBusy) yield return null;

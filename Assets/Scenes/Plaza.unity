@@ -289780,7 +289780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDeck
   handSize: 5
-  renewCost: 300
+  renewCost: 250
   rewardCount: 3
   rerollCost: 100
   buyCost: 500
@@ -289810,7 +289810,12 @@ MonoBehaviour:
   totalMandates: 0
   endless: 0
   phase: 0
+  pointsPerCost: 25
+  moneyPerPoint: 10
+  kills: 0
+  killPoints: 0
   cabinetSize: 3
+  usedRepression: 0
 --- !u!4 &2063606509
 Transform:
   m_ObjectHideFlags: 0

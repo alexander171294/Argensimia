@@ -241,7 +241,7 @@ namespace Argensimia.UI
             renewRt.Find("Inner").GetComponent<Image>().color = UiKit.Hex("#1e56b8");
             renewIcon = UiKit.Img(renewRt, "Icon", UiKit.Refresh, Color.white).RT().At(new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(74, 74), new Vector2(0.5f, 1));
             renewIcon.pivot = new Vector2(0.5f, 0.5f); renewIcon.anchoredPosition = new Vector2(0, -51);
-            var rl = UiKit.Txt(renewRt, "Label", "CAMBIAR\nMANO", 21, Color.white, TextAlignmentOptions.Center, true);
+            var rl = UiKit.Txt(renewRt, "Label", "CAMBIAR\nCARTAS", 21, Color.white, TextAlignmentOptions.Center, true);
             rl.lineSpacing = -14;
             rl.RT().At(new Vector2(0.5f, 0), new Vector2(0, 60), new Vector2(136, 46));
             var pill = UiKit.Img(renewRt, "Cost", UiKit.RR, new Color(0, 0, 0, 0.4f), 14).RT().At(new Vector2(0.5f, 0), new Vector2(0, 10), new Vector2(118, 38));
@@ -362,7 +362,8 @@ namespace Argensimia.UI
 
             int dc = deck.DrawCount;
             if (dc != lastDeck) { lastDeck = dc; deckCount.text = dc.ToString(); deckCount.color = dc == 0 ? UiKit.RedSoft : Color.white; }
-            renewCostTxt.color = gs.CanAfford(deck.renewCost) ? Color.white : UiKit.RedSoft;
+            renewCostTxt.color = gs.CanAfford(deck.renewCost) && dc > 0 ? Color.white : UiKit.RedSoft;
+            renewIcon.GetComponent<Image>().color = dc > 0 ? Color.white : new Color(1, 1, 1, 0.35f);
 
             foreach (var cv in cards)
                 if (cv && cv.transform.parent == hand && cv.tap.interactable)
@@ -828,6 +829,8 @@ namespace Argensimia.UI
         void OnRenew()
         {
             if (busy || zoomed || placing || paused || (gs.phase != Phase.Previa && gs.phase != Phase.Oleada)) return;
+            // sin cartas en el mazo te devolvería las mismas: no se cobra
+            if (deck.DrawCount < 1) { StartCoroutine(Shake(renewRt)); FloatText(renewRt, L.T("MAZO VACÍO"), UiKit.RedSoft, 0); Snd.Ui("ui_error"); return; }
             if (!gs.CanAfford(deck.renewCost)) { StartCoroutine(Shake(renewRt)); return; }
             gs.Spend(deck.renewCost);
             FloatText(moneyPanel, "-$" + GameState.Money(deck.renewCost), UiKit.RedSoft, 0);

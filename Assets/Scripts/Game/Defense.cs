@@ -240,7 +240,8 @@ namespace Argensimia
                 case DefenseKind.Detencion:
                 {
                     int n = 2 + level; // 3 / 4 / 5 agentes
-                    for (int i = 0; i < n; i++) Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - (n - 1) * 0.5f) * 1.1f), Fidget.Mode.Shuffle, 0.25f);
+                    squad.Clear();
+                    for (int i = 0; i < n; i++) { var o = Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - (n - 1) * 0.5f) * 1.1f), Fidget.Mode.Shuffle, 0.25f); if (o) squad.Add(o.transform); }
                     break;
                 }
                 case DefenseKind.Motorizada:
@@ -714,23 +715,8 @@ namespace Argensimia
             punch = 1;
         }
 
-        void Detain()
-        {
-            if (cd > 0) return;
-            Enemy t = null;
-            float r2 = (def.stats.range + HalfLen) * (def.stats.range + HalfLen);
-            foreach (var e in Enemy.All)
-            {
-                if (e.Dead || e.def.members > 1 || (e.transform.position - transform.position).sqrMagnitude > r2) continue;
-                if (!t || e.Cost > t.Cost) t = e;
-            }
-            if (!t) return;
-            cd = 1f / Mathf.Max(0.05f, def.stats.rate * Mul);
-            Snd.At("cuffs", t.transform.position, 1, 0.1f);
-            Snd.At("whistle_short", transform.position, 0.6f, 0.6f);
-            t.Capture();
-            punch = 1;
-        }
+        // Detenciones: ver DefenseArrest.cs (un agente sale corriendo, agarra al manifestante y vuelve).
+        void Detain() => Arrest();
 
         const float WaterSpeed = 22f, WaterGravity = 0.55f;
 
