@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: concertina
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: concertina
-  title: Concertina
+  title: "Alambre de p\xFAas"
   kind: 0
   cost: 500
-  description: 'Rollos de alambre en el piso: no frenan a nadie, pero lastiman y
-    demoran a todos los que pasan. Nadie le puede pegar.'
+  description: 'Rollos de alambre en su casillero: lastiman y demoran a todos los
+    que pasan por encima. No se puede destruir.'
   art: {fileID: 21300000, guid: adb06f19dfb6e425c92eb057a556189e, type: 3}
   color: {r: 0.48235294, g: 0.5294118, b: 0.5803922, a: 1}
   copies: 0

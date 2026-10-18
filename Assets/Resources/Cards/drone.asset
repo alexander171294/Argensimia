@@ -16,8 +16,8 @@ MonoBehaviour:
   title: Drone
   kind: 0
   cost: 2100
-  description: Vuela sobre su slot y dispara a cualquier carril hasta 3 casilleros,
-    primero a los especiales. No frena a nadie; el mortero lo puede bajar.
+  description: "Dispara en cualquier direcci\xF3n y carril hasta 3 casilleros a la
+    redonda, primero a los especiales. No frena a nadie; el mortero lo puede bajar."
   art: {fileID: 21300000, guid: f86e204d308cb4151b6ba81f99b6b5a7, type: 3}
   color: {r: 0.22745098, g: 0.6039216, b: 0.8509804, a: 1}
   copies: 0

@@ -16,8 +16,8 @@ MonoBehaviour:
   title: "Desv\xEDo"
   kind: 0
   cost: 800
-  description: "Un agente de tr\xE1nsito con conos y vallas manda a los que llegan
-    al carril vecino mejor defendido. Nadie le pega, pero no sirve con columnas organizadas."
+  description: "Un agente de tr\xE1nsito con conos en su casillero manda a los que
+    llegan al carril de al lado mejor defendido. No le pegan."
   art: {fileID: 21300000, guid: 5d48b5206604b4c9f8c353f38eb22ff9, type: 3}
   color: {r: 0.9098039, g: 0.45490196, b: 0.17254902, a: 1}
   copies: 0

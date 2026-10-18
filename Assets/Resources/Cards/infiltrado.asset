@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: infiltrado
   m_EditorClassIdentifier: Assembly-CSharp::Argensimia.CardDef
   id: infiltrado
-  title: Infiltrado
+  title: Cacheo
   kind: 0
   cost: 900
-  description: "Un polic\xEDa de civil entre la gente: tarda 10 s en ubicarse y nadie
-    lo ve. Despu\xE9s, el primero que pasa queda detenido y los de alrededor, aturdidos.
-    Un solo uso; a una columna le pega fuerte."
+  description: "Un polic\xEDa de civil fuma un pucho donde lo pongas. A los 10\_s,
+    el primero que pasa queda detenido y los de alrededor, aturdidos. Un solo uso."
   art: {fileID: 21300000, guid: a0b02ca4b2bb0475cbe437ecd6ad9307, type: 3}
   color: {r: 0.3647059, g: 0.41960785, b: 0.47843137, a: 1}
   copies: 0

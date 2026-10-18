@@ -64,6 +64,12 @@ namespace Argensimia
                 "Golpean las vallas de la Casa Rosada: preocupación en el Gabinete",
                 "«Así no se puede gobernar», se quejan en Balcarce 50",
             },
+            ["column_break"] = new[]
+            {
+                "El hidrante dispersa una columna organizada: cada uno por su lado",
+                "Agua fría para la columna: se desarma y sus militantes siguen sueltos",
+                "Se rompe la columna frente al camión hidrante",
+            },
             ["arrive_column"] = new[]
             {
                 "Una columna organizada llega a las puertas de la Casa Rosada",

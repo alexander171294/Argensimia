@@ -230,6 +230,9 @@ namespace Argensimia
             if (IsFinal) Headlines.Say("wave_final"); else Headlines.Say("wave_start", 0f, gs.mandate);
         }
 
+        // Una columna dispersada por el hidrante se reemplaza por n manifestantes sueltos (la columna cuenta como ida).
+        public void AddSpawned(int n) { total += n; }
+
         public void OnEnemyGone(Enemy e, bool arr)
         {
             gone++;

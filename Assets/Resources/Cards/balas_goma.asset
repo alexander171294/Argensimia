@@ -16,9 +16,8 @@ MonoBehaviour:
   title: Escopeteros
   kind: 0
   cost: 1380
-  description: "Infanter\xEDa sin escudo con escopetas antitumulto. Disparan balas
-    de goma en su carril; desde atr\xE1s de un vallado le tiran primero a los que
-    lo golpean. Tambi\xE9n frenan a los que llegan."
+  description: "Disparan balas de goma hacia adelante, hasta 2 casilleros (3 en NV3).
+    Desde atr\xE1s de un vallado le tiran primero a los que lo golpean."
   art: {fileID: 21300000, guid: 99466ac8d59be41d0a9ad394b9c24243, type: 3}
   color: {r: 0.7529412, g: 0.38039216, b: 0.16862746, a: 1}
   copies: 2

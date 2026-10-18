@@ -16,8 +16,9 @@ MonoBehaviour:
   title: Desafectar
   kind: 0
   cost: 0
-  description: "Soltala sobre cualquier defensa del mapa: la retir\xE1s, liber\xE1s
-    el lugar y te devuelven la mitad de lo que pagaste (costo \xD7 nivel)."
+  description: "Soltala sobre cualquier unidad en el mapa, est\xE9 donde est\xE9:
+    la retira, libera el lugar y te devuelven la mitad de lo que pagaste (\xD7 nivel
+    mejorado)."
   art: {fileID: 21300000, guid: 5f3da460b59bb4cabbd1710617e92d7e, type: 3}
   color: {r: 0.54901963, g: 0.42745098, b: 0.24705882, a: 1}
   copies: 0

@@ -16,8 +16,8 @@ MonoBehaviour:
   title: "Infanter\xEDa"
   kind: 0
   cost: 1140
-  description: "Tanque barato: una l\xEDnea de agentes con escudos que frena a todos
-    los que llegan y los golpea cuerpo a cuerpo. No llega detr\xE1s de un vallado."
+  description: "Una l\xEDnea de agentes con escudos que frena a todos los que llegan
+    y los golpea cuerpo a cuerpo."
   art: {fileID: 21300000, guid: 49a231864e4714a4eb742219fbd9f0a4, type: 3}
   color: {r: 0.20784314, g: 0.34117648, b: 0.72156864, a: 1}
   copies: 2

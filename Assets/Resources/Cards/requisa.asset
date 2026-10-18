@@ -16,8 +16,8 @@ MonoBehaviour:
   title: Requisa
   kind: 0
   cost: 1700
-  description: "Cada 8 s desarma al especial m\xE1s peligroso a 2 casilleros: el
-    encapuchado, el piquetero o el mortero pasan a ser manifestantes comunes."
+  description: "Cada 8\_s desarma al especial m\xE1s peligroso a 2 casilleros a la
+    redonda, en cualquier carril: pasa a ser un manifestante com\xFAn."
   art: {fileID: 21300000, guid: b001f4dfa306f46158f25e874f8c0842, type: 3}
   color: {r: 0.41960785, g: 0.30980393, b: 0.627451, a: 1}
   copies: 0

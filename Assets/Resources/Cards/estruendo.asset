@@ -16,8 +16,8 @@ MonoBehaviour:
   title: Estruendo
   kind: 0
   cost: 1100
-  description: "Granada de estruendo: al segundo explota y aturde 3 s a todos en
-    6 m, con algo de da\xF1o. Un solo uso."
+  description: "Granada de estruendo: al segundo explota y aturde 3\_s a todos a
+    1 casillero a la redonda, en cualquier carril, con algo de da\xF1o. Un solo uso."
   art: {fileID: 21300000, guid: b6456121159ff492190bb4da877af8c6, type: 3}
   color: {r: 0.8784314, g: 0.2901961, b: 0.18431373, a: 1}
   copies: 0

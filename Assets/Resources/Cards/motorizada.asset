@@ -16,9 +16,8 @@ MonoBehaviour:
   title: Motorizada
   kind: 0
   cost: 2230
-  description: "Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea,
-    empuja 3 m y aturde 1 s. En el slot ya aparece otra recargando, que tambi\xE9n
-    frena y recibe golpes."
+  description: "Cada 15\_s sale un patrullaje a los porrazos por su carril, hacia
+    adelante hasta Av. de Mayo: golpea, empuja 3\_m y aturde 1\_s."
   art: {fileID: 21300000, guid: c43857332e370424fae289e2eddc8fbe, type: 3}
   color: {r: 0.14117648, g: 0.2509804, b: 0.56078434, a: 1}
   copies: 0

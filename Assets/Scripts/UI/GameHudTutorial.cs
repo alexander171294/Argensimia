@@ -113,8 +113,8 @@ namespace Argensimia.UI
                 "Now the RIOT SQUAD: it fights hand to hand. Place it in front of the barricade, closer to where they come in (to the left).",
                 () => CardRect("infanteria"), () => Defense.Count(DefenseKind.Infanteria) >= 1, () => !InHand("infanteria"), "card:infanteria");
 
-            yield return Info("Uy, la caja quedó flaca. Para eso están las medidas impopulares: dan plata, pero bajan la popularidad.",
-                "Oops, the treasury is running thin. That's what unpopular measures are for: they bring in money, but popularity drops.", Of(moneyPanel));
+            yield return Info("Te estás quedando sin presupuesto. Para eso están las medidas impopulares: dan plata, pero bajan la popularidad.",
+                "You're running out of budget. That's what unpopular measures are for: they bring in money, but popularity drops.", Of(moneyPanel));
             yield return Act("Jugá el IMPUESTAZO: soltalo en cualquier lado (o tocalo y ACTIVAR).",
                 "Play the TAX HIKE: drop it anywhere (or tap it and PLAY CARD).",
                 () => CardRect("impuestazo"), () => tutPlayed.Contains("impuestazo"), () => !InHand("impuestazo"), "card:impuestazo");
@@ -134,8 +134,8 @@ namespace Argensimia.UI
             yield return Info(
                 L.F("CAMBIAR CARTAS manda tu mano al fondo del mazo y roba cinco de arriba por ${0}. No son necesariamente nuevas: si cambiás seguido, te pueden volver las mismas.", GameState.Money(deck.renewCost)),
                 L.F("SWAP CARDS sends your hand to the bottom of the deck and draws five from the top for ${0}. They're not necessarily new: swap often and the same ones can come back.", GameState.Money(deck.renewCost)), Of(renewRt));
-            yield return Info("El MAZO no se rebaraja: lo que jugás o vendés, se gasta. Al cerrar cada mandato ganás 3 cartas nuevas, y si se vacía vas a poder comprar cartas al azar ahí arriba.",
-                "The DECK is never reshuffled: whatever you play or sell is gone. Each term you earn 3 new cards, and if it runs out you can buy random cards right above it.", Of(deckRt));
+            yield return Info("Este es tu MAZO: cada vez que sacás una carta, el mazo se achica. Al cerrar cada mandato ganás 3 cartas nuevas, y si se vacía vas a poder comprar cartas al azar en ese mismo lugar.",
+                "This is your DECK: every time you draw a card, the deck gets smaller. Each term you earn 3 new cards, and if it runs out you can buy random cards in that same spot.", Of(deckRt));
 
             tutAllowStart = true;
             yield return Act("Cuando tengas la defensa lista, tocá ¡ARRANCAR! En una partida normal tenés 30 segundos para decidir; hoy no hay apuro.",

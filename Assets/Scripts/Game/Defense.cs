@@ -241,7 +241,8 @@ namespace Argensimia
                 {
                     int n = 2 + level; // 3 / 4 / 5 agentes
                     squad.Clear();
-                    for (int i = 0; i < n; i++) { var o = Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - (n - 1) * 0.5f) * 1.1f), Fidget.Mode.Shuffle, 0.25f); if (o) squad.Add(o.transform); }
+                    // brigada de detención: sin escudo (la infantería sí lo lleva) y con esposas en la mano
+                    for (int i = 0; i < n; i++) { var o = Officer(new Vector3(1.1f - (i % 2) * 0.7f, 0, (i - (n - 1) * 0.5f) * 1.1f), Fidget.Mode.Shuffle, 0.25f); if (!o) continue; NoShield(o); Cuffs(o.transform); squad.Add(o.transform); }
                     break;
                 }
                 case DefenseKind.Motorizada:
@@ -509,6 +510,21 @@ namespace Argensimia
             return o;
         }
 
+        // Esposas plateadas en la mano izquierda (el lado que ve la cámara de juego): dos aros (cilindros chatos) unidos por una cadenita.
+        static void Cuffs(Transform t)
+        {
+            // dos aros en el mismo plano, uno arriba del otro (se ven de costado, que es como los mira la cámara),
+            // con el centro oscuro para que lean como aros y no como discos
+            var steel = new Color(0.8f, 0.82f, 0.86f);
+            var hole = new Color(0.08f, 0.08f, 0.1f);
+            foreach (float dy in new[] { 0.1f, -0.1f })
+            {
+                FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(-0.4f, 0.92f + dy, 0.2f), new Vector3(0.15f, 0.012f, 0.15f), steel, Quaternion.Euler(0, 0, 90));
+                FxKit.Prim(PrimitiveType.Cylinder, t, new Vector3(-0.4f, 0.92f + dy, 0.2f), new Vector3(0.08f, 0.016f, 0.08f), hole, Quaternion.Euler(0, 0, 90));
+            }
+            FxKit.Prim(PrimitiveType.Cube, t, new Vector3(-0.4f, 0.92f, 0.2f), new Vector3(0.02f, 0.07f, 0.02f), steel); // cadenita
+        }
+
         // Agente sin escudo: misma malla con el submesh del escudo vacío (la malla del FBX es legible).
         static Mesh noShieldMesh;
         static void NoShield(GameObject o)
@@ -724,6 +740,8 @@ namespace Argensimia
 
         // Hidrante: el cañón apunta solo al manifestante más cercano (su carril o los de al lado) y lo moja,
         // lo empuja y lo frena. El tanque (cycleOn s) se gasta solo mientras moja; vacío, recarga cycleOff s.
+        static UnitDef civilian;
+
         void Water(float dt)
         {
             if (reloading) { reload -= dt; if (reload <= 0) { reloading = false; tank = def.cycleOn * Rate; } }
@@ -732,7 +750,6 @@ namespace Argensimia
             float bd = float.MaxValue;
             foreach (var e in tmp)
             {
-                if (e.def.kind == UnitKind.Columna) continue; // la columna organizada es inmune al hidrante
                 float d = (e.transform.position - turret.position).sqrMagnitude;
                 if (d < bd) { bd = d; t = e; }
             }
@@ -760,6 +777,9 @@ namespace Argensimia
             if (tank <= 0) { reloading = true; reload = def.cycleOff; }
             var main = jet.main;
             main.startLifetime = Mathf.Clamp(dist / WaterSpeed + 0.25f, 0.4f, 1.8f);
+            // columna organizada: el chorro la dispersa en manifestantes sueltos (antes era inmune porque el empuje
+            // la mandaba para atrás); desde el cuadro siguiente se los moja como a cualquiera
+            if (t.def.kind == UnitKind.Columna) { if (!civilian) civilian = Resources.Load<UnitDef>("Units/comun"); t.BreakColumn(civilian); return; }
             t.TakeWater(def.stats.damage * Mul * dt);
             t.Wet(1.5f);
             t.Slow(def.slow, 0.5f);

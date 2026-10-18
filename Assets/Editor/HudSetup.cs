@@ -48,31 +48,31 @@ public static class HudSetup
         int n = 0;
         // ---- Policía (Colocar). Stats: vida, daño, ritmo (golpes/s), alcance, área, velocidad
         n += Card("vallado", "Vallado", CardKind.Colocar, 620, "#1fa59a", 3, Rarity.Comun,
-            "Una línea de vallas al fondo del slot. Frena a todos hasta que la derriban; los encapuchados la rompen el triple de rápido. Las balas de goma pueden disparar por detrás.",
+            "Una línea de vallas al fondo de su casillero. Frena a todos los que llegan hasta que la derriban.",
             "Vallan la Plaza: «es preventivo», explican desde Casa Rosada",
-            c => { c.defense = DefenseKind.Vallado; c.stats = S(300, 0, 0, 0); });
+            c => { c.defense = DefenseKind.Vallado; c.stats = S(450, 0, 0, 0); }); // ×1,5: era demasiado débil frente a la infantería
         n += Card("infanteria", "Infantería", CardKind.Colocar, 1140, "#3557b8", 2, Rarity.Comun,
-            "Tanque barato: una línea de agentes con escudos que frena a todos los que llegan y los golpea cuerpo a cuerpo. No llega detrás de un vallado.",
+            "Una línea de agentes con escudos que frena a todos los que llegan y los golpea cuerpo a cuerpo.",
             "Despliegan la Infantería frente a la Casa Rosada",
             c => { c.defense = DefenseKind.Infanteria; c.stats = S(600, 8, 1, 1.5f); });
         n += Card("balas_goma", "Escopeteros", CardKind.Colocar, 1380, "#c0612b", 2, Rarity.PocoComun,
-            "Infantería sin escudo con escopetas antitumulto. Disparan balas de goma en su carril; desde atrás de un vallado le tiran primero a los que lo golpean. También frenan a los que llegan.",
+            "Disparan balas de goma hacia adelante, hasta 2 casilleros (3 en NV3). Desde atrás de un vallado le tiran primero a los que lo golpean.",
             "Balas de goma en la Plaza: hay heridos y la oposición pide un informe",
             c => { c.defense = DefenseKind.BalasGoma; c.stats = S(400, 9, 1.2f, 14); });
         n += Card("lanzagases", "Lanzagases", CardKind.Colocar, 1620, "#6d7d2e", 1, Rarity.PocoComun,
-            "Un agente con lanzagranadas: tira gas al grupo más denso, en su carril o los de al lado. Daño por segundo en área y -40% de velocidad.",
+            "Tira gas hacia adelante hasta 3 casilleros (4 en NV3), al grupo más denso de su carril o los vecinos: daño en área y −40% de velocidad.",
             "Gases en la Plaza: vecinos denuncian ardor en los ojos",
             c => { c.defense = DefenseKind.Lanzagases; c.stats = S(120, 4, 0.35f, 21, 3.5f); c.slow = 0.4f; c.slowTime = 3; });
         n += Card("detencion", "Detenciones", CardKind.Colocar, 1760, "#4b4f9e", 1, Rarity.PocoComun,
-            "Brigada de detención: cuando se llena la barra azul (5 s; menos en NV2 y NV3) un agente sale corriendo hasta el manifestante más peligroso a 5 casilleros, en cualquier carril, lo detiene y vuelve. No puede con columnas.",
+            "Cuando se llena la barra azul, un agente corre hasta el manifestante más peligroso a 5 casilleros a la redonda, en cualquier carril, lo detiene y vuelve.",
             "Detenciones en la Plaza: la oposición pide explicaciones",
             c => { c.defense = DefenseKind.Detencion; c.stats = S(200, 0, 0.25f, 34f); });
         n += Card("motorizada", "Motorizada", CardKind.Colocar, 2230, "#24408f", 0, Rarity.Rara,
-            "Cada 15 s sale una pasada a los porrazos hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s. En el slot ya aparece otra recargando, que también frena y recibe golpes.",
+            "Cada 15 s sale un patrullaje a los porrazos por su carril, hacia adelante hasta Av. de Mayo: golpea, empuja 3 m y aturde 1 s.",
             "Irrumpe la policía motorizada en la Plaza",
             c => { c.defense = DefenseKind.Motorizada; c.stats = S(300, 40, 0, 0); c.push = 3; c.stun = 1; c.cycleOff = 12; });
         n += Card("hidrante", "Camión hidrante", CardKind.Colocar, 3470, "#2a7fd1", 0, Rarity.Rara,
-            "Cañón de agua que apunta al más cercano, en su carril o los de al lado: lo moja, lo empuja y lo frena 60%; si nadie más le pega, daño ×5. Las columnas organizadas son inmunes. Tanque de 8 s, recarga 6 s. Ocupa 2 slots.",
+            "Cañón de agua hacia adelante hasta 4 casilleros (5 en NV3), en su carril o los de al lado. Moja al más cercano, lo empuja y lo frena. Ocupa 2 casilleros.",
             "Hidrantes en la Plaza: denuncian represión",
             c => { c.defense = DefenseKind.Hidrante; c.stats = S(900, 3, 0, 28); c.push = 2; c.slow = 0.6f; c.cycleOn = 8; c.cycleOff = 6; c.slotSize = 2; });
 
@@ -82,43 +82,43 @@ public static class HudSetup
             "Choripanes gratis en la Plaza: «es una jornada solidaria»",
             c => { c.defense = DefenseKind.Puntero; c.stats = S(150, 0, 0, 0); c.moneyRate = 12; });
         n += Card("desafectar", "Desafectar", CardKind.Colocar, 0, "#8c6d3f", 0, Rarity.PocoComun,
-            "Soltala sobre cualquier defensa del mapa: la retirás, liberás el lugar y te devuelven la mitad de lo que pagaste (costo × nivel).",
+            "Soltala sobre cualquier unidad en el mapa, esté donde esté: la retira, libera el lugar y te devuelven la mitad de lo que pagaste (× nivel mejorado).",
             "Desafectan efectivos del operativo: «se reasignan a otras tareas»",
             c => { c.defense = DefenseKind.Desafectar; c.stats = default; });
         n += Card("contenedores", "Contenedores", CardKind.Colocar, 1300, "#3e8e4e", 0, Rarity.Comun,
-            "Dos contenedores de basura atravesados en el carril: aguantan muchísimo y los encapuchados no los pueden saltar.",
+            "Dos contenedores atravesados en su casillero: frenan a todos, aguantan muchísimo y los encapuchados no los pueden saltar.",
             "Usan contenedores de basura como barricada frente a la Casa Rosada",
             c => { c.defense = DefenseKind.Contenedores; c.stats = S(1500, 0, 0, 0); c.noJump = true; });
-        n += Card("infiltrado", "Infiltrado", CardKind.Colocar, 900, "#5d6b7a", 0, Rarity.PocoComun,
-            "Un policía de civil entre la gente: tarda 10 s en ubicarse y nadie lo ve. Después, el primero que pasa queda detenido y los de alrededor, aturdidos. Un solo uso; a una columna le pega fuerte.",
+        n += Card("infiltrado", "Cacheo", CardKind.Colocar, 900, "#5d6b7a", 0, Rarity.PocoComun,
+            "Un policía de civil fuma un pucho donde lo pongas. A los 10 s, el primero que pasa queda detenido y los de alrededor, aturdidos. Un solo uso.",
             "Denuncian policías de civil infiltrados en la marcha",
             c => { c.defense = DefenseKind.Infiltrado; c.stats = S(100, 150, 0, 0, 4); c.stun = 2; c.cycleOn = 10; });
         n += Card("comisario", "Comisario", CardKind.Colocar, 1600, "#2f4f9f", 0, Rarity.Rara,
-            "El comisario arenga por megáfono: las defensas a 1 casillero pegan 30% más fuerte (45% y 60% en NV2 y NV3). También frena.",
+            "Arenga por megáfono: las defensas a 1 casillero a la redonda, en cualquier dirección, pegan 30% más fuerte.",
             "El comisario toma el mando del operativo en la Plaza",
             c => { c.defense = DefenseKind.Comisario; c.stats = S(300, 0, 0, 6.8f); c.buff = 0.3f; });
-        n += Card("concertina", "Concertina", CardKind.Colocar, 500, "#7b8794", 0, Rarity.Comun,
-            "Rollos de alambre en el piso: no frenan a nadie, pero lastiman y demoran a todos los que pasan. Nadie le puede pegar.",
+        n += Card("concertina", "Alambre de púas", CardKind.Colocar, 500, "#7b8794", 0, Rarity.Comun,
+            "Rollos de alambre en su casillero: lastiman y demoran a todos los que pasan por encima. No se puede destruir.",
             "Alambre de púas en la Plaza: «es una medida preventiva»",
             c => { c.defense = DefenseKind.Concertina; c.stats = S(100, 6, 0, 0); c.slow = 0.3f; });
         n += Card("requisa", "Requisa", CardKind.Colocar, 1700, "#6b4fa0", 0, Rarity.PocoComun,
-            "Cada 8 s desarma al especial más peligroso a 2 casilleros: el encapuchado, el piquetero o el mortero pasan a ser manifestantes comunes.",
+            "Cada 8 s desarma al especial más peligroso a 2 casilleros a la redonda, en cualquier carril: pasa a ser un manifestante común.",
             "Requisa en los accesos a la Plaza: secuestran palos y morteros caseros",
             c => { c.defense = DefenseKind.Requisa; c.stats = S(250, 0, 0.125f, 13.6f); });
         n += Card("desvio", "Desvío", CardKind.Colocar, 800, "#e8742c", 0, Rarity.PocoComun,
-            "Un agente de tránsito con conos y vallas manda a los que llegan al carril vecino mejor defendido. Nadie le pega, pero no sirve con columnas organizadas.",
+            "Un agente de tránsito con conos en su casillero manda a los que llegan al carril de al lado mejor defendido. No le pegan.",
             "Desvían la marcha por una calle lateral",
             c => { c.defense = DefenseKind.Desvio; c.stats = S(100, 0, 0, 0); });
         n += Card("estruendo", "Estruendo", CardKind.Colocar, 1100, "#e04a2f", 0, Rarity.PocoComun,
-            "Granada de estruendo: al segundo explota y aturde 3 s a todos en 6 m, con algo de daño. Un solo uso.",
+            "Granada de estruendo: al segundo explota y aturde 3 s a todos a 1 casillero a la redonda, en cualquier carril, con algo de daño. Un solo uso.",
             "Una granada de estruendo sacude la Plaza de Mayo",
             c => { c.defense = DefenseKind.Estruendo; c.stats = S(100, 60, 0, 0, 6); c.stun = 3; c.cycleOn = 0.8f; });
         n += Card("drone", "Drone", CardKind.Colocar, 2100, "#3a9ad9", 0, Rarity.Rara,
-            "Vuela sobre su slot y dispara a cualquier carril hasta 3 casilleros, primero a los especiales. No frena a nadie; el mortero lo puede bajar.",
+            "Dispara en cualquier dirección y carril hasta 3 casilleros a la redonda, primero a los especiales. No frena a nadie; el mortero lo puede bajar.",
             "Un drone policial sobrevuela la Plaza",
             c => { c.defense = DefenseKind.Drone; c.stats = S(200, 10, 1.2f, 20.4f); });
         n += Card("tanqueta", "Tanqueta", CardKind.Colocar, 3900, "#4a5560", 0, Rarity.Rara,
-            "Blindado antidisturbios: frena, aguanta muchísimo y cada 16 s dispara espuma al grupo más denso de toda la Plaza (daño en área, moja y frena 70%). Ocupa 2 slots.",
+            "Frena, aguanta muchísimo y cada 16 s tira espuma al grupo más denso de toda la Plaza, en cualquier carril (área de 1 casillero). Ocupa 2 casilleros.",
             "Llega la tanqueta antidisturbios a la Plaza",
             c => { c.defense = DefenseKind.Tanqueta; c.stats = S(1400, 45, 0, 60, 7); c.slow = 0.7f; c.slowTime = 4; c.cycleOff = 16; c.slotSize = 2; });
 

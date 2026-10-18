@@ -473,6 +473,45 @@ namespace Argensimia
             rolled.Clear();
         }
 
+        // Hidrante: la columna organizada se dispersa en tantos manifestantes comunes como integrantes tiene, cada
+        // uno en la posición de su integrante, ya mojados, con la misma fracción de vida y la bronca del mandato.
+        // Desde ahí el hidrante los trata como a cualquiera. La columna sale de juego sin sumar puntaje.
+        public bool BreakColumn(UnitDef civ)
+        {
+            if (Dead || !civ || def.kind != UnitKind.Columna || !onLane || jumping) return false;
+            float k = hp / Mathf.Max(1, maxHp);
+            float hpMul = maxHp / Mathf.Max(1, def.stats.hp);
+            float dmgMul = def.stats.damage > 0 ? damage / def.stats.damage : 1;
+            float spdMul = def.stats.speed > 0 ? speed / def.stats.speed : 1;
+            int n = Mathf.Max(1, def.members);
+            for (int i = 0; i < n; i++)
+            {
+                var lp = i < Triangle.Length ? Triangle[i] : Vector3.zero;
+                var pos = model ? model.TransformPoint(lp) : transform.position;
+                pos.y = transform.position.y;
+                var e = Spawn(civ, new List<Vector3> { pos }, lane, hpMul, dmgMul, spdMul);
+                e.hp = Mathf.Max(1, e.maxHp * k);
+                if (e.bar) e.bar.Set(e.hp / e.maxHp);
+                e.transform.rotation = transform.rotation;
+                e.Wet(1.5f);
+                e.Slow(0.6f, 0.5f);
+            }
+            if (WaveDirector.I) WaveDirector.I.AddSpawned(n);
+            Dead = true;
+            if (blocker) { blocker.Release(this); blocker = null; }
+            All.Remove(this);
+            if (WaveDirector.I) WaveDirector.I.OnEnemyGone(this, false);
+            Snd.At("poof", transform.position, 1, 0.05f, 0.15f);
+            var fx = new GameObject("ColumnBreak");
+            fx.transform.position = transform.position + Vector3.up * 1.5f;
+            var ps = FxKit.Particles(fx.transform, Vector3.zero, Quaternion.Euler(-90, 0, 0), GameAssets.I.smoke, new Color(0.85f, 0.92f, 1f, 0.8f), 3, 0.8f, 0.6f, 1.2f, 0, 60, 0, 0.6f, 1.8f);
+            var em = ps.emission; em.SetBursts(new[] { new ParticleSystem.Burst(0, 18) });
+            Destroy(fx, 1.8f);
+            Headlines.Say("column_break", 8f);
+            Destroy(gameObject); // los civiles ocupan su lugar: sin animación de salida
+            return true;
+        }
+
         // Requisa: un especial queda desarmado y pasa a ser un manifestante común (conserva vida y bronca relativas).
         public bool Disarm(UnitDef to)
         {

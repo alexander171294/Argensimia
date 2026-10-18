@@ -16,8 +16,8 @@ MonoBehaviour:
   title: Contenedores
   kind: 0
   cost: 1300
-  description: "Dos contenedores de basura atravesados en el carril: aguantan much\xEDsimo
-    y los encapuchados no los pueden saltar."
+  description: "Dos contenedores atravesados en su casillero: frenan a todos, aguantan
+    much\xEDsimo y los encapuchados no los pueden saltar."
   art: {fileID: 21300000, guid: a3450c66f5e9c4d51812c352b23bdac6, type: 3}
   color: {r: 0.24313726, g: 0.5568628, b: 0.30588236, a: 1}
   copies: 0
